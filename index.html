@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frago — Solicitudes</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #161b27;
+    --surface2: #1c2235;
+    --border: #252d42;
+    --border-focus: #4a6fa5;
+    --accent: #4a90d9;
+    --accent2: #5db87a;
+    --accent3: #e07b4a;
+    --accent4: #9b6dd6;
+    --text: #e8eaf0;
+    --text2: #8a93a8;
+    --text3: #5a6275;
+    --danger: #e05a5a;
+    --success: #5db87a;
+    --radius: 10px;
+    --font: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 18px 24px; display: flex; align-items: center; gap: 14px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-logo {
+    width: 36px; height: 36px; background: var(--accent); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 14px; color: #fff; flex-shrink: 0;
+  }
+  .header-title { font-size: 15px; font-weight: 500; }
+  .header-sub { font-size: 12px; color: var(--text2); margin-top: 1px; }
+
+  .main { max-width: 560px; margin: 0 auto; padding: 28px 20px 80px; }
+
+  .section-title {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text3); margin-bottom: 12px; margin-top: 24px;
+  }
+
+  .tipo-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 28px; }
+  .tipo-btn {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 16px 8px; cursor: pointer;
+    text-align: center; transition: all 0.18s; color: var(--text2);
+  }
+  .tipo-btn:hover { border-color: var(--border-focus); color: var(--text); }
+  .tipo-btn.active.t-uniforme  { border-color: var(--accent);  background: rgba(74,144,217,0.09); color: var(--text); }
+  .tipo-btn.active.t-patrulla  { border-color: var(--accent3); background: rgba(224,123,74,0.09); color: var(--text); }
+  .tipo-btn.active.t-papeleria { border-color: var(--accent2); background: rgba(93,184,122,0.09); color: var(--text); }
+  .tipo-btn.active.t-equipo    { border-color: var(--accent4); background: rgba(155,109,214,0.09); color: var(--text); }
+  .tipo-btn.disabled-btn { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+  .tipo-icon { font-size: 24px; display: block; margin-bottom: 8px; }
+  .tipo-label { font-size: 12px; font-weight: 500; display: block; }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 6px; }
+  .field label .req { color: var(--danger); margin-left: 3px; }
+
+  input[type="text"], input[type="number"], select, textarea {
+    width: 100%; background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); color: var(--text); font-family: var(--font);
+    font-size: 14px; padding: 11px 14px; outline: none; transition: border-color 0.15s;
+    -webkit-appearance: none; appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--border-focus); }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a93a8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
+  }
+  select option { background: #1c2235; }
+  textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .urgencia-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+  .urg-btn {
+    border: 1.5px solid var(--border); border-radius: 8px; padding: 10px;
+    text-align: center; cursor: pointer; font-size: 12px; font-weight: 500;
+    color: var(--text2); background: var(--surface); transition: all 0.15s; font-family: var(--font);
+  }
+  .urg-btn:hover { border-color: var(--border-focus); color: var(--text); }
+  .urg-btn.active[data-urg="Normal"]  { border-color: var(--accent2); color: var(--accent2); background: rgba(93,184,122,0.09); }
+  .urg-btn.active[data-urg="Urgente"] { border-color: #e0b84a; color: #e0b84a; background: rgba(224,184,74,0.09); }
+  .urg-btn.active[data-urg="Critico"] { border-color: var(--danger); color: var(--danger); background: rgba(224,90,90,0.09); }
+
+  .modulo { display: none; }
+  .modulo.visible { display: block; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+  .aviso {
+    background: rgba(224,123,74,0.08); border: 1px solid rgba(224,123,74,0.3);
+    border-radius: 8px; padding: 10px 14px; font-size: 12px;
+    color: #e07b4a; margin-bottom: 14px; display: none; line-height: 1.5;
+  }
+  .aviso.visible { display: block; }
+
+  .btn-submit {
+    width: 100%; padding: 14px; border: none; border-radius: var(--radius);
+    font-family: var(--font); font-size: 15px; font-weight: 500;
+    cursor: pointer; transition: all 0.18s; margin-top: 8px;
+    background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn-submit:active { transform: translateY(0); }
+  .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-submit.t-patrulla  { background: var(--accent3); }
+  .btn-submit.t-papeleria { background: var(--accent2); }
+  .btn-submit.t-equipo    { background: var(--accent4); }
+
+  .toast {
+    position: fixed; bottom: 28px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 22px; font-size: 14px; color: var(--text);
+    opacity: 0; transition: all 0.3s ease; pointer-events: none; z-index: 999;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4); max-width: 90vw; text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.ok  { border-color: var(--success); }
+  .toast.err { border-color: var(--danger); }
+
+  .spinner {
+    width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin 0.7s linear infinite; display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 400px) { .field-row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">FG</div>
+  <div>
+    <div class="header-title">Frago — Solicitudes</div>
+    <div class="header-sub">Sistema de gestión operativa</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <p class="section-title">Tipo de solicitud</p>
+  <div class="tipo-grid">
+    <button class="tipo-btn t-uniforme"  onclick="setTipo('Uniforme',this)">
+      <span class="tipo-icon">👕</span><span class="tipo-label">Uniforme</span>
+    </button>
+    <button class="tipo-btn t-patrulla"  onclick="setTipo('Patrulla',this)">
+      <span class="tipo-icon">🚗</span><span class="tipo-label">Patrulla</span>
+    </button>
+    <button class="tipo-btn t-papeleria" onclick="setTipo('Papeleria',this)">
+      <span class="tipo-icon">📋</span><span class="tipo-label">Papelería</span>
+    </button>
+    <button class="tipo-btn t-equipo" id="btn-equipo" onclick="setTipo('Equipo',this)">
+      <span class="tipo-icon">🔦</span><span class="tipo-label">Equipo especial</span>
+    </button>
+  </div>
+
+  <div id="form-body" style="display:none;">
+
+    <p class="section-title">Información general</p>
+
+    <div class="field">
+      <label>Rol <span class="req">*</span></label>
+      <select id="rol" onchange="onRolChange()">
+        <option value="">Selecciona tu rol...</option>
+        <option value="guardia">Guardia</option>
+        <option value="jefe_turno">Jefe de turno</option>
+        <option value="coord_operativo">Coordinador operativo</option>
+        <option value="coord_general">Coordinador general</option>
+        <option value="director_general">Director general</option>
+        <option value="aux_administrativa">Auxiliar administrativa</option>
+        <option value="director_finanzas">Director de finanzas / Administración</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Nombre del solicitante <span class="req">*</span></label>
+      <input type="text" id="solicitante" placeholder="Nombre completo">
+    </div>
+
+    <div class="field" id="campo-servicio">
+      <label>Servicio / Caseta <span class="req">*</span></label>
+      <select id="servicio">
+        <option value="">Selecciona un servicio...</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Urgencia</label>
+      <div class="urgencia-grid">
+        <button class="urg-btn active" data-urg="Normal"  onclick="setUrgencia('Normal',this)">Normal</button>
+        <button class="urg-btn"        data-urg="Urgente" onclick="setUrgencia('Urgente',this)">Urgente</button>
+        <button class="urg-btn"        data-urg="Critico" onclick="setUrgencia('Critico',this)">Crítico</button>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- ── UNIFORME ── -->
+    <div class="modulo" id="mod-Uniforme">
+      <p class="section-title">Detalles del uniforme</p>
+      <div class="field-row">
+        <div class="field">
+          <label>Prenda <span class="req">*</span></label>
+          <select id="prenda">
+            <option value="">Selecciona...</option>
+            <option>Camisa manga larga</option>
+            <option>Pantalón</option>
+            <option>Chamarra</option>
+            <option>Sudadera</option>
+            <option>Chaleco reflejante</option>
+            <option>Chaleco táctico</option>
+            <option>Gorra</option>
+            <option>Botas</option>
+            <option>Impermeable</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Talla <span class="req">*</span></label>
+          <select id="talla">
+            <option value="">Selecciona...</option>
+            <option>XS</option><option>S</option><option>M</option>
+            <option>L</option><option>XL</option><option>2XL</option><option>3XL</option>
+            <option>26</option><option>28</option><option>30</option><option>32</option>
+            <option>34</option><option>36</option><option>38</option><option>40</option>
+            <option>Único</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Cantidad <span class="req">*</span></label>
+        <input type="number" id="cantidad-uni" min="1" placeholder="1">
+      </div>
+      <div class="field">
+        <label>Notas adicionales</label>
+        <textarea id="notas-uni" placeholder="Motivo, desgaste, reposición, etc."></textarea>
+      </div>
+    </div>
+
+    <!-- ── PATRULLA ── -->
+    <div class="modulo" id="mod-Patrulla">
+      <p class="section-title">Detalles de la patrulla</p>
+      <div id="aviso-patrulla" class="aviso">
+        ⚠️ Tu rol solo permite solicitar carga de gasolina o revisión general.
+      </div>
+      <div class="field">
+        <label>Unidad <span class="req">*</span></label>
+        <select id="unidad">
+          <option value="">Selecciona una unidad...</option>
+          <option value="Saveiro Pickup (con caja en batea)">Saveiro Pickup (con caja en batea)</option>
+          <option value="Saveiro Pickup">Saveiro Pickup</option>
+          <option value="Virtus Cumbres del Lago 2023">Virtus Cumbres del Lago 2023</option>
+          <option value="Virtus Lomas de Juriquilla 2023">Virtus Lomas de Juriquilla 2023</option>
+          <option value="Virtus Automatico 2023" id="opt-virtus-auto">Virtus Automático 2023</option>
+          <option value="Vento 2017">Vento 2017</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Tipo de solicitud <span class="req">*</span></label>
+        <select id="tipo-patrulla">
+          <option value="">Selecciona...</option>
+          <option value="Carga de gasolina">Carga de gasolina</option>
+          <option value="Mantenimiento preventivo" class="opt-restringida">Mantenimiento preventivo</option>
+          <option value="Reparacion" class="opt-restringida">Reparación</option>
+          <option value="Revision general">Revisión general</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Descripción <span class="req">*</span></label>
+        <textarea id="detalle-patrulla" placeholder="Describe el problema o servicio requerido..."></textarea>
+      </div>
+      <div class="field">
+        <label>Kilometraje actual (opcional)</label>
+        <input type="number" id="km" placeholder="Ej. 45000">
+      </div>
+    </div>
+
+    <!-- ── PAPELERÍA ── -->
+    <div class="modulo" id="mod-Papeleria">
+      <p class="section-title">Detalles de papelería</p>
+      <div class="field">
+        <label>Artículo <span class="req">*</span></label>
+        <select id="articulo">
+          <option value="">Selecciona...</option>
+          <option>Bitácora / Libro de registro</option>
+          <option>Bolígrafos</option>
+          <option>Formato de acceso vehicular</option>
+          <option>Formato de acceso peatonal</option>
+          <option>Carpeta</option>
+          <option>Hojas blancas</option>
+          <option>Cinta adhesiva</option>
+          <option>Marcadores</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Cantidad <span class="req">*</span></label>
+        <input type="number" id="cantidad-pap" min="1" placeholder="1">
+      </div>
+      <div class="field">
+        <label>Notas adicionales</label>
+        <textarea id="notas-pap" placeholder="Especificaciones, color, tamaño, etc."></textarea>
+      </div>
+    </div>
+
+    <!-- ── EQUIPO ESPECIAL ── -->
+    <div class="modulo" id="mod-Equipo">
+      <p class="section-title">Detalles del equipo</p>
+      <div class="field">
+        <label>Tipo de equipo <span class="req">*</span></label>
+        <select id="tipo-equipo">
+          <option value="">Selecciona...</option>
+          <option>Lámpara / Linterna</option>
+          <option>Radio de comunicación</option>
+          <option>Equipo celular</option>
+          <option>Cámara de vigilancia</option>
+          <option>Bodycam</option>
+          <option>Cargador / Batería</option>
+          
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Cantidad <span class="req">*</span></label>
+          <input type="number" id="cantidad-equipo" min="1" placeholder="1">
+        </div>
+        <div class="field">
+          <label>Acción solicitada <span class="req">*</span></label>
+          <select id="accion-equipo">
+            <option value="">Selecciona...</option>
+            <option>Asignación nueva</option>
+            <option>Reemplazo</option>
+            <option>Reparación</option>
+            <option>Baja / Retiro</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Descripción / Justificación <span class="req">*</span></label>
+        <textarea id="detalle-equipo" placeholder="Especifica el motivo, número de serie si aplica, o detalles del equipo..."></textarea>
+      </div>
+      <div class="field">
+        <label>Servicio o guardia asignado (opcional)</label>
+        <input type="text" id="asignado-equipo" placeholder="¿Para quién o dónde se destina el equipo?">
+      </div>
+    </div>
+
+    <button class="btn-submit" id="btn-enviar" onclick="enviar()">
+      <span class="spinner" id="spinner"></span>
+      <span id="btn-text">Enviar solicitud</span>
+    </button>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx0QUTM1VC_CAXgIJC4gVwBdkxE0a8WYwR05eagd0Y7I7wQk3zctVTyxDAXR_ReOdkuEQ/exec";
+
+let tipoActual = null;
+let urgenciaActual = "Normal";
+let todosLosServicios = [];
+
+// Roles con acceso admin (papelería en Oficinas, equipo especial, Virtus Auto, mantenimiento/reparación)
+const ROLES_ADMIN    = ["coord_general","director_general","aux_administrativa","director_finanzas"];
+const ROLES_OPERATIVOS = ["guardia","jefe_turno","coord_operativo"];
+
+// Servicios que tienen patrulla asignada
+const SERVICIOS_PATRULLA = ["cumbres del lago","lomas de juriquilla","oficinas"];
+
+function rolActual() { return document.getElementById("rol").value; }
+function esRolAdmin() { return ROLES_ADMIN.includes(rolActual()); }
+function esRolConEquipo() { return ["coord_general","director_general","aux_administrativa","director_finanzas","coord_operativo"].includes(rolActual()); }
+
+// ── Cargar servicios ──
+async function cargarServicios() {
+  try {
+    const res = await fetch(SCRIPT_URL);
+    const data = await res.json();
+    if (data.ok && data.servicios) {
+      todosLosServicios = data.servicios.map(s => s.nombre);
+    }
+  } catch(e) {
+    todosLosServicios = [
+      "3 vistas","Vértice","Agua azul","Magnolia","Gasolinera",
+      "Med 100","Central park","El templo",
+      "Cumbres del lago Z1","Cumbres del lago Z2","Cumbres del lago Z3","Cumbres del lago Z4",
+      "Villa capri","Lago el valle","Lago palomas","Catena","Lomas del lago",
+      "Lomas de juriquilla caseta 1","Lomas de juriquilla caseta 2",
+      "Condesa","Balcones de juriquilla","Atia","Oficinas"
+    ];
+  }
+  poblarServicios();
+}
+
+function tienePatrulla(nombre) {
+  const n = nombre.toLowerCase();
+  return SERVICIOS_PATRULLA.some(p => n.includes(p));
+}
+
+function poblarServicios() {
+  const sel = document.getElementById("servicio");
+  const valorPrevio = sel.value;
+  sel.innerHTML = '<option value="">Selecciona un servicio...</option>';
+
+  let lista = [...todosLosServicios];
+
+  if (tipoActual === "Patrulla") {
+    // Solo servicios con patrulla
+    lista = lista.filter(s => tienePatrulla(s));
+  } else if (tipoActual === "Papeleria" && !esRolAdmin()) {
+    // Sin Oficinas para roles operativos
+    lista = lista.filter(s => s.toLowerCase() !== "oficinas");
+  }
+
+  lista.forEach(nombre => {
+    const opt = document.createElement("option");
+    opt.value = nombre; opt.textContent = nombre;
+    if (nombre === valorPrevio) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function actualizarBotonesModulo() {
+  const rol = rolActual();
+  const btnEquipo = document.getElementById("btn-equipo");
+  const puedeEquipo = ["coord_general","director_general","aux_administrativa","director_finanzas","coord_operativo"].includes(rol);
+  btnEquipo.classList.toggle("disabled-btn", rol !== "" && !puedeEquipo);
+}
+
+function onRolChange() {
+  actualizarBotonesModulo();
+  if (tipoActual) poblarServicios();
+  if (tipoActual === "Patrulla") aplicarRestriccionesPatrulla();
+  // Si el rol no tiene acceso a equipo y está en ese módulo, resetear
+  if (tipoActual === "Equipo") {
+    const puedeEquipo = ["coord_general","director_general","aux_administrativa","director_finanzas","coord_operativo"].includes(rolActual());
+    if (!puedeEquipo) {
+      mostrarToast("Tu rol no tiene acceso a Equipo especial", "err");
+      resetModulo();
+    }
+  }
+}
+
+function aplicarRestriccionesPatrulla() {
+  const esOp = ROLES_OPERATIVOS.includes(rolActual());
+  document.getElementById("aviso-patrulla").classList.toggle("visible", esOp);
+
+  const optVirtus = document.getElementById("opt-virtus-auto");
+  optVirtus.disabled = esOp;
+  optVirtus.style.display = esOp ? "none" : "";
+  if (esOp && document.getElementById("unidad").value === "Virtus Automatico 2023")
+    document.getElementById("unidad").value = "";
+
+  document.querySelectorAll(".opt-restringida").forEach(opt => {
+    opt.disabled = esOp; opt.style.display = esOp ? "none" : "";
+  });
+  const tp = document.getElementById("tipo-patrulla");
+  if (esOp && !["Carga de gasolina","Revision general"].includes(tp.value)) tp.value = "";
+}
+
+// ── Tipo de módulo ──
+// Roles que NO aparecen en módulo Equipo
+const ROLES_SIN_EQUIPO = ["guardia","jefe_turno"];
+
+function filtrarRolesEquipo(activar) {
+  const sel = document.getElementById("rol");
+  const valorActual = sel.value;
+  Array.from(sel.options).forEach(opt => {
+    if (ROLES_SIN_EQUIPO.includes(opt.value)) {
+      opt.style.display = activar ? "none" : "";
+      opt.disabled = activar;
+    }
+  });
+  // Si el rol actual queda bloqueado, resetear
+  if (activar && ROLES_SIN_EQUIPO.includes(valorActual)) {
+    sel.value = "";
+  }
+}
+
+function setTipo(tipo, btn) {
+  tipoActual = tipo;
+  document.querySelectorAll(".tipo-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("form-body").style.display = "block";
+  document.querySelectorAll(".modulo").forEach(m => m.classList.remove("visible"));
+  document.getElementById("mod-" + tipo).classList.add("visible");
+  document.getElementById("btn-enviar").className = "btn-submit t-" + tipo.toLowerCase();
+
+  // Filtrar roles según módulo
+  filtrarRolesEquipo(tipo === "Equipo");
+
+  poblarServicios();
+  if (tipo === "Patrulla" && rolActual()) aplicarRestriccionesPatrulla();
+
+  setTimeout(() => {
+    document.getElementById("form-body").scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 50);
+}
+
+function setUrgencia(urg, btn) {
+  urgenciaActual = urg;
+  document.querySelectorAll(".urg-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+}
+
+function mostrarToast(msg, tipo) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast show " + tipo;
+  setTimeout(() => { t.className = "toast"; }, 4500);
+}
+
+// ── Validación ──
+function validar() {
+  const rol = rolActual();
+  if (!tipoActual) { mostrarToast("Selecciona un tipo de solicitud", "err"); return false; }
+  if (!rol) { mostrarToast("Selecciona tu rol", "err"); return false; }
+  if (!document.getElementById("solicitante").value.trim()) { mostrarToast("Escribe tu nombre", "err"); return false; }
+
+  if (tipoActual !== "Equipo") {
+    if (!document.getElementById("servicio").value) { mostrarToast("Selecciona el servicio / caseta", "err"); return false; }
+  }
+
+  if (tipoActual === "Uniforme") {
+    if (!document.getElementById("prenda").value) { mostrarToast("Selecciona la prenda", "err"); return false; }
+    if (!document.getElementById("talla").value) { mostrarToast("Selecciona la talla", "err"); return false; }
+    if (!document.getElementById("cantidad-uni").value) { mostrarToast("Indica la cantidad", "err"); return false; }
+  }
+  if (tipoActual === "Patrulla") {
+    const unidad = document.getElementById("unidad").value;
+    const tipoPat = document.getElementById("tipo-patrulla").value;
+    if (!unidad) { mostrarToast("Selecciona la unidad", "err"); return false; }
+    if (ROLES_OPERATIVOS.includes(rol) && unidad === "Virtus Automatico 2023") {
+      mostrarToast("Tu rol no tiene acceso al Virtus Automático", "err"); return false;
+    }
+    if (!tipoPat) { mostrarToast("Selecciona el tipo de solicitud", "err"); return false; }
+    if (ROLES_OPERATIVOS.includes(rol) && !["Carga de gasolina","Revision general"].includes(tipoPat)) {
+      mostrarToast("Tu rol solo puede solicitar gasolina o revisión general", "err"); return false;
+    }
+    if (!document.getElementById("detalle-patrulla").value.trim()) { mostrarToast("Describe la solicitud", "err"); return false; }
+  }
+  if (tipoActual === "Papeleria") {
+    if (!esRolAdmin() && document.getElementById("servicio").value === "Oficinas") {
+      mostrarToast("Tu rol no puede seleccionar Oficinas", "err"); return false;
+    }
+    if (!document.getElementById("articulo").value) { mostrarToast("Selecciona el artículo", "err"); return false; }
+    if (!document.getElementById("cantidad-pap").value) { mostrarToast("Indica la cantidad", "err"); return false; }
+  }
+  if (tipoActual === "Equipo") {
+    if (!document.getElementById("tipo-equipo").value) { mostrarToast("Selecciona el tipo de equipo", "err"); return false; }
+    if (!document.getElementById("cantidad-equipo").value) { mostrarToast("Indica la cantidad", "err"); return false; }
+    if (!document.getElementById("accion-equipo").value) { mostrarToast("Selecciona la acción solicitada", "err"); return false; }
+    if (!document.getElementById("detalle-equipo").value.trim()) { mostrarToast("Describe la solicitud", "err"); return false; }
+  }
+  return true;
+}
+
+// ── Envío ──
+async function enviar() {
+  if (!validar()) return;
+
+  const btn = document.getElementById("btn-enviar");
+  const spinner = document.getElementById("spinner");
+  const btnText = document.getElementById("btn-text");
+  btn.disabled = true; spinner.style.display = "block"; btnText.textContent = "Enviando...";
+
+  const rolSel = document.getElementById("rol");
+  const payload = {
+    tipo: tipoActual,
+    rol: rolSel.options[rolSel.selectedIndex].text,
+    solicitante: document.getElementById("solicitante").value.trim(),
+    servicio: tipoActual === "Equipo" ? "N/A" : document.getElementById("servicio").value,
+    urgencia: urgenciaActual
+  };
+
+  if (tipoActual === "Uniforme") {
+    const prenda = document.getElementById("prenda").value;
+    const talla  = document.getElementById("talla").value;
+    payload.prenda_talla = prenda + " / " + talla;
+    payload.cantidad = document.getElementById("cantidad-uni").value;
+    payload.notas    = document.getElementById("notas-uni").value.trim();
+    payload.detalle  = prenda + " talla " + talla;
+  }
+  if (tipoActual === "Patrulla") {
+    payload.unidad  = document.getElementById("unidad").value;
+    const tipoPat   = document.getElementById("tipo-patrulla").value;
+    const detalle   = document.getElementById("detalle-patrulla").value.trim();
+    payload.detalle = tipoPat + ": " + detalle;
+    const km = document.getElementById("km").value;
+    if (km) payload.notas = "Kilometraje: " + km + " km";
+  }
+  if (tipoActual === "Papeleria") {
+    payload.articulo = document.getElementById("articulo").value;
+    payload.cantidad = document.getElementById("cantidad-pap").value;
+    payload.notas    = document.getElementById("notas-pap").value.trim();
+    payload.detalle  = document.getElementById("articulo").value;
+  }
+  if (tipoActual === "Equipo") {
+    const tipoEq  = document.getElementById("tipo-equipo").value;
+    const accion  = document.getElementById("accion-equipo").value;
+    const asignado = document.getElementById("asignado-equipo").value.trim();
+    payload.articulo = tipoEq;
+    payload.cantidad = document.getElementById("cantidad-equipo").value;
+    payload.detalle  = accion + ": " + document.getElementById("detalle-equipo").value.trim();
+    payload.notas    = asignado ? "Asignado a: " + asignado : "";
+  }
+
+  try {
+    const res  = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.ok) {
+      mostrarToast("✓ Enviado — " + data.id, "ok");
+      setTimeout(() => resetForm(), 2200);
+    } else {
+      mostrarToast("Error: " + (data.error || "intenta de nuevo"), "err");
+    }
+  } catch(err) {
+    mostrarToast("Error de conexión — intenta de nuevo", "err");
+  } finally {
+    btn.disabled = false; spinner.style.display = "none"; btnText.textContent = "Enviar solicitud";
+  }
+}
+
+function resetModulo() {
+  tipoActual = null;
+  document.querySelectorAll(".tipo-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("form-body").style.display = "none";
+  document.querySelectorAll(".modulo").forEach(m => m.classList.remove("visible"));
+}
+
+function resetForm() {
+  tipoActual = null; urgenciaActual = "Normal";
+  filtrarRolesEquipo(false); // restaurar todos los roles
+  document.querySelectorAll(".tipo-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("form-body").style.display = "none";
+  document.querySelectorAll(".modulo").forEach(m => m.classList.remove("visible"));
+  document.querySelectorAll(".urg-btn").forEach(b => b.classList.remove("active"));
+  document.querySelector('.urg-btn[data-urg="Normal"]').classList.add("active");
+  document.getElementById("aviso-patrulla").classList.remove("visible");
+  ["rol","solicitante","servicio","prenda","talla","unidad","tipo-patrulla","articulo","tipo-equipo","accion-equipo"].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = "";
+  });
+  ["cantidad-uni","notas-uni","detalle-patrulla","km","cantidad-pap","notas-pap","cantidad-equipo","detalle-equipo","asignado-equipo"].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = "";
+  });
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+cargarServicios();
+</script>
+</body>
+</html>
