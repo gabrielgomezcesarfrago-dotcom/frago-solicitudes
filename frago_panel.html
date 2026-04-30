@@ -248,20 +248,28 @@ function doLogin() {
   const pass = document.getElementById("login-pass").value;
   if (USUARIOS[user] && USUARIOS[user] === pass) {
     usuarioActual = user;
-    document.getElementById("login-wrap").style.display = "none";
-    document.getElementById("panel-wrap").style.display = "block";
-    document.getElementById("header-user").textContent = user;
-    cargarSolicitudes();
+    sessionStorage.setItem("frago_user", user);
+    mostrarPanel(user);
   } else {
     document.getElementById("login-err").style.display = "block";
   }
 }
 
+function mostrarPanel(user) {
+  usuarioActual = user;
+  document.getElementById("login-wrap").style.display = "none";
+  document.getElementById("panel-wrap").style.display = "block";
+  document.getElementById("header-user").textContent = user;
+  cargarSolicitudes();
+}
+
 function logout() {
   usuarioActual = "";
+  sessionStorage.removeItem("frago_user");
   document.getElementById("panel-wrap").style.display = "none";
   document.getElementById("login-wrap").style.display = "flex";
   document.getElementById("login-pass").value = "";
+  document.getElementById("login-user").value = "";
   document.getElementById("login-err").style.display = "none";
 }
 
@@ -447,6 +455,13 @@ function mostrarError(msg) {
   document.getElementById("tabla-body").innerHTML =
     `<tr><td colspan="9" class="empty">${msg}</td></tr>`;
 }
+// Recuperar sesión al cargar
+(function() {
+  const user = sessionStorage.getItem("frago_user");
+  if (user && USUARIOS[user]) {
+    mostrarPanel(user);
+  }
+})();
 </script>
 </body>
 </html>
