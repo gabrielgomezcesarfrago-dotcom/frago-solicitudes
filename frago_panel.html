@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frago — Panel de Gestión</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117; --surface: #161b27; --surface2: #1c2235;
+    --border: #252d42; --border-focus: #4a6fa5;
+    --accent: #4a90d9; --accent2: #5db87a; --accent3: #e07b4a; --accent4: #9b6dd6;
+    --text: #e8eaf0; --text2: #8a93a8; --text3: #5a6275;
+    --danger: #e05a5a; --success: #5db87a; --warning: #e0b84a;
+    --radius: 10px; --font: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* LOGIN */
+  .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .login-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px 36px; width: 100%; max-width: 360px; }
+  .login-logo { width: 44px; height: 44px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; color: #fff; margin: 0 auto 20px; }
+  .login-title { font-size: 18px; font-weight: 500; text-align: center; margin-bottom: 4px; }
+  .login-sub { font-size: 13px; color: var(--text2); text-align: center; margin-bottom: 28px; }
+  .login-field { margin-bottom: 14px; }
+  .login-field label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 6px; }
+  .login-field input { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: var(--font); font-size: 14px; padding: 11px 14px; outline: none; transition: border-color 0.15s; }
+  .login-field input:focus { border-color: var(--border-focus); }
+  .login-err { font-size: 12px; color: var(--danger); margin-bottom: 12px; display: none; text-align: center; }
+  .btn-login { width: 100%; padding: 13px; border: none; border-radius: var(--radius); background: var(--accent); color: #fff; font-family: var(--font); font-size: 14px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
+  .btn-login:hover { opacity: 0.88; }
+
+  /* HEADER */
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
+  .header-logo { width: 34px; height: 34px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; color: #fff; flex-shrink: 0; }
+  .header-title { font-size: 14px; font-weight: 500; flex: 1; }
+  .btn-logout { background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--text2); font-family: var(--font); font-size: 12px; padding: 6px 12px; cursor: pointer; transition: all 0.15s; }
+  .btn-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* MAIN */
+  .main { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 12px; margin-bottom: 28px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+  .stat-num { font-size: 28px; font-weight: 600; line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 12px; color: var(--text2); }
+  .s-total { color: var(--text); } .s-pend { color: var(--warning); }
+  .s-aprov { color: var(--accent); } .s-atend { color: var(--success); } .s-rech { color: var(--danger); }
+
+  /* FILTROS */
+  .filtros { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; align-items: center; }
+  .filtro-select { background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text2); font-family: var(--font); font-size: 13px; padding: 8px 32px 8px 12px; outline: none; cursor: pointer; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a93a8' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+  .filtro-buscar { flex: 1; min-width: 200px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--font); font-size: 13px; padding: 8px 14px; outline: none; }
+  .filtro-buscar:focus, .filtro-select:focus { border-color: var(--border-focus); }
+  .btn-refresh { background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text2); font-family: var(--font); font-size: 13px; padding: 8px 14px; cursor: pointer; transition: all 0.15s; }
+  .btn-refresh:hover { border-color: var(--border-focus); color: var(--text); }
+
+  /* TABLA */
+  .tabla-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { background: var(--surface2); }
+  th { padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); white-space: nowrap; border-bottom: 1px solid var(--border); }
+  td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text2); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .td-id { font-family: var(--mono); font-size: 11px; color: var(--text3); white-space: nowrap; }
+  .td-main { color: var(--text); font-weight: 500; }
+  .td-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-Pendiente  { background: rgba(224,184,74,0.12); color: var(--warning); }
+  .b-Aprobada   { background: rgba(74,144,217,0.12); color: var(--accent); }
+  .b-Atendida   { background: rgba(93,184,122,0.12); color: var(--success); }
+  .b-Rechazada  { background: rgba(224,90,90,0.12);  color: var(--danger); }
+  .b-Cerrada    { background: rgba(90,98,117,0.2);   color: var(--text3); }
+
+  .tipo-badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 6px; white-space: nowrap; }
+  .t-Uniforme  { background: rgba(74,144,217,0.1);  color: var(--accent); }
+  .t-Patrulla  { background: rgba(224,123,74,0.1);  color: var(--accent3); }
+  .t-Papeleria { background: rgba(93,184,122,0.1);  color: var(--accent2); }
+  .t-Equipo    { background: rgba(155,109,214,0.1); color: var(--accent4); }
+
+  .u-Normal  { color: var(--text3); } .u-Urgente { color: var(--warning); } .u-Critico { color: var(--danger); font-weight: 500; }
+
+  .acciones { display: flex; gap: 6px; flex-wrap: wrap; }
+  .btn-accion { font-size: 11px; font-weight: 500; padding: 5px 10px; border-radius: 6px; border: none; cursor: pointer; font-family: var(--font); transition: opacity 0.15s; white-space: nowrap; }
+  .btn-accion:hover { opacity: 0.8; }
+  .btn-aprobar  { background: rgba(74,144,217,0.15); color: var(--accent); }
+  .btn-atender  { background: rgba(93,184,122,0.15); color: var(--success); }
+  .btn-rechazar { background: rgba(224,90,90,0.15);  color: var(--danger); }
+  .btn-cerrar   { background: rgba(90,98,117,0.15);  color: var(--text2); }
+  .btn-ver      { background: rgba(255,255,255,0.05);color: var(--text2); }
+
+  .empty { text-align: center; padding: 48px 20px; color: var(--text3); font-size: 14px; }
+
+  /* MODAL */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
+  .modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+  .modal-title { font-size: 16px; font-weight: 500; }
+  .modal-id { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-top: 3px; }
+  .btn-close { background: none; border: none; color: var(--text2); font-size: 22px; cursor: pointer; line-height: 1; padding: 0 4px; }
+  .modal-row { display: flex; gap: 8px; margin-bottom: 10px; font-size: 13px; }
+  .modal-key { color: var(--text3); min-width: 140px; flex-shrink: 0; }
+  .modal-val { color: var(--text); }
+  .modal-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+  .modal-nota { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--font); font-size: 13px; padding: 10px 12px; outline: none; resize: vertical; min-height: 70px; margin-bottom: 12px; }
+  .modal-nota:focus { border-color: var(--border-focus); }
+  .modal-acciones { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-modal { flex: 1; padding: 11px; border: none; border-radius: 8px; font-family: var(--font); font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; min-width: 100px; }
+  .btn-modal:hover { opacity: 0.85; }
+  .bm-aprobar  { background: var(--accent);   color: #fff; }
+  .bm-atender  { background: var(--success);  color: #fff; }
+  .bm-rechazar { background: var(--danger);   color: #fff; }
+  .bm-cerrar   { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px; font-size: 13px; color: var(--text); opacity: 0; transition: all 0.3s ease; pointer-events: none; z-index: 999; box-shadow: 0 8px 32px rgba(0,0,0,0.4); white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.ok { border-color: var(--success); } .toast.err { border-color: var(--danger); }
+
+  .spinner-wrap { text-align: center; padding: 48px; color: var(--text3); font-size: 14px; }
+  @media (max-width: 600px) { th.hide-sm, td.hide-sm { display: none; } }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="login-wrap">
+  <div class="login-box">
+    <div class="login-logo">FG</div>
+    <p class="login-title">Panel de Gestión</p>
+    <p class="login-sub">Acceso restringido — equipo Frago</p>
+    <div class="login-field">
+      <label>Usuario</label>
+      <input type="text" id="login-user" placeholder="Tu nombre" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <p class="login-err" id="login-err">Usuario o contraseña incorrectos</p>
+    <button class="btn-login" onclick="doLogin()">Entrar</button>
+  </div>
+</div>
+
+<!-- PANEL -->
+<div id="panel-wrap" style="display:none;">
+  <div class="header">
+    <div class="header-logo">FG</div>
+    <div class="header-title">Panel de Gestión — Frago</div>
+    <span style="font-size:12px;color:var(--text2);margin-right:10px;" id="header-user"></span>
+    <button class="btn-logout" onclick="logout()">Salir</button>
+  </div>
+
+  <div class="main">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num s-total" id="st-total">—</div><div class="stat-label">Total</div></div>
+      <div class="stat-card"><div class="stat-num s-pend"  id="st-pend">—</div><div class="stat-label">Pendientes</div></div>
+      <div class="stat-card"><div class="stat-num s-aprov" id="st-aprov">—</div><div class="stat-label">Aprobadas</div></div>
+      <div class="stat-card"><div class="stat-num s-atend" id="st-atend">—</div><div class="stat-label">Atendidas</div></div>
+      <div class="stat-card"><div class="stat-num s-rech"  id="st-rech">—</div><div class="stat-label">Rechazadas</div></div>
+    </div>
+
+    <div class="filtros">
+      <input class="filtro-buscar" type="text" id="buscar" placeholder="Buscar por nombre, servicio, ID..." oninput="renderTabla()">
+      <select class="filtro-select" id="f-estatus" onchange="renderTabla()">
+        <option value="">Todos los estatus</option>
+        <option>Pendiente</option><option>Aprobada</option>
+        <option>Atendida</option><option>Rechazada</option><option>Cerrada</option>
+      </select>
+      <select class="filtro-select" id="f-tipo" onchange="renderTabla()">
+        <option value="">Todos los tipos</option>
+        <option>Uniforme</option><option>Patrulla</option>
+        <option>Papeleria</option><option>Equipo</option>
+      </select>
+      <select class="filtro-select" id="f-urgencia" onchange="renderTabla()">
+        <option value="">Toda urgencia</option>
+        <option>Normal</option><option>Urgente</option><option>Critico</option>
+      </select>
+      <button class="btn-refresh" onclick="cargarSolicitudes()">↻ Actualizar</button>
+    </div>
+
+    <div class="tabla-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>Solicitante</th>
+            <th class="hide-sm">Servicio</th>
+            <th class="hide-sm">Detalle</th>
+            <th>Urgencia</th>
+            <th>Estatus</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-body">
+          <tr><td colspan="9" class="spinner-wrap">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg" onclick="if(event.target===this)cerrarModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="m-titulo"></div>
+        <div class="modal-id"    id="m-id"></div>
+      </div>
+      <button class="btn-close" onclick="cerrarModal()">×</button>
+    </div>
+    <div id="m-body"></div>
+    <hr class="modal-divider">
+    <p style="font-size:12px;color:var(--text3);margin-bottom:8px;">Nota de gestión (opcional)</p>
+    <textarea class="modal-nota" id="m-nota" placeholder="Agrega una nota al actualizar el estatus..."></textarea>
+    <div class="modal-acciones" id="m-acciones"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx0QUTM1VC_CAXgIJC4gVwBdkxE0a8WYwR05eagd0Y7I7wQk3zctVTyxDAXR_ReOdkuEQ/exec";
+
+// Cambia estas contraseñas antes de publicar
+const USUARIOS = {
+  "gabriel":  "fqEVDmty0Hr0",
+  "emiliano": "OMwqCm0FcyvS",
+  "gigi":     "@apDwM#$YdST",
+  "othon":    "GAQhutq66yCF"
+};
+
+let solicitudes = [];
+let solicitudActual = null;
+let usuarioActual = "";
+
+// ── LOGIN ──
+function doLogin() {
+  const user = document.getElementById("login-user").value.trim().toLowerCase();
+  const pass = document.getElementById("login-pass").value;
+  if (USUARIOS[user] && USUARIOS[user] === pass) {
+    usuarioActual = user;
+    document.getElementById("login-wrap").style.display = "none";
+    document.getElementById("panel-wrap").style.display = "block";
+    document.getElementById("header-user").textContent = user;
+    cargarSolicitudes();
+  } else {
+    document.getElementById("login-err").style.display = "block";
+  }
+}
+
+function logout() {
+  usuarioActual = "";
+  document.getElementById("panel-wrap").style.display = "none";
+  document.getElementById("login-wrap").style.display = "flex";
+  document.getElementById("login-pass").value = "";
+  document.getElementById("login-err").style.display = "none";
+}
+
+// ── CARGAR SOLICITUDES ──
+async function cargarSolicitudes() {
+  document.getElementById("tabla-body").innerHTML =
+    '<tr><td colspan="9" class="spinner-wrap">Cargando solicitudes...</td></tr>';
+  try {
+    const res  = await fetch(SCRIPT_URL + "?action=getSolicitudes");
+    const data = await res.json();
+    if (data.ok) {
+      solicitudes = data.solicitudes || [];
+      actualizarStats();
+      renderTabla();
+    } else {
+      mostrarError("No se pudo cargar las solicitudes");
+    }
+  } catch(e) {
+    mostrarError("Error de conexión");
+  }
+}
+
+function actualizarStats() {
+  const c = { Pendiente:0, Aprobada:0, Atendida:0, Rechazada:0 };
+  solicitudes.forEach(s => { if (c[s.estatus] !== undefined) c[s.estatus]++; });
+  document.getElementById("st-total").textContent = solicitudes.length;
+  document.getElementById("st-pend").textContent  = c.Pendiente;
+  document.getElementById("st-aprov").textContent = c.Aprobada;
+  document.getElementById("st-atend").textContent = c.Atendida;
+  document.getElementById("st-rech").textContent  = c.Rechazada;
+}
+
+// ── TABLA ──
+function renderTabla() {
+  const buscar = document.getElementById("buscar").value.toLowerCase();
+  const fEst   = document.getElementById("f-estatus").value;
+  const fTipo  = document.getElementById("f-tipo").value;
+  const fUrg   = document.getElementById("f-urgencia").value;
+
+  const filtradas = solicitudes.filter(s => {
+    const txt = [s.id,s.solicitante,s.servicio,s.detalle,s.rol].join(" ").toLowerCase();
+    return (!buscar || txt.includes(buscar))
+      && (!fEst  || s.estatus  === fEst)
+      && (!fTipo || s.tipo     === fTipo)
+      && (!fUrg  || s.urgencia === fUrg);
+  });
+
+  const tbody = document.getElementById("tabla-body");
+  if (!filtradas.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="empty">No hay solicitudes con esos filtros</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtradas.map(s => `
+    <tr>
+      <td class="td-id">${s.id||"—"}</td>
+      <td style="white-space:nowrap;font-size:12px;">${formatFecha(s.fecha)}</td>
+      <td><span class="tipo-badge t-${s.tipo}">${s.tipo}</span></td>
+      <td>
+        <div class="td-main">${s.solicitante||"—"}</div>
+        <div class="td-sub">${s.rol||""}</div>
+      </td>
+      <td class="hide-sm" style="font-size:12px;">${s.servicio||"—"}</td>
+      <td class="hide-sm" style="font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.detalle||"—"}</td>
+      <td><span class="u-${s.urgencia||'Normal'}">${s.urgencia||"Normal"}</span></td>
+      <td><span class="badge b-${s.estatus}">${s.estatus}</span></td>
+      <td>
+        <div class="acciones">
+          <button class="btn-accion btn-ver" onclick="abrirModal('${s.id}')">Ver</button>
+          ${s.estatus==="Pendiente"              ? `<button class="btn-accion btn-aprobar"  onclick="accionRapida('${s.id}','Aprobada')">Aprobar</button>`  : ""}
+          ${s.estatus==="Aprobada"               ? `<button class="btn-accion btn-atender"  onclick="accionRapida('${s.id}','Atendida')">Atender</button>`  : ""}
+          ${s.estatus==="Pendiente"              ? `<button class="btn-accion btn-rechazar" onclick="accionRapida('${s.id}','Rechazada')">Rechazar</button>` : ""}
+          ${["Atendida","Rechazada"].includes(s.estatus) ? `<button class="btn-accion btn-cerrar" onclick="accionRapida('${s.id}','Cerrada')">Cerrar</button>` : ""}
+        </div>
+      </td>
+    </tr>
+  `).join("");
+}
+
+// ── MODAL ──
+function abrirModal(id) {
+  const s = solicitudes.find(x => x.id === id);
+  if (!s) return;
+  solicitudActual = s;
+  document.getElementById("m-titulo").textContent = s.tipo + " — " + (s.solicitante||"");
+  document.getElementById("m-id").textContent = s.id;
+  document.getElementById("m-nota").value = "";
+
+  const campos = [
+    ["Fecha",        formatFecha(s.fecha)],
+    ["Tipo",         s.tipo],
+    ["Rol",          s.rol],
+    ["Solicitante",  s.solicitante],
+    ["Servicio",     s.servicio],
+    ["Urgencia",     s.urgencia],
+    ["Estatus",      s.estatus],
+    s.detalle   ? ["Detalle",        s.detalle]   : null,
+    s.unidad    ? ["Unidad",         s.unidad]    : null,
+    s.prenda    ? ["Prenda / Talla", s.prenda]    : null,
+    s.condicion ? ["Condición",      s.condicion] : null,
+    s.articulo  ? ["Artículo",       s.articulo]  : null,
+    s.cantidad  ? ["Cantidad",       s.cantidad]  : null,
+    s.notas     ? ["Notas",          s.notas]     : null,
+    s.aprobadoPor    ? ["Aprobado por",       s.aprobadoPor]               : null,
+    s.fechaAprobacion? ["Fecha aprobación",   formatFecha(s.fechaAprobacion)] : null,
+    s.atendidoPor    ? ["Atendido por",       s.atendidoPor]               : null,
+    s.fechaEntrega   ? ["Fecha entrega",      formatFecha(s.fechaEntrega)] : null,
+    s.notaGestion    ? ["Nota de gestión",    s.notaGestion]               : null,
+  ].filter(Boolean);
+
+  document.getElementById("m-body").innerHTML = campos.map(([k,v]) =>
+    `<div class="modal-row"><span class="modal-key">${k}</span><span class="modal-val">${v||"—"}</span></div>`
+  ).join("");
+
+  const est = s.estatus;
+  let btns = "";
+  if (est === "Pendiente") {
+    btns += `<button class="btn-modal bm-aprobar"  onclick="accionModal('Aprobada')">Aprobar</button>`;
+    btns += `<button class="btn-modal bm-rechazar" onclick="accionModal('Rechazada')">Rechazar</button>`;
+  }
+  if (est === "Aprobada") {
+    btns += `<button class="btn-modal bm-atender"  onclick="accionModal('Atendida')">Marcar atendida</button>`;
+    btns += `<button class="btn-modal bm-rechazar" onclick="accionModal('Rechazada')">Rechazar</button>`;
+  }
+  if (["Atendida","Rechazada"].includes(est)) {
+    btns += `<button class="btn-modal bm-cerrar" onclick="accionModal('Cerrada')">Cerrar solicitud</button>`;
+  }
+  btns += `<button class="btn-modal bm-cerrar" onclick="cerrarModal()">Cancelar</button>`;
+  document.getElementById("m-acciones").innerHTML = btns;
+  document.getElementById("modal-bg").classList.add("open");
+}
+
+function cerrarModal() {
+  document.getElementById("modal-bg").classList.remove("open");
+  solicitudActual = null;
+}
+
+async function accionModal(nuevoEstatus) {
+  if (!solicitudActual) return;
+  const nota = document.getElementById("m-nota").value.trim();
+  cerrarModal();
+  await actualizarEstatus(solicitudActual.id, nuevoEstatus, nota);
+}
+
+async function accionRapida(id, nuevoEstatus) {
+  await actualizarEstatus(id, nuevoEstatus, "");
+}
+
+async function actualizarEstatus(id, nuevoEstatus, nota) {
+  try {
+    const res  = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action:"actualizarEstatus", id, estatus:nuevoEstatus, nota, gestionadoPor:usuarioActual })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      mostrarToast("✓ Solicitud " + nuevoEstatus.toLowerCase(), "ok");
+      await cargarSolicitudes();
+    } else {
+      mostrarToast("Error: " + (data.error||"intenta de nuevo"), "err");
+    }
+  } catch(e) {
+    mostrarToast("Error de conexión", "err");
+  }
+}
+
+// ── UTILIDADES ──
+function formatFecha(f) {
+  if (!f) return "—";
+  const d = new Date(f);
+  if (isNaN(d)) return f;
+  return d.toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"})
+       + " " + d.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"});
+}
+
+function mostrarToast(msg, tipo) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.className = "toast show " + tipo;
+  setTimeout(() => { t.className = "toast"; }, 4000);
+}
+
+function mostrarError(msg) {
+  document.getElementById("tabla-body").innerHTML =
+    `<tr><td colspan="9" class="empty">${msg}</td></tr>`;
+}
+</script>
+</body>
+</html>
