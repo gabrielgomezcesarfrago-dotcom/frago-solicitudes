@@ -221,11 +221,15 @@
             <option>Pantalón</option>
             <option>Chamarra</option>
             <option>Sudadera</option>
-            <option>Chaleco reflejante</option>
+            <option>Chaleco reflejante rojo (FRAGO)</option>
+            <option>Chaleco reflejante de seguridad (naranja)</option>
             <option>Chaleco táctico</option>
             <option>Gorra</option>
             <option>Botas</option>
             <option>Impermeable</option>
+            <option>Fajilla</option>
+            <option>Cinturón</option>
+            <option>Broche</option>
             <option>Otro</option>
           </select>
         </div>
@@ -244,6 +248,15 @@
       <div class="field">
         <label>Cantidad <span class="req">*</span></label>
         <input type="number" id="cantidad-uni" min="1" placeholder="1">
+      </div>
+      <div class="field" id="campo-condicion" style="display:none;">
+        <label>¿Acepta uniforme en buen estado (usado)?</label>
+        <div class="urgencia-grid">
+          <button class="urg-btn active" data-cond="Cualquiera" onclick="setCondicion('Cualquiera',this)" style="grid-column: span 1;">Sí, cualquiera</button>
+          <button class="urg-btn" data-cond="Nuevo" onclick="setCondicion('Nuevo',this)">Solo nuevo</button>
+          <button class="urg-btn" data-cond="Usado" onclick="setCondicion('Usado',this)">Solo usado</button>
+        </div>
+        <p style="font-size:11px;color:var(--text3);margin-top:6px;">Si acepta usado, el sistema asignará primero del inventario disponible.</p>
       </div>
       <div class="field">
         <label>Notas adicionales</label>
@@ -375,6 +388,7 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx0QUTM1VC_CAXgIJC4g
 
 let tipoActual = null;
 let urgenciaActual = "Normal";
+let condicionActual = "Cualquiera";
 let todosLosServicios = [];
 
 // Roles con acceso admin (papelería en Oficinas, equipo especial, Virtus Auto, mantenimiento/reparación)
@@ -448,6 +462,7 @@ function onRolChange() {
   actualizarBotonesModulo();
   if (tipoActual) poblarServicios();
   if (tipoActual === "Patrulla") aplicarRestriccionesPatrulla();
+  actualizarCampoCondicion();
   // Si el rol no tiene acceso a equipo y está en ese módulo, resetear
   if (tipoActual === "Equipo") {
     const puedeEquipo = ["coord_general","director_general","aux_administrativa","director_finanzas","coord_operativo"].includes(rolActual());
@@ -507,11 +522,34 @@ function setTipo(tipo, btn) {
   filtrarRolesEquipo(tipo === "Equipo");
 
   poblarServicios();
+  actualizarCampoCondicion();
   if (tipo === "Patrulla" && rolActual()) aplicarRestriccionesPatrulla();
 
   setTimeout(() => {
     document.getElementById("form-body").scrollIntoView({ behavior: "smooth", block: "start" });
   }, 50);
+}
+
+const ROLES_CON_CONDICION = ["coord_operativo","coord_general","director_general","director_finanzas"];
+
+function setCondicion(cond, btn) {
+  condicionActual = cond;
+  document.querySelectorAll("[data-cond]").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+}
+
+function actualizarCampoCondicion() {
+  const campo = document.getElementById("campo-condicion");
+  if (!campo) return;
+  const mostrar = tipoActual === "Uniforme" && ROLES_CON_CONDICION.includes(rolActual());
+  campo.style.display = mostrar ? "block" : "none";
+  if (!mostrar) {
+    // Si no se muestra, resetear a Cualquiera
+    condicionActual = "Cualquiera";
+    document.querySelectorAll("[data-cond]").forEach(b => b.classList.remove("active"));
+    const def = document.querySelector('[data-cond="Cualquiera"]');
+    if (def) def.classList.add("active");
+  }
 }
 
 function setUrgencia(urg, btn) {
@@ -595,6 +633,7 @@ async function enviar() {
     const talla  = document.getElementById("talla").value;
     payload.prenda_talla = prenda + " / " + talla;
     payload.cantidad = document.getElementById("cantidad-uni").value;
+    payload.condicion = condicionActual;
     payload.notas    = document.getElementById("notas-uni").value.trim();
     payload.detalle  = prenda + " talla " + talla;
   }
@@ -648,6 +687,10 @@ function resetModulo() {
 function resetForm() {
   tipoActual = null; urgenciaActual = "Normal";
   filtrarRolesEquipo(false); // restaurar todos los roles
+  condicionActual = "Cualquiera";
+  document.querySelectorAll("[data-cond]").forEach(b => b.classList.remove("active"));
+  const defCond = document.querySelector('[data-cond="Cualquiera"]');
+  if (defCond) defCond.classList.add("active");
   document.querySelectorAll(".tipo-btn").forEach(b => b.classList.remove("active"));
   document.getElementById("form-body").style.display = "none";
   document.querySelectorAll(".modulo").forEach(m => m.classList.remove("visible"));
