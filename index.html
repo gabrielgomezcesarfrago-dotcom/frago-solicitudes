@@ -272,7 +272,7 @@
       </div>
       <div class="field">
         <label>Unidad <span class="req">*</span></label>
-        <select id="unidad">
+        <select id="unidad" onchange="onUnidadChange()">
           <option value="">Selecciona una unidad...</option>
           <option value="Saveiro Pickup (con caja en batea)">Saveiro Pickup (con caja en batea)</option>
           <option value="Saveiro Pickup">Saveiro Pickup</option>
@@ -280,14 +280,18 @@
           <option value="Virtus Lomas de Juriquilla 2023">Virtus Lomas de Juriquilla 2023</option>
           <option value="Virtus Automatico 2023" id="opt-virtus-auto">Virtus Automático 2023</option>
           <option value="Vento 2017">Vento 2017</option>
+          <option value="Motocicleta Caseta 1 Lomas de Juriquilla">Motocicleta Caseta 1 — Lomas de Juriquilla</option>
+          <option value="Motocicleta Caseta 2 Lomas de Juriquilla">Motocicleta Caseta 2 — Lomas de Juriquilla</option>
+          <option value="Motocicleta Balcones de Juriquilla">Motocicleta — Balcones de Juriquilla</option>
+          <option value="Monopatin Electrico Real del Lago" id="opt-monopatin">Monopatín Eléctrico — Real del Lago</option>
         </select>
       </div>
       <div class="field">
         <label>Tipo de solicitud <span class="req">*</span></label>
-        <select id="tipo-patrulla">
+        <select id="tipo-patrulla" onchange="onTipoPatrullaChange()">
           <option value="">Selecciona...</option>
-          <option value="Carga de gasolina">Carga de gasolina</option>
-          <option value="Mantenimiento preventivo" class="opt-restringida">Mantenimiento preventivo</option>
+          <option value="Carga de gasolina" class="opt-restringida-mono">Carga de gasolina</option>
+          <option value="Mantenimiento preventivo" class="opt-restringida opt-restringida-mono">Mantenimiento preventivo</option>
           <option value="Reparacion" class="opt-restringida">Reparación</option>
           <option value="Revision general">Revisión general</option>
         </select>
@@ -473,6 +477,41 @@ function onRolChange() {
   }
 }
 
+function esMonopatin() {
+  return document.getElementById("unidad").value === "Monopatin Electrico Real del Lago";
+}
+
+function onUnidadChange() {
+  const mono = esMonopatin();
+  const aviso = document.getElementById("aviso-patrulla");
+  const selTipo = document.getElementById("tipo-patrulla");
+
+  // Restricciones del monopatín: solo revisión y reparación
+  document.querySelectorAll(".opt-restringida-mono").forEach(opt => {
+    opt.disabled = mono;
+    opt.style.display = mono ? "none" : "";
+  });
+
+  if (mono) {
+    if (!["Reparacion","Revision general"].includes(selTipo.value)) selTipo.value = "";
+    aviso.textContent = "⚠️ El monopatín solo permite solicitar reparación o revisión general.";
+    aviso.classList.add("visible");
+  } else {
+    // Restaurar aviso original según rol
+    aplicarRestriccionesPatrulla();
+  }
+}
+
+function onTipoPatrullaChange() {
+  // Si es monopatín y eligen algo no permitido, resetear
+  if (esMonopatin()) {
+    const val = document.getElementById("tipo-patrulla").value;
+    if (!["Reparacion","Revision general"].includes(val)) {
+      document.getElementById("tipo-patrulla").value = "";
+    }
+  }
+}
+
 function aplicarRestriccionesPatrulla() {
   const esOp = ROLES_OPERATIVOS.includes(rolActual());
   document.getElementById("aviso-patrulla").classList.toggle("visible", esOp);
@@ -591,6 +630,9 @@ function validar() {
     if (!tipoPat) { mostrarToast("Selecciona el tipo de solicitud", "err"); return false; }
     if (ROLES_OPERATIVOS.includes(rol) && !["Carga de gasolina","Revision general"].includes(tipoPat)) {
       mostrarToast("Tu rol solo puede solicitar gasolina o revisión general", "err"); return false;
+    }
+    if (esMonopatin() && !["Reparacion","Revision general"].includes(tipoPat)) {
+      mostrarToast("El monopatín solo permite reparación o revisión general", "err"); return false;
     }
     if (!document.getElementById("detalle-patrulla").value.trim()) { mostrarToast("Describe la solicitud", "err"); return false; }
   }
