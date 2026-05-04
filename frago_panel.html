@@ -1281,7 +1281,9 @@ async function ejecutarCancelacion() {
   errEl.style.display = "none";
   if (!motivo) { mostrarToast("Escribe el motivo de cancelación", "err"); return; }
   // Guardar ID antes de cerrar modal (cerrarModalCancelar lo pone en null)
+  console.log("solicitudACancelar antes de cerrar:", solicitudACancelar);
   const idACancelar = solicitudACancelar;
+  console.log("idACancelar guardado:", idACancelar);
   cerrarModalCancelar();
   try {
     const res  = await fetch(SCRIPT_URL, {
