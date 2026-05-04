@@ -36,6 +36,9 @@
   .login-err { font-size: 12px; color: var(--danger); margin-bottom: 12px; display: none; text-align: center; }
   .btn-login { width: 100%; padding: 13px; border: none; border-radius: var(--radius); background: var(--accent); color: #fff; font-family: var(--font); font-size: 14px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
   .btn-login:hover { opacity: 0.88; }
+  .remember-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; cursor: pointer; }
+  .remember-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+  .remember-row span { font-size: 13px; color: var(--text2); }
 
   /* HEADER */
   .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
@@ -216,6 +219,10 @@
       <label>Contraseña</label>
       <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
+    <label class="remember-row">
+      <input type="checkbox" id="remember-me">
+      <span>Recordar mi sesión</span>
+    </label>
     <p class="login-err" id="login-err">Usuario o contraseña incorrectos</p>
     <button class="btn-login" onclick="doLogin()">Entrar</button>
   </div>
@@ -569,7 +576,15 @@ function doLogin() {
   const pass = document.getElementById("login-pass").value;
   if (USUARIOS[user] && USUARIOS[user] === pass) {
     usuarioActual = user;
-    sessionStorage.setItem("frago_user", user);
+    const remember = document.getElementById("remember-me").checked;
+    if (remember) {
+      localStorage.setItem("frago_user", user);
+      localStorage.setItem("frago_remember", "true");
+    } else {
+      sessionStorage.setItem("frago_user", user);
+      localStorage.removeItem("frago_user");
+      localStorage.removeItem("frago_remember");
+    }
     mostrarPanel(user);
   } else {
     document.getElementById("login-err").style.display = "block";
@@ -593,11 +608,14 @@ function mostrarPanel(user) {
 function logout() {
   usuarioActual = "";
   sessionStorage.removeItem("frago_user");
+  localStorage.removeItem("frago_user");
+  localStorage.removeItem("frago_remember");
   document.getElementById("panel-wrap").style.display = "none";
   document.getElementById("login-wrap").style.display = "flex";
   document.getElementById("login-pass").value = "";
   document.getElementById("login-user").value = "";
   document.getElementById("login-err").style.display = "none";
+  document.getElementById("remember-me").checked = false;
 }
 
 // ── CARGAR SOLICITUDES ──
@@ -1383,11 +1401,23 @@ async function guardarRegistroFlota(tipo) {
 
 function cerrarModalFlota() { document.getElementById("modal-flota-bg").classList.remove("open"); }
 
-// Recuperar sesión al cargar
+// Recuperar sesión al cargar — localStorage (recuerda) o sessionStorage (sesión)
 (function() {
-  const user = sessionStorage.getItem("frago_user");
+  const userLocal   = localStorage.getItem("frago_user");
+  const userSession = sessionStorage.getItem("frago_user");
+  const user = userLocal || userSession;
   if (user && USUARIOS[user]) {
     mostrarPanel(user);
+    // Marcar checkbox si está recordado
+    if (userLocal) {
+      const cb = document.getElementById("remember-me");
+      if (cb) cb.checked = true;
+    }
+  }
+  // Pre-llenar usuario si estaba recordado
+  if (userLocal) {
+    const input = document.getElementById("login-user");
+    if (input) { input.value = userLocal; }
   }
 })();
 </script>
