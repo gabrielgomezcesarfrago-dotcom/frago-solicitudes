@@ -173,6 +173,7 @@
   .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 5px; width: fit-content; }
   .tab-btn { padding: 11px 24px; border-radius: 9px; border: none; font-family: var(--font); font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.15s; background: none; color: var(--text2); }
   .tab-btn.active { background: var(--surface2); color: var(--text); }
+  .tab-badge { display: inline-flex; align-items: center; justify-content: center; background: var(--danger); color: #fff; border-radius: 20px; font-size: 10px; font-weight: 600; min-width: 18px; height: 18px; padding: 0 5px; margin-left: 6px; vertical-align: middle; line-height: 1; }
   .tab-content { display: none; }
   .tab-content.active { display: block; }
 
@@ -227,7 +228,7 @@
 
     <!-- Pestañas -->
     <div class="tabs">
-      <button class="tab-btn active" onclick="setTab('solicitudes',this)">📋 Solicitudes</button>
+      <button class="tab-btn active" onclick="setTab('solicitudes',this)">📋 Solicitudes<span class="tab-badge" id="badge-pendientes" style="display:none;">0</span></button>
       <button class="tab-btn" onclick="setTab('dashboard',this)">📊 Dashboard</button>
       <button class="tab-btn" id="tab-btn-inventario" onclick="setTab('inventario',this)">📦 Inventario</button>
       <button class="tab-btn" onclick="setTab('flota',this)">🚗 Flota</button>
@@ -620,6 +621,16 @@ function actualizarStats() {
   document.getElementById("st-aprov").textContent = c.Aprobada;
   document.getElementById("st-atend").textContent = c.Atendida;
   document.getElementById("st-rech").textContent  = c.Rechazada;
+
+  // Badge de pendientes
+  const badge = document.getElementById("badge-pendientes");
+  const pendientes = c.Pendiente + c.Aprobada; // pendientes + aprobadas sin atender
+  if (pendientes > 0) {
+    badge.textContent = pendientes;
+    badge.style.display = "inline-flex";
+  } else {
+    badge.style.display = "none";
+  }
 }
 
 // ── TABLA ──
