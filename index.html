@@ -556,12 +556,27 @@ function setTipo(tipo, btn) {
   document.getElementById("form-body").style.display = "block";
   document.querySelectorAll(".modulo").forEach(m => m.classList.remove("visible"));
   document.getElementById("mod-" + tipo).classList.add("visible");
-  document.getElementById("btn-enviar").className = "btn-submit t-" + tipo.toLowerCase();
 
-  poblarServicios();
+  const esConsulta = tipo === "Consulta";
 
-  if (tipo === "Patrulla") aplicarRestriccionesPatrulla();
-  if (tipo === "Uniforme") actualizarCampoCondicion();
+  // Mostrar u ocultar campos comunes según si es Consulta o no
+  document.getElementById("btn-enviar").style.display        = esConsulta ? "none" : "flex";
+  document.getElementById("btn-enviar").className            = "btn-submit t-" + tipo.toLowerCase();
+  document.getElementById("campo-servicio").style.display    = esConsulta ? "none" : "block";
+
+  const urgRow = document.querySelector(".urgencia-grid");
+  if (urgRow && urgRow.parentElement) urgRow.parentElement.style.display = esConsulta ? "none" : "block";
+
+  const solRow = document.getElementById("solicitante");
+  if (solRow && solRow.parentElement) solRow.parentElement.style.display = esConsulta ? "none" : "block";
+
+  if (!esConsulta) {
+    poblarServicios();
+    if (tipo === "Patrulla") aplicarRestriccionesPatrulla();
+    if (tipo === "Uniforme") actualizarCampoCondicion();
+  } else {
+    mostrarFoliosRecientesMod();
+  }
 
   setTimeout(() => {
     document.getElementById("form-body").scrollIntoView({ behavior:"smooth", block:"start" });
