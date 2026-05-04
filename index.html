@@ -459,7 +459,10 @@
       <button class="btn-copy" onclick="copiarFolio()">📋 Copiar folio</button>
     </div>
     <p style="font-size:12px;color:var(--text3);margin-bottom:20px;">Guarda este número para consultar el estatus de tu solicitud en cualquier momento.</p>
-    <button class="btn-nueva" onclick="nuevaSolicitud()">+ Nueva solicitud</button>
+    <div style="display:flex;gap:10px;flex-direction:column;max-width:320px;margin:0 auto;">
+      <button class="btn-nueva" onclick="nuevaSolicitud()">+ Nueva solicitud</button>
+      <button onclick="verEstatusDesdeConfirmacion()" style="width:100%;padding:13px;border:1.5px solid var(--border);border-radius:var(--radius);background:none;color:var(--text2);font-family:var(--font);font-size:14px;font-weight:500;cursor:pointer;">← Regresar al inicio</button>
+    </div>
   </div>
   <!-- CONSULTA DE FOLIO -->
   <div id="consulta-section">
@@ -936,6 +939,16 @@ function nuevaSolicitud() {
   window.scrollTo({ top:0, behavior:"smooth" });
 }
 
+function verEstatusDesdeConfirmacion() {
+  // Regresar al inicio sin resetear — mantiene folios recientes visibles
+  document.getElementById("confirmacion-screen").style.display = "none";
+  document.querySelector(".main").style.display = "block";
+  resetForm();
+  cargarDatosGuardados();
+  mostrarFoliosRecientes();
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+
 // ── FOLIOS RECIENTES ──
 function guardarFolioReciente(folio) {
   let recientes = JSON.parse(localStorage.getItem("frago_folios") || "[]");
@@ -1100,20 +1113,66 @@ async function consultarFolioMod() {
         Pendiente:"#e0b84a", Aprobada:"#4a90d9", Atendida:"#5db87a",
         Rechazada:"#e05a5a", Cerrada:"#5a6275", Cancelada:"#e05a5a"
       }[s.estatus] || "#8a93a8";
+      guardarFolioReciente(folio);
+      mostrarFoliosRecientesMod();
+
+      // Línea de tiempo del estatus
+      const PASOS = ["Pendiente","Aprobada","Atendida","Cerrada"];
+      const estatusIdx = PASOS.indexOf(s.estatus);
+      const esRechazada = s.estatus === "Rechazada";
+      const esCancelada = s.estatus === "Cancelada";
+
+      const timelineHTML = (esRechazada || esCancelada) ? `
+        <div style="text-align:center;padding:12px;background:rgba(224,90,90,0.08);border-radius:8px;border:1px solid rgba(224,90,90,0.2);margin-bottom:12px;">
+          <div style="font-size:20px;margin-bottom:4px;">${esCancelada ? "🚫" : "❌"}</div>
+          <div style="font-weight:500;color:var(--danger);">${s.estatus}</div>
+          ${s.notaGestion ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;">${s.notaGestion}</div>` : ""}
+        </div>` : `
+        <div style="display:flex;align-items:center;gap:0;margin-bottom:16px;overflow-x:auto;padding:4px 0;">
+          ${PASOS.map((paso, i) => {
+            const done  = i < estatusIdx;
+            const activo = i === estatusIdx;
+            const color  = done || activo ? "#4a90d9" : "#252d42";
+            const textC  = done || activo ? "#e8eaf0" : "#5a6275";
+            const bgC    = activo ? "#4a90d9" : done ? "#1D9E75" : "#1c2235";
+            const iconos = ["📋","✅","📦","🔒"];
+            return `
+              <div style="display:flex;align-items:center;flex:1;min-width:60px;">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+                  <div style="width:32px;height:32px;border-radius:50%;background:${bgC};border:2px solid ${color};display:flex;align-items:center;justify-content:center;font-size:14px;">${done ? "✓" : activo ? iconos[i] : iconos[i]}</div>
+                  <div style="font-size:10px;color:${textC};text-align:center;white-space:nowrap;">${paso}</div>
+                </div>
+                ${i < PASOS.length-1 ? `<div style="height:2px;flex:1;background:${done ? "#1D9E75" : "#252d42"};margin-bottom:16px;min-width:10px;"></div>` : ""}
+              </div>`;
+          }).join("")}
+        </div>`;
+
       result.innerHTML = `
         <div style="background:var(--surface2);border-radius:10px;padding:14px;border:1px solid var(--border);">
+          ${timelineHTML}
           <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-            <div style="flex:1;min-width:100px;"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;">Folio</div><div style="font-family:var(--mono);font-size:12px;color:var(--text);">${s.id}</div></div>
-            <div style="flex:1;min-width:100px;"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;">Estatus</div><div style="font-weight:500;color:${estatusColor};">● ${s.estatus}</div></div>
+            <div style="flex:1;min-width:100px;">
+              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;">Folio</div>
+              <div style="font-family:var(--mono);font-size:12px;color:var(--text);">${s.id}</div>
+            </div>
+            <div style="flex:1;min-width:100px;">
+              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;">Tipo</div>
+              <div style="font-size:13px;color:var(--text);">${s.tipo}</div>
+            </div>
           </div>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;">
-            <div style="flex:1;min-width:80px;"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;">Tipo</div><div style="font-size:13px;color:var(--text);">${s.tipo}</div></div>
-            <div style="flex:1;min-width:80px;"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;">Fecha</div><div style="font-size:13px;color:var(--text);">${new Date(s.fecha).toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"})}</div></div>
-            <div style="flex:1;min-width:80px;"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;">Servicio</div><div style="font-size:13px;color:var(--text);">${s.servicio||"—"}</div></div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+            <div style="flex:1;min-width:80px;">
+              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;">Fecha</div>
+              <div style="font-size:13px;color:var(--text);">${new Date(s.fecha).toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"})}</div>
+            </div>
+            <div style="flex:1;min-width:80px;">
+              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;">Servicio</div>
+              <div style="font-size:13px;color:var(--text);">${s.servicio||"—"}</div>
+            </div>
           </div>
-          ${s.notaGestion ? `<div style="margin-top:10px;font-size:12px;color:var(--text3);border-top:1px solid var(--border);padding-top:8px;">Nota: ${s.notaGestion}</div>` : ""}
+          ${s.detalle ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;padding-top:8px;border-top:1px solid var(--border);">Detalle: ${s.detalle}</div>` : ""}
+          ${s.notaGestion && !esRechazada && !esCancelada ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;">Nota: ${s.notaGestion}</div>` : ""}
         </div>`;
-      guardarFolioReciente(folio);
     } else {
       result.innerHTML = '<p style="font-size:13px;color:var(--danger);">No se encontró una solicitud con ese folio.</p>';
     }
