@@ -560,8 +560,15 @@
       <button class="btn-close" onclick="cerrarModalCancelar()">×</button>
     </div>
     <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6;">La solicitud quedará marcada como <strong style="color:var(--danger);">Cancelada</strong> y no podrá ser atendida. Esta acción queda registrada.</p>
-    <p style="font-size:12px;color:var(--text2);margin-bottom:8px;">Motivo de cancelación <span style="color:var(--danger);">*</span></p>
-    <textarea class="modal-nota" id="mc-motivo" placeholder="Describe el motivo de la cancelación..."></textarea>
+    <div class="inv-form-field" style="margin-bottom:14px;">
+      <label style="display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;">Confirma tu contraseña <span style="color:var(--danger);">*</span></label>
+      <input type="password" id="mc-password" placeholder="••••••••" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:14px;padding:10px 14px;outline:none;" onkeydown="if(event.key==='Enter')ejecutarCancelacion()">
+    </div>
+    <div class="inv-form-field">
+      <label style="display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;">Motivo de cancelación <span style="color:var(--danger);">*</span></label>
+      <textarea class="modal-nota" id="mc-motivo" placeholder="Describe el motivo de la cancelación..."></textarea>
+    </div>
+    <p id="mc-error" style="font-size:12px;color:var(--danger);margin-bottom:10px;display:none;">Contraseña incorrecta</p>
     <div class="modal-acciones">
       <button class="btn-modal bm-cancelar" onclick="ejecutarCancelacion()" style="background:#2a1515;color:var(--danger);border:1px solid rgba(224,90,90,0.3);">Confirmar cancelación</button>
       <button class="btn-modal bm-cerrar"   onclick="cerrarModalCancelar()">Volver</button>
@@ -637,8 +644,23 @@ const CADENA = {
   }
 };
 
+function normalizarTipo(tipo) {
+  if (!tipo) return "Papeleria";
+  // Quitar acentos y normalizar
+  const t = tipo.toString().trim()
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .toLowerCase();
+  if (t.includes("uniforme"))  return "Uniforme";
+  if (t.includes("patrulla"))  return "Patrulla";
+  if (t.includes("papeler"))   return "Papeleria";
+  if (t.includes("equipo"))    return "Equipo";
+  // Log para debug
+  console.warn("Tipo no reconocido:", tipo, "->", t);
+  return tipo; // devolver el original para no perder info
+}
+
 function puedeEjecutar(accion, tipo) {
-  const cadena = CADENA[tipo] || CADENA["Papeleria"];
+  const cadena = CADENA[normalizarTipo(tipo)] || CADENA["Papeleria"];
   const permitidos = cadena[accion] || [];
   return permitidos.includes(usuarioActual);
 }
@@ -1233,10 +1255,24 @@ function abrirModalCancelar(id) {
 function cerrarModalCancelar() {
   document.getElementById("modal-cancelar-bg").classList.remove("open");
   solicitudACancelar = null;
+  const pw = document.getElementById("mc-password");
+  if (pw) pw.value = "";
+  const err = document.getElementById("mc-error");
+  if (err) err.style.display = "none";
 }
 
 async function ejecutarCancelacion() {
-  const motivo = document.getElementById("mc-motivo").value.trim();
+  const motivo   = document.getElementById("mc-motivo").value.trim();
+  const password = document.getElementById("mc-password").value;
+  const errEl    = document.getElementById("mc-error");
+
+  if (!password) { mostrarToast("Ingresa tu contraseña", "err"); return; }
+  if (USUARIOS[usuarioActual] !== password) {
+    errEl.style.display = "block";
+    document.getElementById("mc-password").value = "";
+    return;
+  }
+  errEl.style.display = "none";
   if (!motivo) { mostrarToast("Escribe el motivo de cancelación", "err"); return; }
   cerrarModalCancelar();
   try {
