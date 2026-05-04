@@ -312,11 +312,11 @@
     <!-- ── TAB: SOLICITUDES ── -->
     <div class="tab-content active" id="tab-solicitudes">
       <div class="stats-grid">
-        <div class="stat-card"><div class="stat-num s-total" id="st-total">—</div><div class="stat-label">Total</div></div>
-        <div class="stat-card"><div class="stat-num s-pend"  id="st-pend">—</div><div class="stat-label">Pendientes</div></div>
-        <div class="stat-card"><div class="stat-num s-aprov" id="st-aprov">—</div><div class="stat-label">Aprobadas</div></div>
-        <div class="stat-card"><div class="stat-num s-atend" id="st-atend">—</div><div class="stat-label">Atendidas</div></div>
-        <div class="stat-card"><div class="stat-num s-rech"  id="st-rech">—</div><div class="stat-label">Rechazadas</div></div>
+        <div class="stat-card" onclick="filtrarEstatus('')" style="cursor:pointer;" title="Ver todas"><div class="stat-num s-total" id="st-total">—</div><div class="stat-label">Total 🔍</div></div>
+        <div class="stat-card" onclick="filtrarEstatus('Pendiente')" style="cursor:pointer;" title="Ver pendientes"><div class="stat-num s-pend" id="st-pend">—</div><div class="stat-label">Pendientes 🔍</div></div>
+        <div class="stat-card" onclick="filtrarEstatus('Aprobada')" style="cursor:pointer;" title="Ver aprobadas"><div class="stat-num s-aprov" id="st-aprov">—</div><div class="stat-label">Aprobadas 🔍</div></div>
+        <div class="stat-card" onclick="filtrarEstatus('Atendida')" style="cursor:pointer;" title="Ver atendidas"><div class="stat-num s-atend" id="st-atend">—</div><div class="stat-label">Atendidas 🔍</div></div>
+        <div class="stat-card" onclick="filtrarEstatus('Rechazada')" style="cursor:pointer;" title="Ver rechazadas"><div class="stat-num s-rech" id="st-rech">—</div><div class="stat-label">Rechazadas 🔍</div></div>
       </div>
 
       <div class="filtros">
@@ -747,8 +747,9 @@ async function cargarSolicitudes() {
 
 function actualizarStats() {
   const c = { Pendiente:0, Aprobada:0, Atendida:0, Rechazada:0 };
-  solicitudes.forEach(s => { if (c[s.estatus] !== undefined) c[s.estatus]++; });
-  document.getElementById("st-total").textContent = solicitudes.length;
+  const activas = solicitudes.filter(s => s.estatus !== "Cancelada");
+  activas.forEach(s => { if (c[s.estatus] !== undefined) c[s.estatus]++; });
+  document.getElementById("st-total").textContent = activas.length;
   document.getElementById("st-pend").textContent  = c.Pendiente;
   document.getElementById("st-aprov").textContent = c.Aprobada;
   document.getElementById("st-atend").textContent = c.Atendida;
@@ -763,6 +764,12 @@ function actualizarStats() {
   } else {
     badge.style.display = "none";
   }
+}
+
+function filtrarEstatus(estatus) {
+  document.getElementById("f-estatus").value = estatus;
+  renderTabla();
+  document.getElementById("tab-solicitudes").scrollIntoView({ behavior:"smooth", block:"start" });
 }
 
 // ── TABLA ──
@@ -908,19 +915,19 @@ function abrirModal(id) {
   const tipo = s.tipo;
   let btns = "";
   if (est === "Pendiente" && puedeEjecutar("aprobar",tipo))
-    btns += `<button class="btn-modal bm-aprobar"  onclick="accionModal('Aprobada')">Aprobar</button>`;
+    btns += `<button class="btn-modal bm-aprobar"  onclick="accionModal('Aprobada')">✓ Aprobar</button>`;
   if (est === "Pendiente" && puedeEjecutar("rechazar",tipo))
-    btns += `<button class="btn-modal bm-rechazar" onclick="accionModal('Rechazada')">Rechazar</button>`;
+    btns += `<button class="btn-modal bm-rechazar" onclick="accionModal('Rechazada')">✗ Rechazar</button>`;
   if (est === "Aprobada" && puedeEjecutar("atender",tipo))
-    btns += `<button class="btn-modal bm-atender"  onclick="accionModal('Atendida')">Marcar atendida</button>`;
+    btns += `<button class="btn-modal bm-atender"  onclick="accionModal('Atendida')">📦 Marcar atendida</button>`;
   if (est === "Aprobada" && puedeEjecutar("rechazar",tipo))
-    btns += `<button class="btn-modal bm-rechazar" onclick="accionModal('Rechazada')">Rechazar</button>`;
+    btns += `<button class="btn-modal bm-rechazar" onclick="accionModal('Rechazada')">✗ Rechazar</button>`;
   if (["Atendida","Rechazada"].includes(est) && puedeEjecutar("cerrar",tipo))
-    btns += `<button class="btn-modal bm-cerrar" onclick="accionModal('Cerrada')">Cerrar solicitud</button>`;
+    btns += `<button class="btn-modal bm-aprobar" onclick="accionModal('Cerrada')" style="background:var(--accent);">🔒 Cerrar solicitud</button>`;
   if (ROLES_CANCELAR.includes(usuarioActual) && !["Cerrada","Cancelada"].includes(est))
-    btns += `<button class="btn-modal bm-cancelar" onclick="cerrarModal();abrirModalCancelar('${s.id}')">Cancelar solicitud</button>`;
+    btns += `<button class="btn-modal bm-cancelar" onclick="cerrarModal();abrirModalCancelar('${s.id}')">🚫 Cancelar solicitud</button>`;
   if (!btns) btns += `<p style="font-size:12px;color:var(--text3);padding:8px 0;">No tienes permisos para gestionar esta solicitud en su estatus actual.</p>`;
-  btns += `<button class="btn-modal bm-cerrar" onclick="cerrarModal()">Cerrar</button>`;
+  btns += `<button class="btn-modal bm-cerrar" onclick="cerrarModal()">← Cerrar</button>`;
   document.getElementById("m-acciones").innerHTML = btns;
   document.getElementById("modal-bg").classList.add("open");
 }
@@ -933,8 +940,9 @@ function cerrarModal() {
 async function accionModal(nuevoEstatus) {
   if (!solicitudActual) return;
   const nota = document.getElementById("m-nota").value.trim();
+  const idActual = solicitudActual.id; // guardar antes de cerrar modal
   cerrarModal();
-  await actualizarEstatus(solicitudActual.id, nuevoEstatus, nota);
+  await actualizarEstatus(idActual, nuevoEstatus, nota);
 }
 
 async function accionRapida(id, nuevoEstatus) {
