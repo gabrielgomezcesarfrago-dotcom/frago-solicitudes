@@ -7,110 +7,81 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f1117;
-    --surface: #161b27;
-    --surface2: #1c2235;
-    --border: #252d42;
-    --border-focus: #4a6fa5;
-    --accent: #4a90d9;
-    --accent2: #5db87a;
-    --accent3: #e07b4a;
-    --accent4: #9b6dd6;
-    --text: #e8eaf0;
-    --text2: #8a93a8;
-    --text3: #5a6275;
-    --danger: #e05a5a;
-    --success: #5db87a;
-    --radius: 10px;
-    --font: 'DM Sans', sans-serif;
-    --mono: 'DM Mono', monospace;
+    --bg: #0f1117; --surface: #161b27; --surface2: #1c2235;
+    --border: #252d42; --border-focus: #4a6fa5;
+    --accent: #4a90d9; --accent2: #5db87a; --accent3: #e07b4a; --accent4: #9b6dd6;
+    --text: #e8eaf0; --text2: #8a93a8; --text3: #5a6275;
+    --danger: #e05a5a; --success: #5db87a;
+    --radius: 10px; --font: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
 
-  .header {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 18px 24px; display: flex; align-items: center; gap: 14px;
-    position: sticky; top: 0; z-index: 100;
-  }
-  .header-logo {
-    width: 36px; height: 36px; background: var(--accent); border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 600; font-size: 14px; color: #fff; flex-shrink: 0;
-  }
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 18px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
+  .header-logo { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; color: #fff; flex-shrink: 0; }
   .header-title { font-size: 15px; font-weight: 500; }
   .header-sub { font-size: 12px; color: var(--text2); margin-top: 1px; }
 
   .main { max-width: 560px; margin: 0 auto; padding: 28px 20px 80px; }
 
-  .section-title {
-    font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
-    text-transform: uppercase; color: var(--text3); margin-bottom: 12px; margin-top: 24px;
-  }
+  .section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; margin-top: 24px; }
 
+  /* ROL SELECTOR */
+  .roles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
+  .rol-btn { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 12px 14px; cursor: pointer; text-align: left; transition: all 0.18s; color: var(--text2); font-family: var(--font); }
+  .rol-btn:hover { border-color: var(--border-focus); color: var(--text); }
+  .rol-btn.active { border-color: var(--accent); background: rgba(74,144,217,0.09); color: var(--text); }
+  .rol-name { font-size: 13px; font-weight: 500; display: block; }
+  .rol-sub { font-size: 11px; color: var(--text3); margin-top: 2px; display: block; }
+
+  /* TIPO SELECTOR */
   .tipo-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 28px; }
-  .tipo-btn {
-    background: var(--surface); border: 1.5px solid var(--border);
-    border-radius: var(--radius); padding: 16px 8px; cursor: pointer;
-    text-align: center; transition: all 0.18s; color: var(--text2);
-  }
+  .tipo-btn { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 16px 8px; cursor: pointer; text-align: center; transition: all 0.18s; color: var(--text2); font-family: var(--font); }
   .tipo-btn:hover { border-color: var(--border-focus); color: var(--text); }
-  .tipo-btn.active.t-uniforme  { border-color: var(--accent);  background: rgba(74,144,217,0.09); color: var(--text); }
-  .tipo-btn.active.t-patrulla  { border-color: var(--accent3); background: rgba(224,123,74,0.09); color: var(--text); }
-  .tipo-btn.active.t-papeleria { border-color: var(--accent2); background: rgba(93,184,122,0.09); color: var(--text); }
+  .tipo-btn.active.t-uniforme  { border-color: var(--accent);  background: rgba(74,144,217,0.09);  color: var(--text); }
+  .tipo-btn.active.t-patrulla  { border-color: var(--accent3); background: rgba(224,123,74,0.09);  color: var(--text); }
+  .tipo-btn.active.t-papeleria { border-color: var(--accent2); background: rgba(93,184,122,0.09);  color: var(--text); }
   .tipo-btn.active.t-equipo    { border-color: var(--accent4); background: rgba(155,109,214,0.09); color: var(--text); }
-  .tipo-btn.disabled-btn { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
   .tipo-icon { font-size: 24px; display: block; margin-bottom: 8px; }
   .tipo-label { font-size: 12px; font-weight: 500; display: block; }
 
+  /* FIELDS */
   .field { margin-bottom: 16px; }
   .field label { display: block; font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 6px; }
   .field label .req { color: var(--danger); margin-left: 3px; }
-
   input[type="text"], input[type="number"], select, textarea {
-    width: 100%; background: var(--surface); border: 1.5px solid var(--border);
-    border-radius: var(--radius); color: var(--text); font-family: var(--font);
-    font-size: 14px; padding: 11px 14px; outline: none; transition: border-color 0.15s;
-    -webkit-appearance: none; appearance: none;
+    width: 100%; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius);
+    color: var(--text); font-family: var(--font); font-size: 14px; padding: 11px 14px;
+    outline: none; transition: border-color 0.15s; -webkit-appearance: none; appearance: none;
   }
   input:focus, select:focus, textarea:focus { border-color: var(--border-focus); }
-  select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a93a8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
-  }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a93a8' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
   select option { background: #1c2235; }
   textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
   .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
+  /* URGENCIA */
   .urgencia-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
-  .urg-btn {
-    border: 1.5px solid var(--border); border-radius: 8px; padding: 10px;
-    text-align: center; cursor: pointer; font-size: 12px; font-weight: 500;
-    color: var(--text2); background: var(--surface); transition: all 0.15s; font-family: var(--font);
-  }
+  .urg-btn { border: 1.5px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--text2); background: var(--surface); transition: all 0.15s; font-family: var(--font); }
   .urg-btn:hover { border-color: var(--border-focus); color: var(--text); }
   .urg-btn.active[data-urg="Normal"]  { border-color: var(--accent2); color: var(--accent2); background: rgba(93,184,122,0.09); }
   .urg-btn.active[data-urg="Urgente"] { border-color: #e0b84a; color: #e0b84a; background: rgba(224,184,74,0.09); }
   .urg-btn.active[data-urg="Critico"] { border-color: var(--danger); color: var(--danger); background: rgba(224,90,90,0.09); }
 
+  /* CONDICIÓN */
+  .cond-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+  .cond-btn { border: 1.5px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--text2); background: var(--surface); transition: all 0.15s; font-family: var(--font); }
+  .cond-btn:hover { border-color: var(--border-focus); color: var(--text); }
+  .cond-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(74,144,217,0.09); }
+
   .modulo { display: none; }
   .modulo.visible { display: block; }
   .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
 
-  .aviso {
-    background: rgba(224,123,74,0.08); border: 1px solid rgba(224,123,74,0.3);
-    border-radius: 8px; padding: 10px 14px; font-size: 12px;
-    color: #e07b4a; margin-bottom: 14px; display: none; line-height: 1.5;
-  }
+  .aviso { background: rgba(224,123,74,0.08); border: 1px solid rgba(224,123,74,0.3); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #e07b4a; margin-bottom: 14px; display: none; line-height: 1.5; }
   .aviso.visible { display: block; }
 
-  .btn-submit {
-    width: 100%; padding: 14px; border: none; border-radius: var(--radius);
-    font-family: var(--font); font-size: 15px; font-weight: 500;
-    cursor: pointer; transition: all 0.18s; margin-top: 8px;
-    background: var(--accent); color: #fff;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
+  .btn-submit { width: 100%; padding: 14px; border: none; border-radius: var(--radius); font-family: var(--font); font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.18s; margin-top: 8px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; }
   .btn-submit:hover { opacity: 0.88; transform: translateY(-1px); }
   .btn-submit:active { transform: translateY(0); }
   .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
@@ -118,26 +89,17 @@
   .btn-submit.t-papeleria { background: var(--accent2); }
   .btn-submit.t-equipo    { background: var(--accent4); }
 
-  .toast {
-    position: fixed; bottom: 28px; left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 12px; padding: 14px 22px; font-size: 14px; color: var(--text);
-    opacity: 0; transition: all 0.3s ease; pointer-events: none; z-index: 999;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4); max-width: 90vw; text-align: center;
-  }
+  .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 22px; font-size: 14px; color: var(--text); opacity: 0; transition: all 0.3s ease; pointer-events: none; z-index: 999; box-shadow: 0 8px 32px rgba(0,0,0,0.4); max-width: 90vw; text-align: center; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .toast.ok  { border-color: var(--success); }
-  .toast.err { border-color: var(--danger); }
+  .toast.ok { border-color: var(--success); } .toast.err { border-color: var(--danger); }
 
-  .spinner {
-    width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: #fff; border-radius: 50%;
-    animation: spin 0.7s linear infinite; display: none;
-  }
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  @media (max-width: 400px) { .field-row { grid-template-columns: 1fr; } }
+  #tipo-section { display: none; }
+  #form-body { display: none; }
+
+  @media (max-width: 400px) { .field-row { grid-template-columns: 1fr; } .roles-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -152,39 +114,43 @@
 
 <div class="main">
 
-  <p class="section-title">Tipo de solicitud</p>
-  <div class="tipo-grid">
-    <button class="tipo-btn t-uniforme"  onclick="setTipo('Uniforme',this)">
-      <span class="tipo-icon">👕</span><span class="tipo-label">Uniforme</span>
+  <!-- PASO 1: ROL -->
+  <p class="section-title">¿Cuál es tu rol?</p>
+  <div class="roles-grid">
+    <button class="rol-btn" onclick="setRol('guardia',this)">
+      <span class="rol-name">Guardia</span>
     </button>
-    <button class="tipo-btn t-patrulla"  onclick="setTipo('Patrulla',this)">
-      <span class="tipo-icon">🚗</span><span class="tipo-label">Patrulla</span>
+    <button class="rol-btn" onclick="setRol('jefe_turno',this)">
+      <span class="rol-name">Jefe de turno</span>
     </button>
-    <button class="tipo-btn t-papeleria" onclick="setTipo('Papeleria',this)">
-      <span class="tipo-icon">📋</span><span class="tipo-label">Papelería</span>
+    <button class="rol-btn" onclick="setRol('coord_operativo',this)">
+      <span class="rol-name">Coordinador operativo</span>
     </button>
-    <button class="tipo-btn t-equipo" id="btn-equipo" onclick="setTipo('Equipo',this)">
-      <span class="tipo-icon">🔦</span><span class="tipo-label">Equipo especial</span>
+    <button class="rol-btn" onclick="setRol('coord_general',this)">
+      <span class="rol-name">Coordinador general</span>
+    </button>
+    <button class="rol-btn" onclick="setRol('director_general',this)">
+      <span class="rol-name">Director general</span>
+    </button>
+    <button class="rol-btn" onclick="setRol('aux_administrativa',this)">
+      <span class="rol-name">Auxiliar administrativa</span>
+    </button>
+    <button class="rol-btn" onclick="setRol('director_finanzas',this)">
+      <span class="rol-name">Director de finanzas</span>
+      <span class="rol-sub">/ Administración</span>
     </button>
   </div>
 
-  <div id="form-body" style="display:none;">
+  <!-- PASO 2: TIPO -->
+  <div id="tipo-section">
+    <p class="section-title" style="margin-top:28px;">Tipo de solicitud</p>
+    <div class="tipo-grid" id="tipo-grid"></div>
+  </div>
+
+  <!-- PASO 3: FORMULARIO -->
+  <div id="form-body">
 
     <p class="section-title">Información general</p>
-
-    <div class="field">
-      <label>Rol <span class="req">*</span></label>
-      <select id="rol" onchange="onRolChange()">
-        <option value="">Selecciona tu rol...</option>
-        <option value="guardia">Guardia</option>
-        <option value="jefe_turno">Jefe de turno</option>
-        <option value="coord_operativo">Coordinador operativo</option>
-        <option value="coord_general">Coordinador general</option>
-        <option value="director_general">Director general</option>
-        <option value="aux_administrativa">Auxiliar administrativa</option>
-        <option value="director_finanzas">Director de finanzas / Administración</option>
-      </select>
-    </div>
 
     <div class="field">
       <label>Nombre del solicitante <span class="req">*</span></label>
@@ -209,7 +175,7 @@
 
     <hr class="divider">
 
-    <!-- ── UNIFORME ── -->
+    <!-- UNIFORME -->
     <div class="modulo" id="mod-Uniforme">
       <p class="section-title">Detalles del uniforme</p>
       <div class="field-row">
@@ -252,10 +218,10 @@
       </div>
       <div class="field" id="campo-condicion" style="display:none;">
         <label>¿Acepta uniforme en buen estado (usado)?</label>
-        <div class="urgencia-grid">
-          <button class="urg-btn active" data-cond="Cualquiera" onclick="setCondicion('Cualquiera',this)" style="grid-column: span 1;">Sí, cualquiera</button>
-          <button class="urg-btn" data-cond="Nuevo" onclick="setCondicion('Nuevo',this)">Solo nuevo</button>
-          <button class="urg-btn" data-cond="Usado" onclick="setCondicion('Usado',this)">Solo usado</button>
+        <div class="cond-grid">
+          <button class="cond-btn active" data-cond="Cualquiera" onclick="setCondicion('Cualquiera',this)">Sí, cualquiera</button>
+          <button class="cond-btn" data-cond="Nuevo"      onclick="setCondicion('Nuevo',this)">Solo nuevo</button>
+          <button class="cond-btn" data-cond="Usado"      onclick="setCondicion('Usado',this)">Solo usado</button>
         </div>
         <p style="font-size:11px;color:var(--text3);margin-top:6px;">Si acepta usado, el sistema asignará primero del inventario disponible.</p>
       </div>
@@ -265,15 +231,13 @@
       </div>
     </div>
 
-    <!-- ── PATRULLA ── -->
+    <!-- PATRULLA -->
     <div class="modulo" id="mod-Patrulla">
       <p class="section-title">Detalles de la patrulla</p>
-      <div id="aviso-patrulla" class="aviso">
-        ⚠️ Tu rol solo permite solicitar carga de gasolina o revisión general.
-      </div>
+      <div id="aviso-patrulla" class="aviso"></div>
       <div class="field">
         <label>Unidad <span class="req">*</span></label>
-        <select id="unidad" onchange="onUnidadChange()">
+        <select id="unidad">
           <option value="">Selecciona una unidad...</option>
           <option value="Saveiro Pickup (con caja en batea)">Saveiro Pickup (con caja en batea)</option>
           <option value="Saveiro Pickup">Saveiro Pickup</option>
@@ -291,10 +255,10 @@
         <label>Tipo de solicitud <span class="req">*</span></label>
         <select id="tipo-patrulla" onchange="onTipoPatrullaChange()">
           <option value="">Selecciona...</option>
-          <option value="Carga de gasolina" class="opt-restringida-mono">Carga de gasolina</option>
-          <option value="Mantenimiento preventivo" class="opt-restringida opt-restringida-mono">Mantenimiento preventivo</option>
-          <option value="Reparacion" class="opt-restringida">Reparación</option>
-          <option value="Revision general">Revisión general</option>
+          <option value="Carga de gasolina">Carga de gasolina</option>
+          <option value="Mantenimiento preventivo" class="opt-restringida">Mantenimiento preventivo</option>
+          <option value="Reparacion" class="opt-restringida-mono">Reparación</option>
+          <option value="Revision general" class="opt-restringida-jefe">Revisión general</option>
         </select>
       </div>
       <div class="field">
@@ -307,7 +271,7 @@
       </div>
     </div>
 
-    <!-- ── PAPELERÍA ── -->
+    <!-- PAPELERÍA -->
     <div class="modulo" id="mod-Papeleria">
       <p class="section-title">Detalles de papelería</p>
       <div class="field">
@@ -335,7 +299,7 @@
       </div>
     </div>
 
-    <!-- ── EQUIPO ESPECIAL ── -->
+    <!-- EQUIPO ESPECIAL -->
     <div class="modulo" id="mod-Equipo">
       <p class="section-title">Detalles del equipo</p>
       <div class="field">
@@ -348,7 +312,6 @@
           <option>Cámara de vigilancia</option>
           <option>Bodycam</option>
           <option>Cargador / Batería</option>
-          
           <option>Otro</option>
         </select>
       </div>
@@ -370,7 +333,7 @@
       </div>
       <div class="field">
         <label>Descripción / Justificación <span class="req">*</span></label>
-        <textarea id="detalle-equipo" placeholder="Especifica el motivo, número de serie si aplica, o detalles del equipo..."></textarea>
+        <textarea id="detalle-equipo" placeholder="Especifica el motivo, número de serie si aplica..."></textarea>
       </div>
       <div class="field">
         <label>Servicio o guardia asignado (opcional)</label>
@@ -391,164 +354,72 @@
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx0QUTM1VC_CAXgIJC4gVwBdkxE0a8WYwR05eagd0Y7I7wQk3zctVTyxDAXR_ReOdkuEQ/exec";
 
-let tipoActual = null;
+// ── ACCESO POR ROL ──
+const ACCESO = {
+  guardia:          ["Uniforme","Papeleria"],
+  jefe_turno:       ["Uniforme","Patrulla","Papeleria"],
+  coord_operativo:  ["Uniforme","Patrulla","Papeleria","Equipo"],
+  coord_general:    ["Uniforme","Patrulla","Papeleria","Equipo"],
+  director_general: ["Uniforme","Patrulla","Papeleria","Equipo"],
+  aux_administrativa:["Uniforme","Papeleria","Equipo"],
+  director_finanzas: ["Uniforme","Patrulla","Papeleria","Equipo"]
+};
+
+const TIPOS_CONFIG = {
+  Uniforme:  { icon:"👕", label:"Uniforme",       clase:"t-uniforme"  },
+  Patrulla:  { icon:"🚗", label:"Patrulla",        clase:"t-patrulla"  },
+  Papeleria: { icon:"📋", label:"Papelería",       clase:"t-papeleria" },
+  Equipo:    { icon:"🔦", label:"Equipo especial", clase:"t-equipo"    }
+};
+
+// Roles con acceso a condición de uniforme
+const ROLES_CON_CONDICION = ["coord_operativo","coord_general","director_general","director_finanzas"];
+// Roles solo gasolina en patrulla
+const ROLES_SOLO_GASOLINA = ["jefe_turno"];
+// Roles gasolina + revisión en patrulla
+const ROLES_GAS_REVISION  = ["coord_operativo"];
+// Roles sin Virtus Auto
+const ROLES_SIN_VIRTUS    = ["jefe_turno","coord_operativo"];
+// Roles con Oficinas en papelería
+const ROLES_CON_OFICINAS  = ["coord_general","director_general","aux_administrativa","director_finanzas"];
+// Servicios con patrulla
+const SERVICIOS_PATRULLA  = ["cumbres del lago","lomas de juriquilla","oficinas","real del lago"];
+
+let rolActual      = null;
+let tipoActual     = null;
 let urgenciaActual = "Normal";
-let condicionActual = "Cualquiera";
+let condicionActual= "Cualquiera";
 let todosLosServicios = [];
 
-// Roles con acceso admin (papelería en Oficinas, equipo especial, Virtus Auto, mantenimiento/reparación)
-const ROLES_ADMIN    = ["coord_general","director_general","aux_administrativa","director_finanzas"];
-const ROLES_OPERATIVOS = ["guardia","jefe_turno","coord_operativo"];
+// ── PASO 1: ROL ──
+function setRol(rol, btn) {
+  rolActual = rol;
+  document.querySelectorAll(".rol-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
 
-// Servicios que tienen patrulla asignada
-const SERVICIOS_PATRULLA = ["cumbres del lago","lomas de juriquilla","oficinas"];
+  // Resetear tipo y formulario si cambia el rol
+  tipoActual = null;
+  document.getElementById("form-body").style.display = "none";
+  document.querySelectorAll(".modulo").forEach(m => m.classList.remove("visible"));
 
-function rolActual() { return document.getElementById("rol").value; }
-function esRolAdmin() { return ROLES_ADMIN.includes(rolActual()); }
-function esRolConEquipo() { return ["coord_general","director_general","aux_administrativa","director_finanzas","coord_operativo"].includes(rolActual()); }
+  // Construir grilla de tipos según rol
+  const acceso = ACCESO[rol] || [];
+  const grid = document.getElementById("tipo-grid");
+  grid.innerHTML = acceso.map(tipo => {
+    const c = TIPOS_CONFIG[tipo];
+    return `<button class="tipo-btn ${c.clase}" onclick="setTipo('${tipo}',this)">
+      <span class="tipo-icon">${c.icon}</span>
+      <span class="tipo-label">${c.label}</span>
+    </button>`;
+  }).join("");
 
-// ── Cargar servicios ──
-async function cargarServicios() {
-  try {
-    const res = await fetch(SCRIPT_URL);
-    const data = await res.json();
-    if (data.ok && data.servicios) {
-      todosLosServicios = data.servicios.map(s => s.nombre);
-    }
-  } catch(e) {
-    todosLosServicios = [
-      "3 vistas","Vértice","Agua azul","Magnolia","Gasolinera",
-      "Med 100","Central park","El templo",
-      "Cumbres del lago Z1","Cumbres del lago Z2","Cumbres del lago Z3","Cumbres del lago Z4",
-      "Villa capri","Lago el valle","Lago palomas","Catena","Lomas del lago",
-      "Lomas de juriquilla caseta 1","Lomas de juriquilla caseta 2",
-      "Condesa","Balcones de juriquilla","Atia","Oficinas"
-    ];
-  }
-  poblarServicios();
+  document.getElementById("tipo-section").style.display = "block";
+  setTimeout(() => {
+    document.getElementById("tipo-section").scrollIntoView({ behavior:"smooth", block:"start" });
+  }, 50);
 }
 
-function tienePatrulla(nombre) {
-  const n = nombre.toLowerCase();
-  return SERVICIOS_PATRULLA.some(p => n.includes(p));
-}
-
-function poblarServicios() {
-  const sel = document.getElementById("servicio");
-  const valorPrevio = sel.value;
-  sel.innerHTML = '<option value="">Selecciona un servicio...</option>';
-
-  let lista = [...todosLosServicios];
-
-  if (tipoActual === "Patrulla") {
-    // Solo servicios con patrulla
-    lista = lista.filter(s => tienePatrulla(s));
-  } else if (tipoActual === "Papeleria" && !esRolAdmin()) {
-    // Sin Oficinas para roles operativos
-    lista = lista.filter(s => s.toLowerCase() !== "oficinas");
-  }
-
-  lista.forEach(nombre => {
-    const opt = document.createElement("option");
-    opt.value = nombre; opt.textContent = nombre;
-    if (nombre === valorPrevio) opt.selected = true;
-    sel.appendChild(opt);
-  });
-}
-
-function actualizarBotonesModulo() {
-  const rol = rolActual();
-  const btnEquipo = document.getElementById("btn-equipo");
-  const puedeEquipo = ["coord_general","director_general","aux_administrativa","director_finanzas","coord_operativo"].includes(rol);
-  btnEquipo.classList.toggle("disabled-btn", rol !== "" && !puedeEquipo);
-}
-
-function onRolChange() {
-  actualizarBotonesModulo();
-  if (tipoActual) poblarServicios();
-  if (tipoActual === "Patrulla") aplicarRestriccionesPatrulla();
-  actualizarCampoCondicion();
-  // Si el rol no tiene acceso a equipo y está en ese módulo, resetear
-  if (tipoActual === "Equipo") {
-    const puedeEquipo = ["coord_general","director_general","aux_administrativa","director_finanzas","coord_operativo"].includes(rolActual());
-    if (!puedeEquipo) {
-      mostrarToast("Tu rol no tiene acceso a Equipo especial", "err");
-      resetModulo();
-    }
-  }
-}
-
-function esMonopatin() {
-  return document.getElementById("unidad").value === "Monopatin Electrico Real del Lago";
-}
-
-function onUnidadChange() {
-  const mono = esMonopatin();
-  const aviso = document.getElementById("aviso-patrulla");
-  const selTipo = document.getElementById("tipo-patrulla");
-
-  // Restricciones del monopatín: solo revisión y reparación
-  document.querySelectorAll(".opt-restringida-mono").forEach(opt => {
-    opt.disabled = mono;
-    opt.style.display = mono ? "none" : "";
-  });
-
-  if (mono) {
-    if (!["Reparacion","Revision general"].includes(selTipo.value)) selTipo.value = "";
-    aviso.textContent = "⚠️ El monopatín solo permite solicitar reparación o revisión general.";
-    aviso.classList.add("visible");
-  } else {
-    // Restaurar aviso original según rol
-    aplicarRestriccionesPatrulla();
-  }
-}
-
-function onTipoPatrullaChange() {
-  // Si es monopatín y eligen algo no permitido, resetear
-  if (esMonopatin()) {
-    const val = document.getElementById("tipo-patrulla").value;
-    if (!["Reparacion","Revision general"].includes(val)) {
-      document.getElementById("tipo-patrulla").value = "";
-    }
-  }
-}
-
-function aplicarRestriccionesPatrulla() {
-  const esOp = ROLES_OPERATIVOS.includes(rolActual());
-  document.getElementById("aviso-patrulla").classList.toggle("visible", esOp);
-
-  const optVirtus = document.getElementById("opt-virtus-auto");
-  optVirtus.disabled = esOp;
-  optVirtus.style.display = esOp ? "none" : "";
-  if (esOp && document.getElementById("unidad").value === "Virtus Automatico 2023")
-    document.getElementById("unidad").value = "";
-
-  document.querySelectorAll(".opt-restringida").forEach(opt => {
-    opt.disabled = esOp; opt.style.display = esOp ? "none" : "";
-  });
-  const tp = document.getElementById("tipo-patrulla");
-  if (esOp && !["Carga de gasolina","Revision general"].includes(tp.value)) tp.value = "";
-}
-
-// ── Tipo de módulo ──
-// Roles que NO aparecen en módulo Equipo
-const ROLES_SIN_EQUIPO = ["guardia","jefe_turno"];
-
-function filtrarRolesEquipo(activar) {
-  const sel = document.getElementById("rol");
-  const valorActual = sel.value;
-  Array.from(sel.options).forEach(opt => {
-    if (ROLES_SIN_EQUIPO.includes(opt.value)) {
-      opt.style.display = activar ? "none" : "";
-      opt.disabled = activar;
-    }
-  });
-  // Si el rol actual queda bloqueado, resetear
-  if (activar && ROLES_SIN_EQUIPO.includes(valorActual)) {
-    sel.value = "";
-  }
-}
-
+// ── PASO 2: TIPO ──
 function setTipo(tipo, btn) {
   tipoActual = tipo;
   document.querySelectorAll(".tipo-btn").forEach(b => b.classList.remove("active"));
@@ -558,19 +429,124 @@ function setTipo(tipo, btn) {
   document.getElementById("mod-" + tipo).classList.add("visible");
   document.getElementById("btn-enviar").className = "btn-submit t-" + tipo.toLowerCase();
 
-  // Filtrar roles según módulo
-  filtrarRolesEquipo(tipo === "Equipo");
-
   poblarServicios();
-  actualizarCampoCondicion();
-  if (tipo === "Patrulla" && rolActual()) aplicarRestriccionesPatrulla();
+
+  if (tipo === "Patrulla") aplicarRestriccionesPatrulla();
+  if (tipo === "Uniforme") actualizarCampoCondicion();
 
   setTimeout(() => {
-    document.getElementById("form-body").scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById("form-body").scrollIntoView({ behavior:"smooth", block:"start" });
   }, 50);
 }
 
-const ROLES_CON_CONDICION = ["coord_operativo","coord_general","director_general","director_finanzas"];
+// ── SERVICIOS ──
+async function cargarServicios() {
+  try {
+    const res  = await fetch(SCRIPT_URL);
+    const data = await res.json();
+    if (data.ok && data.servicios) todosLosServicios = data.servicios.map(s => s.nombre);
+  } catch(e) {
+    todosLosServicios = [
+      "3 vistas","Vértice","Agua azul","Magnolia","Gasolinera","Med 100",
+      "Central park","El templo","Cumbres del lago Z1","Cumbres del lago Z2",
+      "Cumbres del lago Z3","Cumbres del lago Z4","Villa capri","Lago el valle",
+      "Lago palomas","Catena","Lomas del lago","Lomas de juriquilla caseta 1",
+      "Lomas de juriquilla caseta 2","Condesa","Balcones de juriquilla","Atia",
+      "Real del Lago","Oficinas"
+    ];
+  }
+}
+
+function tienePatrulla(nombre) {
+  const n = nombre.toLowerCase();
+  return SERVICIOS_PATRULLA.some(p => n.includes(p));
+}
+
+function poblarServicios() {
+  const sel = document.getElementById("servicio");
+  sel.innerHTML = '<option value="">Selecciona un servicio...</option>';
+  let lista = [...todosLosServicios];
+
+  if (tipoActual === "Patrulla") {
+    lista = lista.filter(s => tienePatrulla(s));
+  } else if (tipoActual === "Papeleria" && !ROLES_CON_OFICINAS.includes(rolActual)) {
+    lista = lista.filter(s => s.toLowerCase() !== "oficinas");
+  }
+
+  lista.forEach(nombre => {
+    const opt = document.createElement("option");
+    opt.value = nombre; opt.textContent = nombre;
+    sel.appendChild(opt);
+  });
+}
+
+// ── RESTRICCIONES PATRULLA ──
+function aplicarRestriccionesPatrulla() {
+  const soloGasolina  = ROLES_SOLO_GASOLINA.includes(rolActual);
+  const gasRevision   = ROLES_GAS_REVISION.includes(rolActual);
+  const sinVirtus     = ROLES_SIN_VIRTUS.includes(rolActual);
+  const aviso         = document.getElementById("aviso-patrulla");
+
+  // Aviso
+  if (soloGasolina) { aviso.textContent = "⚠️ Tu rol solo permite solicitar carga de gasolina."; aviso.classList.add("visible"); }
+  else if (gasRevision) { aviso.textContent = "⚠️ Tu rol solo permite solicitar gasolina o revisión general."; aviso.classList.add("visible"); }
+  else { aviso.classList.remove("visible"); }
+
+  // Virtus Auto
+  const optVirtus = document.getElementById("opt-virtus-auto");
+  optVirtus.disabled = sinVirtus; optVirtus.style.display = sinVirtus ? "none" : "";
+  if (sinVirtus && document.getElementById("unidad").value === "Virtus Automatico 2023")
+    document.getElementById("unidad").value = "";
+
+  // Tipos de solicitud
+  const tp = document.getElementById("tipo-patrulla");
+  document.querySelectorAll(".opt-restringida").forEach(opt => {
+    const hide = soloGasolina || gasRevision;
+    opt.disabled = hide; opt.style.display = hide ? "none" : "";
+  });
+  const optRevision = document.querySelector('[value="Revision general"]');
+  if (optRevision) { optRevision.disabled = soloGasolina; optRevision.style.display = soloGasolina ? "none" : ""; }
+
+  if (soloGasolina && tp.value !== "Carga de gasolina") tp.value = "";
+  else if (gasRevision && !["Carga de gasolina","Revision general"].includes(tp.value)) tp.value = "";
+}
+
+function esMonopatin() { return document.getElementById("unidad").value === "Monopatin Electrico Real del Lago"; }
+
+function onTipoPatrullaChange() {
+  if (esMonopatin() && !["Reparacion","Revision general"].includes(document.getElementById("tipo-patrulla").value))
+    document.getElementById("tipo-patrulla").value = "";
+}
+
+// Restringe opciones cuando se selecciona el monopatín
+document.addEventListener("change", function(e) {
+  if (e.target.id !== "unidad") return;
+  const mono = esMonopatin();
+  const aviso = document.getElementById("aviso-patrulla");
+  const tp = document.getElementById("tipo-patrulla");
+  const optGas = document.querySelector('[value="Carga de gasolina"]');
+  const optMant = document.querySelector('.opt-restringida');
+
+  if (mono) {
+    if (optGas) { optGas.disabled = true; optGas.style.display = "none"; }
+    document.querySelectorAll(".opt-restringida").forEach(o => { o.disabled = true; o.style.display = "none"; });
+    aviso.textContent = "⚠️ El monopatín solo permite reparación o revisión general.";
+    aviso.classList.add("visible");
+    if (!["Reparacion","Revision general"].includes(tp.value)) tp.value = "";
+  } else {
+    if (optGas) { optGas.disabled = false; optGas.style.display = ""; }
+    aplicarRestriccionesPatrulla();
+  }
+});
+
+// ── CONDICIÓN UNIFORME ──
+function actualizarCampoCondicion() {
+  const campo = document.getElementById("campo-condicion");
+  if (!campo) return;
+  const mostrar = ROLES_CON_CONDICION.includes(rolActual);
+  campo.style.display = mostrar ? "block" : "none";
+  if (!mostrar) { condicionActual = "Cualquiera"; }
+}
 
 function setCondicion(cond, btn) {
   condicionActual = cond;
@@ -578,113 +554,90 @@ function setCondicion(cond, btn) {
   btn.classList.add("active");
 }
 
-function actualizarCampoCondicion() {
-  const campo = document.getElementById("campo-condicion");
-  if (!campo) return;
-  const mostrar = tipoActual === "Uniforme" && ROLES_CON_CONDICION.includes(rolActual());
-  campo.style.display = mostrar ? "block" : "none";
-  if (!mostrar) {
-    // Si no se muestra, resetear a Cualquiera
-    condicionActual = "Cualquiera";
-    document.querySelectorAll("[data-cond]").forEach(b => b.classList.remove("active"));
-    const def = document.querySelector('[data-cond="Cualquiera"]');
-    if (def) def.classList.add("active");
-  }
-}
-
+// ── URGENCIA ──
 function setUrgencia(urg, btn) {
   urgenciaActual = urg;
   document.querySelectorAll(".urg-btn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
 }
 
+// ── TOAST ──
 function mostrarToast(msg, tipo) {
   const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.className = "toast show " + tipo;
+  t.textContent = msg; t.className = "toast show " + tipo;
   setTimeout(() => { t.className = "toast"; }, 4500);
 }
 
-// ── Validación ──
+// ── VALIDACIÓN ──
 function validar() {
-  const rol = rolActual();
-  if (!tipoActual) { mostrarToast("Selecciona un tipo de solicitud", "err"); return false; }
-  if (!rol) { mostrarToast("Selecciona tu rol", "err"); return false; }
+  if (!rolActual)  { mostrarToast("Selecciona tu rol", "err"); return false; }
+  if (!tipoActual) { mostrarToast("Selecciona el tipo de solicitud", "err"); return false; }
   if (!document.getElementById("solicitante").value.trim()) { mostrarToast("Escribe tu nombre", "err"); return false; }
-
-  if (tipoActual !== "Equipo") {
-    if (!document.getElementById("servicio").value) { mostrarToast("Selecciona el servicio / caseta", "err"); return false; }
-  }
+  if (tipoActual !== "Equipo" && !document.getElementById("servicio").value) { mostrarToast("Selecciona el servicio / caseta", "err"); return false; }
 
   if (tipoActual === "Uniforme") {
-    if (!document.getElementById("prenda").value) { mostrarToast("Selecciona la prenda", "err"); return false; }
-    if (!document.getElementById("talla").value) { mostrarToast("Selecciona la talla", "err"); return false; }
-    if (!document.getElementById("cantidad-uni").value) { mostrarToast("Indica la cantidad", "err"); return false; }
+    if (!document.getElementById("prenda").value)      { mostrarToast("Selecciona la prenda", "err"); return false; }
+    if (!document.getElementById("talla").value)       { mostrarToast("Selecciona la talla", "err"); return false; }
+    if (!document.getElementById("cantidad-uni").value){ mostrarToast("Indica la cantidad", "err"); return false; }
   }
   if (tipoActual === "Patrulla") {
-    const unidad = document.getElementById("unidad").value;
+    const unidad  = document.getElementById("unidad").value;
     const tipoPat = document.getElementById("tipo-patrulla").value;
-    if (!unidad) { mostrarToast("Selecciona la unidad", "err"); return false; }
-    if (ROLES_OPERATIVOS.includes(rol) && unidad === "Virtus Automatico 2023") {
-      mostrarToast("Tu rol no tiene acceso al Virtus Automático", "err"); return false;
-    }
+    if (!unidad)  { mostrarToast("Selecciona la unidad", "err"); return false; }
     if (!tipoPat) { mostrarToast("Selecciona el tipo de solicitud", "err"); return false; }
-    if (ROLES_OPERATIVOS.includes(rol) && !["Carga de gasolina","Revision general"].includes(tipoPat)) {
-      mostrarToast("Tu rol solo puede solicitar gasolina o revisión general", "err"); return false;
-    }
-    if (esMonopatin() && !["Reparacion","Revision general"].includes(tipoPat)) {
-      mostrarToast("El monopatín solo permite reparación o revisión general", "err"); return false;
-    }
+    if (ROLES_SOLO_GASOLINA.includes(rolActual) && tipoPat !== "Carga de gasolina") { mostrarToast("Tu rol solo puede solicitar gasolina", "err"); return false; }
+    if (ROLES_GAS_REVISION.includes(rolActual) && !["Carga de gasolina","Revision general"].includes(tipoPat)) { mostrarToast("Tu rol solo puede solicitar gasolina o revisión general", "err"); return false; }
+    if (esMonopatin() && !["Reparacion","Revision general"].includes(tipoPat)) { mostrarToast("El monopatín solo permite reparación o revisión general", "err"); return false; }
     if (!document.getElementById("detalle-patrulla").value.trim()) { mostrarToast("Describe la solicitud", "err"); return false; }
   }
   if (tipoActual === "Papeleria") {
-    if (!esRolAdmin() && document.getElementById("servicio").value === "Oficinas") {
-      mostrarToast("Tu rol no puede seleccionar Oficinas", "err"); return false;
-    }
-    if (!document.getElementById("articulo").value) { mostrarToast("Selecciona el artículo", "err"); return false; }
-    if (!document.getElementById("cantidad-pap").value) { mostrarToast("Indica la cantidad", "err"); return false; }
+    if (!document.getElementById("articulo").value)        { mostrarToast("Selecciona el artículo", "err"); return false; }
+    if (!document.getElementById("cantidad-pap").value)    { mostrarToast("Indica la cantidad", "err"); return false; }
   }
   if (tipoActual === "Equipo") {
-    if (!document.getElementById("tipo-equipo").value) { mostrarToast("Selecciona el tipo de equipo", "err"); return false; }
+    if (!document.getElementById("tipo-equipo").value)     { mostrarToast("Selecciona el tipo de equipo", "err"); return false; }
     if (!document.getElementById("cantidad-equipo").value) { mostrarToast("Indica la cantidad", "err"); return false; }
-    if (!document.getElementById("accion-equipo").value) { mostrarToast("Selecciona la acción solicitada", "err"); return false; }
+    if (!document.getElementById("accion-equipo").value)   { mostrarToast("Selecciona la acción", "err"); return false; }
     if (!document.getElementById("detalle-equipo").value.trim()) { mostrarToast("Describe la solicitud", "err"); return false; }
   }
   return true;
 }
 
-// ── Envío ──
+// ── ENVÍO ──
 async function enviar() {
   if (!validar()) return;
-
   const btn = document.getElementById("btn-enviar");
   const spinner = document.getElementById("spinner");
   const btnText = document.getElementById("btn-text");
   btn.disabled = true; spinner.style.display = "block"; btnText.textContent = "Enviando...";
 
-  const rolSel = document.getElementById("rol");
+  const ROLES_LABELS = {
+    guardia:"Guardia", jefe_turno:"Jefe de turno", coord_operativo:"Coordinador operativo",
+    coord_general:"Coordinador general", director_general:"Director general",
+    aux_administrativa:"Auxiliar administrativa", director_finanzas:"Director de finanzas / Administración"
+  };
+
   const payload = {
-    tipo: tipoActual,
-    rol: rolSel.options[rolSel.selectedIndex].text,
-    solicitante: document.getElementById("solicitante").value.trim(),
-    servicio: tipoActual === "Equipo" ? "N/A" : document.getElementById("servicio").value,
-    urgencia: urgenciaActual
+    tipo:       tipoActual,
+    rol:        ROLES_LABELS[rolActual] || rolActual,
+    solicitante:document.getElementById("solicitante").value.trim(),
+    servicio:   tipoActual === "Equipo" ? "N/A" : document.getElementById("servicio").value,
+    urgencia:   urgenciaActual
   };
 
   if (tipoActual === "Uniforme") {
     const prenda = document.getElementById("prenda").value;
     const talla  = document.getElementById("talla").value;
     payload.prenda_talla = prenda + " / " + talla;
-    payload.cantidad = document.getElementById("cantidad-uni").value;
-    payload.condicion = condicionActual;
-    payload.notas    = document.getElementById("notas-uni").value.trim();
-    payload.detalle  = prenda + " talla " + talla;
+    payload.cantidad     = document.getElementById("cantidad-uni").value;
+    payload.condicion    = condicionActual;
+    payload.notas        = document.getElementById("notas-uni").value.trim();
+    payload.detalle      = prenda + " talla " + talla;
   }
   if (tipoActual === "Patrulla") {
     payload.unidad  = document.getElementById("unidad").value;
     const tipoPat   = document.getElementById("tipo-patrulla").value;
-    const detalle   = document.getElementById("detalle-patrulla").value.trim();
-    payload.detalle = tipoPat + ": " + detalle;
+    payload.detalle = tipoPat + ": " + document.getElementById("detalle-patrulla").value.trim();
     const km = document.getElementById("km").value;
     if (km) payload.notas = "Kilometraje: " + km + " km";
   }
@@ -695,8 +648,8 @@ async function enviar() {
     payload.detalle  = document.getElementById("articulo").value;
   }
   if (tipoActual === "Equipo") {
-    const tipoEq  = document.getElementById("tipo-equipo").value;
-    const accion  = document.getElementById("accion-equipo").value;
+    const tipoEq   = document.getElementById("tipo-equipo").value;
+    const accion   = document.getElementById("accion-equipo").value;
     const asignado = document.getElementById("asignado-equipo").value.trim();
     payload.articulo = tipoEq;
     payload.cantidad = document.getElementById("cantidad-equipo").value;
@@ -705,7 +658,7 @@ async function enviar() {
   }
 
   try {
-    const res  = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+    const res  = await fetch(SCRIPT_URL, { method:"POST", body:JSON.stringify(payload) });
     const data = await res.json();
     if (data.ok) {
       mostrarToast("✓ Enviado — " + data.id, "ok");
@@ -720,33 +673,26 @@ async function enviar() {
   }
 }
 
-function resetModulo() {
-  tipoActual = null;
-  document.querySelectorAll(".tipo-btn").forEach(b => b.classList.remove("active"));
-  document.getElementById("form-body").style.display = "none";
-  document.querySelectorAll(".modulo").forEach(m => m.classList.remove("visible"));
-}
-
+// ── RESET ──
 function resetForm() {
-  tipoActual = null; urgenciaActual = "Normal";
-  filtrarRolesEquipo(false); // restaurar todos los roles
-  condicionActual = "Cualquiera";
+  rolActual = null; tipoActual = null; urgenciaActual = "Normal"; condicionActual = "Cualquiera";
+  document.querySelectorAll(".rol-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".urg-btn").forEach(b => b.classList.remove("active"));
+  document.querySelector('.urg-btn[data-urg="Normal"]').classList.add("active");
   document.querySelectorAll("[data-cond]").forEach(b => b.classList.remove("active"));
   const defCond = document.querySelector('[data-cond="Cualquiera"]');
   if (defCond) defCond.classList.add("active");
-  document.querySelectorAll(".tipo-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("tipo-section").style.display = "none";
   document.getElementById("form-body").style.display = "none";
   document.querySelectorAll(".modulo").forEach(m => m.classList.remove("visible"));
-  document.querySelectorAll(".urg-btn").forEach(b => b.classList.remove("active"));
-  document.querySelector('.urg-btn[data-urg="Normal"]').classList.add("active");
   document.getElementById("aviso-patrulla").classList.remove("visible");
-  ["rol","solicitante","servicio","prenda","talla","unidad","tipo-patrulla","articulo","tipo-equipo","accion-equipo"].forEach(id => {
+  ["solicitante","servicio","prenda","talla","unidad","tipo-patrulla","articulo","tipo-equipo","accion-equipo"].forEach(id => {
     const el = document.getElementById(id); if(el) el.value = "";
   });
   ["cantidad-uni","notas-uni","detalle-patrulla","km","cantidad-pap","notas-pap","cantidad-equipo","detalle-equipo","asignado-equipo"].forEach(id => {
     const el = document.getElementById(id); if(el) el.value = "";
   });
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({ top:0, behavior:"smooth" });
 }
 
 cargarServicios();
