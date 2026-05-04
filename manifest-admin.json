@@ -1,8 +1,8 @@
 {
-  "name": "Frago Admin",
-  "short_name": "Frago Admin",
-  "description": "Panel de gestión operativa Frago",
-  "start_url": "/frago-solicitudes/frago_panel.html",
+  "name": "FRAGO Solicitudes",
+  "short_name": "FRAGO Solicitudes",
+  "description": "Sistema de solicitudes operativas Frago",
+  "start_url": "/frago-solicitudes/",
   "display": "standalone",
   "background_color": "#0f1117",
   "theme_color": "#0f1117",
