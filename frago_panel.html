@@ -125,6 +125,32 @@
   .spinner-wrap { text-align: center; padding: 48px; color: var(--text3); font-size: 14px; }
   @media (max-width: 600px) { th.hide-sm, td.hide-sm { display: none; } }
 
+  /* INVENTARIO */
+  .inv-toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; align-items: center; }
+  .inv-stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap: 12px; margin-bottom: 20px; }
+  .inv-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+  .inv-stat-num { font-size: 22px; font-weight: 600; margin-bottom: 2px; }
+  .inv-stat-label { font-size: 11px; color: var(--text2); }
+  .stock-ok   { color: var(--success); }
+  .stock-bajo { color: var(--danger); }
+  .stock-med  { color: var(--warning); }
+  .btn-inv { font-size: 12px; font-weight: 500; padding: 7px 14px; border-radius: 7px; border: none; cursor: pointer; font-family: var(--font); transition: opacity 0.15s; white-space: nowrap; }
+  .btn-inv:hover { opacity: 0.8; }
+  .btn-entrada  { background: rgba(93,184,122,0.15);  color: var(--success); }
+  .btn-salida   { background: rgba(224,123,74,0.15);  color: var(--accent3); }
+  .btn-ajuste   { background: rgba(74,144,217,0.15);  color: var(--accent); }
+  .btn-nuevo    { background: var(--accent); color: #fff; }
+
+  /* Modal inventario */
+  .inv-form-field { margin-bottom: 14px; }
+  .inv-form-field label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 5px; }
+  .inv-form-field input, .inv-form-field select { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--font); font-size: 13px; padding: 9px 12px; outline: none; -webkit-appearance: none; appearance: none; }
+  .inv-form-field input:focus, .inv-form-field select:focus { border-color: var(--border-focus); }
+  .inv-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .badge-condicion { font-size: 10px; padding: 2px 7px; border-radius: 10px; }
+  .c-nuevo { background: rgba(74,144,217,0.12); color: var(--accent); }
+  .c-usado { background: rgba(224,184,74,0.12); color: var(--warning); }
+
   /* PESTAÑAS */
   .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 4px; width: fit-content; }
   .tab-btn { padding: 8px 20px; border-radius: 7px; border: none; font-family: var(--font); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; background: none; color: var(--text2); }
@@ -185,6 +211,7 @@
     <div class="tabs">
       <button class="tab-btn active" onclick="setTab('solicitudes',this)">📋 Solicitudes</button>
       <button class="tab-btn" onclick="setTab('dashboard',this)">📊 Dashboard</button>
+      <button class="tab-btn" id="tab-btn-inventario" onclick="setTab('inventario',this)">📦 Inventario</button>
     </div>
 
     <!-- ── TAB: SOLICITUDES ── -->
@@ -291,6 +318,70 @@
       </div>
     </div>
 
+    <!-- ── TAB: INVENTARIO ── -->
+    <div class="tab-content" id="tab-inventario">
+
+      <div id="inv-acceso-negado" style="display:none;">
+        <p style="text-align:center;padding:48px;color:var(--text3);font-size:14px;">No tienes permisos para gestionar el inventario.</p>
+      </div>
+
+      <div id="inv-contenido">
+        <!-- Stats rápidos -->
+        <div class="inv-stats">
+          <div class="inv-stat"><div class="inv-stat-num stock-bajo" id="inv-bajo">—</div><div class="inv-stat-label">Artículos en stock bajo</div></div>
+          <div class="inv-stat"><div class="inv-stat-num stock-ok"   id="inv-ok">—</div><div class="inv-stat-label">Artículos con stock OK</div></div>
+          <div class="inv-stat"><div class="inv-stat-num"            id="inv-total-items" style="color:var(--text)">—</div><div class="inv-stat-label">Total artículos registrados</div></div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="inv-toolbar">
+          <input class="filtro-buscar" type="text" id="inv-buscar" placeholder="Buscar prenda o talla..." oninput="renderInventario()" style="flex:1;min-width:180px;">
+          <select class="filtro-select" id="inv-f-condicion" onchange="renderInventario()">
+            <option value="">Toda condición</option>
+            <option>Nueva</option><option>Nuevo</option>
+            <option>Usada (Buen estado)</option><option>Usado (Buen estado)</option>
+          </select>
+          <select class="filtro-select" id="inv-f-stock" onchange="renderInventario()">
+            <option value="">Todo stock</option>
+            <option value="bajo">Stock bajo</option>
+            <option value="ok">Stock OK</option>
+          </select>
+          <button class="btn-inv btn-nuevo" onclick="abrirModalInv('nuevo')">+ Nuevo artículo</button>
+          <button class="btn-refresh" onclick="cargarInventario()">↻</button>
+        </div>
+
+        <!-- Tabla -->
+        <div class="tabla-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Prenda</th><th>Talla</th><th>Condición</th>
+                <th>Stock actual</th><th>Mínimo</th><th>Alerta</th><th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="inv-tabla-body">
+              <tr><td colspan="7" class="spinner-wrap">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL INVENTARIO -->
+<div class="modal-bg" id="modal-inv-bg" onclick="if(event.target===this)cerrarModalInv()">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="mi-titulo">Inventario</div>
+        <div class="modal-id"    id="mi-sub"></div>
+      </div>
+      <button class="btn-close" onclick="cerrarModalInv()">×</button>
+    </div>
+    <div id="mi-body"></div>
+    <div class="modal-acciones" id="mi-acciones" style="margin-top:12px;"></div>
   </div>
 </div>
 
@@ -578,6 +669,9 @@ function mostrarError(msg) {
   document.getElementById("tabla-body").innerHTML =
     `<tr><td colspan="9" class="empty">${msg}</td></tr>`;
 }
+// ── ROLES CON ACCESO A INVENTARIO ──
+const ROLES_INV = ["gigi","gabriel","emiliano","othon"];
+
 // ── PESTAÑAS ──
 function setTab(tab, btn) {
   document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
@@ -585,6 +679,242 @@ function setTab(tab, btn) {
   btn.classList.add("active");
   document.getElementById("tab-" + tab).classList.add("active");
   if (tab === "dashboard") renderDashboard();
+  if (tab === "inventario") iniciarInventario();
+}
+
+// ── INVENTARIO ──
+let inventarioData = [];
+
+function iniciarInventario() {
+  const puedeVer = ROLES_INV.includes(usuarioActual);
+  document.getElementById("inv-acceso-negado").style.display = puedeVer ? "none" : "block";
+  document.getElementById("inv-contenido").style.display = puedeVer ? "block" : "none";
+  if (puedeVer) cargarInventario();
+}
+
+async function cargarInventario() {
+  document.getElementById("inv-tabla-body").innerHTML =
+    '<tr><td colspan="7" class="spinner-wrap">Cargando inventario...</td></tr>';
+  try {
+    const res  = await fetch(SCRIPT_URL + "?action=getInventario");
+    const data = await res.json();
+    if (data.ok) {
+      inventarioData = data.items || [];
+      actualizarStatsInv();
+      renderInventario();
+    } else {
+      document.getElementById("inv-tabla-body").innerHTML =
+        '<tr><td colspan="7" class="empty">No se pudo cargar el inventario</td></tr>';
+    }
+  } catch(e) {
+    document.getElementById("inv-tabla-body").innerHTML =
+      '<tr><td colspan="7" class="empty">Error de conexión</td></tr>';
+  }
+}
+
+function actualizarStatsInv() {
+  const bajo = inventarioData.filter(i => i.alerta === "⚠️ STOCK BAJO").length;
+  const ok   = inventarioData.filter(i => i.alerta !== "⚠️ STOCK BAJO").length;
+  document.getElementById("inv-bajo").textContent  = bajo || "0";
+  document.getElementById("inv-ok").textContent    = ok   || "0";
+  document.getElementById("inv-total-items").textContent = inventarioData.length || "0";
+}
+
+function renderInventario() {
+  const buscar = document.getElementById("inv-buscar").value.toLowerCase();
+  const fCond  = document.getElementById("inv-f-condicion").value;
+  const fStock = document.getElementById("inv-f-stock").value;
+
+  const filtrados = inventarioData.filter(i => {
+    const txt = (i.prenda + " " + i.talla).toLowerCase();
+    const esBajo = i.alerta === "⚠️ STOCK BAJO";
+    return (!buscar || txt.includes(buscar))
+      && (!fCond  || i.condicion === fCond)
+      && (!fStock || (fStock === "bajo" ? esBajo : !esBajo));
+  });
+
+  const tbody = document.getElementById("inv-tabla-body");
+  if (!filtrados.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">No hay artículos con esos filtros</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtrados.map(i => {
+    const esBajo = i.alerta === "⚠️ STOCK BAJO";
+    const stockClass = esBajo ? "stock-bajo" : (Number(i.stock) <= Number(i.minimo) * 1.5 ? "stock-med" : "stock-ok");
+    const condClass = (i.condicion === "Nueva" || i.condicion === "Nuevo") ? "c-nuevo" : "c-usado";
+    return `<tr>
+      <td class="td-main">${i.prenda}</td>
+      <td style="font-size:12px;">${i.talla||"—"}</td>
+      <td><span class="badge-condicion ${condClass}">${i.condicion}</span></td>
+      <td><span class="${stockClass}" style="font-weight:500;">${i.stock}</span></td>
+      <td style="font-size:12px;color:var(--text3);">${i.minimo}</td>
+      <td style="font-size:12px;">${esBajo ? "⚠️ Bajo" : "✓"}</td>
+      <td>
+        <div class="acciones">
+          <button class="btn-inv btn-entrada" onclick="abrirModalInv('entrada','${i.id}')">Entrada</button>
+          <button class="btn-inv btn-salida"  onclick="abrirModalInv('salida','${i.id}')">Salida</button>
+          <button class="btn-inv btn-ajuste"  onclick="abrirModalInv('ajuste','${i.id}')">Ajustar</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+// ── MODAL INVENTARIO ──
+let itemActual = null;
+
+function abrirModalInv(accion, id) {
+  const item = id ? inventarioData.find(i => i.id === id) : null;
+  itemActual = item;
+
+  const titulos = { entrada:"Registrar entrada", salida:"Registrar salida", ajuste:"Ajuste de stock", nuevo:"Nuevo artículo" };
+  document.getElementById("mi-titulo").textContent = titulos[accion] || accion;
+  document.getElementById("mi-sub").textContent = item ? item.prenda + " / " + item.talla + " — " + item.condicion : "";
+
+  let html = "";
+
+  if (accion === "nuevo") {
+    html = `
+      <div class="inv-form-field"><label>Prenda</label>
+        <select id="mi-prenda">
+          <option value="">Selecciona...</option>
+          ${["Camisa manga larga","Pantalón","Chamarra","Sudadera","Chaleco reflejante rojo (FRAGO)",
+             "Chaleco reflejante de seguridad (naranja)","Chaleco táctico","Gorra","Botas",
+             "Impermeable azul","Impermeable amarillo","Fajilla","Cinturón","Broche","Otro"]
+            .map(p => `<option>${p}</option>`).join("")}
+        </select>
+      </div>
+      <div class="inv-form-row">
+        <div class="inv-form-field"><label>Talla</label>
+          <select id="mi-talla">
+            <option value="">Selecciona...</option>
+            ${["XS","S","M","L","XL","2XL","3XL","26","28","30","32","34","36","38","40","Único"]
+              .map(t => `<option>${t}</option>`).join("")}
+          </select>
+        </div>
+        <div class="inv-form-field"><label>Condición</label>
+          <select id="mi-condicion">
+            <option>Nueva</option><option>Nuevo</option>
+            <option>Usada (Buen estado)</option><option>Usado (Buen estado)</option>
+          </select>
+        </div>
+      </div>
+      <div class="inv-form-row">
+        <div class="inv-form-field"><label>Stock inicial</label><input type="number" id="mi-stock" min="0" placeholder="0"></div>
+        <div class="inv-form-field"><label>Stock mínimo</label><input type="number" id="mi-minimo" min="0" placeholder="1"></div>
+      </div>`;
+  } else if (accion === "entrada") {
+    html = `
+      <div class="inv-form-field"><label>Cantidad que ingresa</label><input type="number" id="mi-cantidad" min="1" placeholder="1"></div>
+      <div class="inv-form-field"><label>Motivo</label>
+        <select id="mi-motivo">
+          <option>Compra</option><option>Donación</option><option>Devolución</option><option>Otro</option>
+        </select>
+      </div>
+      <div class="inv-form-field"><label>Notas (opcional)</label><input type="text" id="mi-notas" placeholder="Proveedor, referencia, etc."></div>
+      <p style="font-size:12px;color:var(--text2);margin-top:4px;">Stock actual: <strong style="color:var(--text)">${item?.stock||0}</strong> → pasará a <strong style="color:var(--success)" id="mi-preview-stock">${item?.stock||0}</strong></p>`;
+  } else if (accion === "salida") {
+    html = `
+      <div class="inv-form-field"><label>Cantidad que sale</label><input type="number" id="mi-cantidad" min="1" max="${item?.stock||0}" placeholder="1" oninput="previewStock('salida',${item?.stock||0})"></div>
+      <div class="inv-form-field"><label>Motivo</label>
+        <select id="mi-motivo">
+          <option>Entrega a guardia</option><option>Baja por desgaste</option><option>Pérdida</option><option>Otro</option>
+        </select>
+      </div>
+      <div class="inv-form-field"><label>Guardia / Destino (opcional)</label><input type="text" id="mi-notas" placeholder="Nombre del guardia o servicio"></div>
+      <p style="font-size:12px;color:var(--text2);margin-top:4px;">Stock actual: <strong style="color:var(--text)">${item?.stock||0}</strong> → pasará a <strong style="color:var(--warning)" id="mi-preview-stock">${item?.stock||0}</strong></p>`;
+  } else if (accion === "ajuste") {
+    html = `
+      <div class="inv-form-field"><label>Nuevo stock (valor exacto)</label><input type="number" id="mi-stock-ajuste" min="0" placeholder="${item?.stock||0}" value="${item?.stock||0}"></div>
+      <div class="inv-form-field"><label>Nuevo mínimo (opcional)</label><input type="number" id="mi-minimo-ajuste" min="0" placeholder="${item?.minimo||1}" value="${item?.minimo||1}"></div>
+      <div class="inv-form-field"><label>Motivo del ajuste</label><input type="text" id="mi-notas" placeholder="Conteo físico, corrección, etc."></div>`;
+  }
+
+  document.getElementById("mi-body").innerHTML = html;
+
+  // Botones
+  const acciones = {
+    nuevo:   `<button class="btn-modal bm-aprobar" onclick="ejecutarAccionInv('nuevo')">Guardar artículo</button>`,
+    entrada: `<button class="btn-modal bm-aprobar" onclick="ejecutarAccionInv('entrada')">Registrar entrada</button>`,
+    salida:  `<button class="btn-modal bm-rechazar" onclick="ejecutarAccionInv('salida')">Registrar salida</button>`,
+    ajuste:  `<button class="btn-modal bm-atender" onclick="ejecutarAccionInv('ajuste')">Guardar ajuste</button>`
+  };
+  document.getElementById("mi-acciones").innerHTML =
+    (acciones[accion]||"") + `<button class="btn-modal bm-cerrar" onclick="cerrarModalInv()">Cancelar</button>`;
+
+  // Guardar acción actual
+  document.getElementById("modal-inv-bg").dataset.accion = accion;
+  document.getElementById("modal-inv-bg").classList.add("open");
+
+  // Preview en tiempo real para entrada
+  if (accion === "entrada") {
+    document.getElementById("mi-cantidad").addEventListener("input", function() {
+      previewStock("entrada", item?.stock||0);
+    });
+  }
+}
+
+function previewStock(tipo, stockActual) {
+  const cant = parseInt(document.getElementById("mi-cantidad")?.value) || 0;
+  const nuevo = tipo === "entrada" ? stockActual + cant : stockActual - cant;
+  const el = document.getElementById("mi-preview-stock");
+  if (el) el.textContent = Math.max(0, nuevo);
+}
+
+async function ejecutarAccionInv(accion) {
+  const payload = { action: "gestionarInventario", tipo: accion, gestionadoPor: usuarioActual };
+
+  if (accion === "nuevo") {
+    const prenda = document.getElementById("mi-prenda")?.value;
+    const talla  = document.getElementById("mi-talla")?.value;
+    const cond   = document.getElementById("mi-condicion")?.value;
+    const stock  = document.getElementById("mi-stock")?.value;
+    const minimo = document.getElementById("mi-minimo")?.value;
+    if (!prenda || !talla || !cond || stock === "") { mostrarToast("Completa todos los campos", "err"); return; }
+    Object.assign(payload, { prenda, talla, condicion: cond, stock: Number(stock), minimo: Number(minimo)||1 });
+  } else if (accion === "entrada" || accion === "salida") {
+    const cantidad = parseInt(document.getElementById("mi-cantidad")?.value);
+    if (!cantidad || cantidad <= 0) { mostrarToast("Indica una cantidad válida", "err"); return; }
+    if (accion === "salida" && cantidad > Number(itemActual?.stock||0)) {
+      mostrarToast("No hay suficiente stock", "err"); return;
+    }
+    Object.assign(payload, {
+      id:       itemActual.id,
+      cantidad: accion === "salida" ? -cantidad : cantidad,
+      motivo:   document.getElementById("mi-motivo")?.value,
+      notas:    document.getElementById("mi-notas")?.value || ""
+    });
+  } else if (accion === "ajuste") {
+    const nuevoStock  = document.getElementById("mi-stock-ajuste")?.value;
+    const nuevoMinimo = document.getElementById("mi-minimo-ajuste")?.value;
+    if (nuevoStock === "") { mostrarToast("Indica el nuevo stock", "err"); return; }
+    Object.assign(payload, {
+      id:       itemActual.id,
+      nuevoStock:  Number(nuevoStock),
+      nuevoMinimo: Number(nuevoMinimo)||itemActual.minimo,
+      notas:    document.getElementById("mi-notas")?.value || ""
+    });
+  }
+
+  cerrarModalInv();
+  try {
+    const res  = await fetch(SCRIPT_URL, { method:"POST", body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.ok) {
+      mostrarToast("✓ Inventario actualizado", "ok");
+      await cargarInventario();
+    } else {
+      mostrarToast("Error: " + (data.error||"intenta de nuevo"), "err");
+    }
+  } catch(e) {
+    mostrarToast("Error de conexión", "err");
+  }
+}
+
+function cerrarModalInv() {
+  document.getElementById("modal-inv-bg").classList.remove("open");
+  itemActual = null;
 }
 
 // ── DASHBOARD ──
