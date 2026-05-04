@@ -611,8 +611,15 @@ function tienePatrulla(nombre) {
   return SERVICIOS_PATRULLA.some(p => n.includes(p));
 }
 
-function poblarServicios() {
+async function poblarServicios() {
   const sel = document.getElementById("servicio");
+
+  // Si todavía no han cargado los servicios, esperar
+  if (todosLosServicios.length === 0) {
+    sel.innerHTML = '<option value="">Cargando servicios...</option>';
+    await cargarServicios();
+  }
+
   sel.innerHTML = '<option value="">Selecciona un servicio...</option>';
   let lista = [...todosLosServicios];
 
