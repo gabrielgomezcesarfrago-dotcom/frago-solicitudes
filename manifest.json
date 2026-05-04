@@ -1,6 +1,6 @@
 {
   "name": "FRAGO Solicitudes",
-  "short_name": "FRAGO",
+  "short_name": "FRAGO Solicitudes",
   "description": "Sistema de solicitudes operativas Frago",
   "start_url": "/frago-solicitudes/",
   "display": "standalone",
