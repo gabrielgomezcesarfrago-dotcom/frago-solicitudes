@@ -733,6 +733,8 @@ async function cargarSolicitudes() {
     const data = await res.json();
     if (data.ok) {
       solicitudes = data.solicitudes || [];
+      // Log primeras 3 solicitudes para debug
+      console.log("Solicitudes recibidas (primeras 3):", solicitudes.slice(0,3).map(s => ({id:s.id, tipo:s.tipo, estatus:s.estatus})));
       actualizarStats();
       renderTabla();
     } else {
@@ -937,10 +939,11 @@ async function accionRapida(id, nuevoEstatus) {
 }
 
 async function actualizarEstatus(id, nuevoEstatus, nota) {
+  console.log("actualizarEstatus →", { id, tipo: typeof id, nuevoEstatus });
   try {
     const res  = await fetch(SCRIPT_URL, {
       method: "POST",
-      body: JSON.stringify({ action:"actualizarEstatus", id, estatus:nuevoEstatus, nota, gestionadoPor:usuarioActual })
+      body: JSON.stringify({ action:"actualizarEstatus", id: String(id||"").trim(), estatus:nuevoEstatus, nota, gestionadoPor:usuarioActual })
     });
     const data = await res.json();
     if (data.ok) {
