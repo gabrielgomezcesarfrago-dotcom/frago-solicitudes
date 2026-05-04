@@ -48,6 +48,7 @@
   .tipo-btn.active.t-patrulla  { border-color: var(--accent3); background: rgba(224,123,74,0.09);  color: var(--text); }
   .tipo-btn.active.t-papeleria { border-color: var(--accent2); background: rgba(93,184,122,0.09);  color: var(--text); }
   .tipo-btn.active.t-equipo    { border-color: var(--accent4); background: rgba(155,109,214,0.09); color: var(--text); }
+  .tipo-btn.active.t-consulta  { border-color: #4abfbf; background: rgba(74,191,191,0.09); color: var(--text); }
   .tipo-icon { font-size: 24px; display: block; margin-bottom: 8px; }
   .tipo-label { font-size: 12px; font-weight: 500; display: block; }
 
@@ -161,7 +162,7 @@
 <body>
 
 <div class="header">
-  <div class="header-logo">FG</div>
+  <div class="header-logo" style="background:transparent;padding:0;"><img src="data:image/png;base64,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" style="height:32px;width:auto;object-fit:contain;" alt="Frago"></div>
   <div>
     <div class="header-title">Frago — Solicitudes</div>
     <div class="header-sub">Sistema de gestión operativa</div>
@@ -418,6 +419,24 @@
       </div>
     </div>
 
+    <!-- CONSULTA DE FOLIO -->
+    <div class="modulo" id="mod-Consulta">
+      <p class="section-title">Consultar mi solicitud</p>
+      <div class="field">
+        <label>Folio de seguimiento</label>
+        <div style="display:flex;gap:8px;">
+          <input class="consulta-input" type="text" id="consulta-input-mod" placeholder="REQ-040525-143022" maxlength="25" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')consultarFolioMod()" style="flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:14px;padding:11px 14px;outline:none;">
+          <button onclick="consultarFolioMod()" style="background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:11px 18px;font-family:var(--font);font-size:14px;font-weight:500;cursor:pointer;">Buscar</button>
+        </div>
+      </div>
+      <div id="recientes-mod-wrap" style="display:none;margin-top:8px;">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px;">Recientes:</div>
+        <div id="recientes-mod-chips"></div>
+      </div>
+      <div id="consulta-mod-result" style="margin-top:14px;"></div>
+      <button onclick="consultarFolioMod()" style="width:100%;margin-top:16px;padding:14px;border:none;border-radius:var(--radius);background:#4abfbf;color:#fff;font-family:var(--font);font-size:15px;font-weight:500;cursor:pointer;">🔍 Consultar estatus</button>
+    </div>
+
     <button class="btn-submit" id="btn-enviar" onclick="enviar()">
       <span class="spinner" id="spinner"></span>
       <span id="btn-text">Enviar solicitud</span>
@@ -465,20 +484,21 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx0QUTM1VC_CAXgIJC4g
 
 // ── ACCESO POR ROL ──
 const ACCESO = {
-  guardia:          ["Uniforme","Papeleria"],
-  jefe_turno:       ["Uniforme","Patrulla","Papeleria"],
-  coord_operativo:  ["Uniforme","Patrulla","Papeleria","Equipo"],
-  coord_general:    ["Uniforme","Patrulla","Papeleria","Equipo"],
-  director_general: ["Uniforme","Patrulla","Papeleria","Equipo"],
-  aux_administrativa:["Uniforme","Papeleria","Equipo"],
-  director_finanzas: ["Uniforme","Patrulla","Papeleria","Equipo"]
+  guardia:           ["Uniforme","Papeleria","Consulta"],
+  jefe_turno:        ["Uniforme","Patrulla","Papeleria","Consulta"],
+  coord_operativo:   ["Uniforme","Patrulla","Papeleria","Equipo","Consulta"],
+  coord_general:     ["Uniforme","Patrulla","Papeleria","Equipo","Consulta"],
+  director_general:  ["Uniforme","Patrulla","Papeleria","Equipo","Consulta"],
+  aux_administrativa:["Uniforme","Papeleria","Equipo","Consulta"],
+  director_finanzas: ["Uniforme","Patrulla","Papeleria","Equipo","Consulta"]
 };
 
 const TIPOS_CONFIG = {
-  Uniforme:  { icon:"👕", label:"Uniforme",       clase:"t-uniforme"  },
-  Patrulla:  { icon:"🚗", label:"Patrulla",        clase:"t-patrulla"  },
-  Papeleria: { icon:"📋", label:"Papelería",       clase:"t-papeleria" },
-  Equipo:    { icon:"🔦", label:"Equipo especial", clase:"t-equipo"    }
+  Uniforme:  { icon:"👕", label:"Uniforme",         clase:"t-uniforme"  },
+  Patrulla:  { icon:"🚗", label:"Patrulla",          clase:"t-patrulla"  },
+  Papeleria: { icon:"📋", label:"Papelería",         clase:"t-papeleria" },
+  Equipo:    { icon:"🔦", label:"Equipo especial",   clase:"t-equipo"    },
+  Consulta:  { icon:"🔍", label:"Consultar folio",   clase:"t-consulta"  }
 };
 
 // Roles con acceso a condición de uniforme
@@ -1049,6 +1069,53 @@ enviar = async function() {
 };
 
 // ── INIT ──
+async function consultarFolioMod() {
+  const folio = document.getElementById("consulta-input-mod")?.value.trim().toUpperCase();
+  if (!folio || !folio.startsWith("REQ")) { mostrarToast("Ingresa un folio válido", "err"); return; }
+  const result = document.getElementById("consulta-mod-result");
+  result.innerHTML = '<p style="font-size:13px;color:var(--text3);">Consultando...</p>';
+  try {
+    const res  = await fetch(SCRIPT_URL + "?action=consultarFolio&id=" + encodeURIComponent(folio));
+    const data = await res.json();
+    if (data.ok && data.solicitud) {
+      const s = data.solicitud;
+      const estatusColor = {
+        Pendiente:"#e0b84a", Aprobada:"#4a90d9", Atendida:"#5db87a",
+        Rechazada:"#e05a5a", Cerrada:"#5a6275", Cancelada:"#e05a5a"
+      }[s.estatus] || "#8a93a8";
+      result.innerHTML = `
+        <div style="background:var(--surface2);border-radius:10px;padding:14px;border:1px solid var(--border);">
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+            <div style="flex:1;min-width:100px;"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;">Folio</div><div style="font-family:var(--mono);font-size:12px;color:var(--text);">${s.id}</div></div>
+            <div style="flex:1;min-width:100px;"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;">Estatus</div><div style="font-weight:500;color:${estatusColor};">● ${s.estatus}</div></div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <div style="flex:1;min-width:80px;"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;">Tipo</div><div style="font-size:13px;color:var(--text);">${s.tipo}</div></div>
+            <div style="flex:1;min-width:80px;"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;">Fecha</div><div style="font-size:13px;color:var(--text);">${new Date(s.fecha).toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"})}</div></div>
+            <div style="flex:1;min-width:80px;"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;">Servicio</div><div style="font-size:13px;color:var(--text);">${s.servicio||"—"}</div></div>
+          </div>
+          ${s.notaGestion ? `<div style="margin-top:10px;font-size:12px;color:var(--text3);border-top:1px solid var(--border);padding-top:8px;">Nota: ${s.notaGestion}</div>` : ""}
+        </div>`;
+      guardarFolioReciente(folio);
+    } else {
+      result.innerHTML = '<p style="font-size:13px;color:var(--danger);">No se encontró una solicitud con ese folio.</p>';
+    }
+  } catch(e) {
+    result.innerHTML = '<p style="font-size:13px;color:var(--danger);">Error de conexión — intenta de nuevo.</p>';
+  }
+}
+
+function mostrarFoliosRecientesMod() {
+  const recientes = JSON.parse(localStorage.getItem("frago_folios") || "[]");
+  const wrap  = document.getElementById("recientes-mod-wrap");
+  const chips = document.getElementById("recientes-mod-chips");
+  if (!wrap || !recientes.length) { if(wrap) wrap.style.display = "none"; return; }
+  wrap.style.display = "block";
+  chips.innerHTML = recientes.map(f =>
+    `<span class="reciente-chip" onclick="document.getElementById('consulta-input-mod').value='${f}';consultarFolioMod();">${f}</span>`
+  ).join("");
+}
+
 cargarServicios();
 cargarDatosGuardados();
 mostrarFoliosRecientes();
