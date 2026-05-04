@@ -983,7 +983,10 @@ async function consultarFolio() {
   result.innerHTML = '<p style="font-size:13px;color:var(--text3);">Consultando...</p>';
 
   try {
-    const res  = await fetch(SCRIPT_URL + "?action=consultarFolio&id=" + encodeURIComponent(folio));
+    const res  = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "consultarFolio", id: folio })
+    });
     const data = await res.json();
 
     if (data.ok && data.solicitud) {
@@ -1105,7 +1108,10 @@ async function consultarFolioMod() {
   const result = document.getElementById("consulta-mod-result");
   result.innerHTML = '<p style="font-size:13px;color:var(--text3);">Consultando...</p>';
   try {
-    const res  = await fetch(SCRIPT_URL + "?action=consultarFolio&id=" + encodeURIComponent(folio));
+    const res  = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "consultarFolio", id: folio })
+    });
     const data = await res.json();
     if (data.ok && data.solicitud) {
       const s = data.solicitud;
