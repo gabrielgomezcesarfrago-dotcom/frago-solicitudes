@@ -98,6 +98,56 @@
 
   #tipo-section { display: none; }
   #form-body { display: none; }
+  #confirmacion-screen { display: none; }
+  #consulta-section { margin-top: 32px; }
+
+  /* Barra de progreso */
+  .progress-bar { display: flex; align-items: center; gap: 0; margin-bottom: 28px; }
+  .progress-step { display: flex; align-items: center; gap: 6px; }
+  .progress-dot { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; transition: all 0.2s; background: var(--surface2); color: var(--text3); border: 1.5px solid var(--border); }
+  .progress-dot.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .progress-dot.done { background: var(--accent2); color: #fff; border-color: var(--accent2); }
+  .progress-label { font-size: 12px; color: var(--text3); white-space: nowrap; }
+  .progress-label.active { color: var(--text); font-weight: 500; }
+  .progress-line { flex: 1; height: 1.5px; background: var(--border); margin: 0 8px; min-width: 20px; }
+  .progress-line.done { background: var(--accent2); }
+
+  /* Botón regresar */
+  .btn-back { background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--text2); font-family: var(--font); font-size: 13px; padding: 7px 14px; cursor: pointer; margin-bottom: 16px; transition: all 0.15s; display: none; }
+  .btn-back:hover { border-color: var(--border-focus); color: var(--text); }
+
+  /* Pantalla de confirmación */
+  .confirm-screen { text-align: center; padding: 20px 0; }
+  .confirm-icon { font-size: 56px; margin-bottom: 16px; }
+  .confirm-title { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .confirm-sub { font-size: 14px; color: var(--text2); margin-bottom: 24px; }
+  .folio-box { background: var(--surface2); border: 1.5px solid var(--accent4); border-radius: 12px; padding: 18px; margin: 0 auto 20px; max-width: 320px; }
+  .folio-label { font-size: 11px; color: var(--text3); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 8px; }
+  .folio-num { font-family: var(--mono); font-size: 22px; font-weight: 600; color: var(--accent4); letter-spacing: 2px; margin-bottom: 12px; }
+  .btn-copy { background: rgba(155,109,214,0.15); color: var(--accent4); border: none; border-radius: 8px; padding: 8px 18px; font-family: var(--font); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+  .btn-copy:hover { opacity: 0.8; }
+  .btn-nueva { width: 100%; padding: 13px; border: none; border-radius: var(--radius); background: var(--accent); color: #fff; font-family: var(--font); font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 8px; transition: opacity 0.15s; }
+  .btn-nueva:hover { opacity: 0.88; }
+
+  /* Consulta de folio */
+  .consulta-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; }
+  .consulta-title { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; }
+  .consulta-input-row { display: flex; gap: 8px; }
+  .consulta-input { flex: 1; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--mono); font-size: 14px; padding: 10px 14px; outline: none; text-transform: uppercase; }
+  .consulta-input:focus { border-color: var(--border-focus); }
+  .btn-consultar { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 10px 16px; font-family: var(--font); font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: opacity 0.15s; }
+  .btn-consultar:hover { opacity: 0.88; }
+  .consulta-result { margin-top: 14px; display: none; }
+  .consulta-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .consulta-field { flex: 1; min-width: 80px; }
+  .consulta-field-label { font-size: 10px; color: var(--text3); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .consulta-field-val { font-size: 13px; color: var(--text); font-weight: 500; }
+
+  /* Folios recientes */
+  .recientes { margin-top: 12px; }
+  .recientes-label { font-size: 11px; color: var(--text3); margin-bottom: 8px; }
+  .reciente-chip { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 4px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; color: var(--text2); cursor: pointer; margin: 3px 3px 0 0; transition: all 0.15s; }
+  .reciente-chip:hover { border-color: var(--border-focus); color: var(--text); }
 
   @media (max-width: 400px) { .field-row { grid-template-columns: 1fr; } .roles-grid { grid-template-columns: 1fr; } }
 </style>
@@ -113,6 +163,27 @@
 </div>
 
 <div class="main">
+
+  <!-- BARRA DE PROGRESO -->
+  <div class="progress-bar" id="progress-bar">
+    <div class="progress-step">
+      <div class="progress-dot active" id="pdot-1">1</div>
+      <span class="progress-label active" id="plabel-1">Rol</span>
+    </div>
+    <div class="progress-line" id="pline-1"></div>
+    <div class="progress-step">
+      <div class="progress-dot" id="pdot-2">2</div>
+      <span class="progress-label" id="plabel-2">Tipo</span>
+    </div>
+    <div class="progress-line" id="pline-2"></div>
+    <div class="progress-step">
+      <div class="progress-dot" id="pdot-3">3</div>
+      <span class="progress-label" id="plabel-3">Solicitud</span>
+    </div>
+  </div>
+
+  <!-- BOTÓN REGRESAR -->
+  <button class="btn-back" id="btn-back" onclick="regresarPaso()">← Regresar</button>
 
   <!-- PASO 1: ROL -->
   <p class="section-title">¿Cuál es tu rol?</p>
@@ -347,6 +418,38 @@
     </button>
 
   </div>
+</div>
+
+<!-- PANTALLA DE CONFIRMACIÓN -->
+<div id="confirmacion-screen" class="main" style="display:none;max-width:560px;margin:0 auto;padding:28px 20px 80px;">
+  <div class="confirm-screen">
+    <div class="confirm-icon">✅</div>
+    <div class="confirm-title">¡Solicitud enviada!</div>
+    <div class="confirm-sub">Tu solicitud fue registrada correctamente</div>
+    <div class="folio-box">
+      <div class="folio-label">Folio de seguimiento</div>
+      <div class="folio-num" id="confirm-folio">—</div>
+      <button class="btn-copy" onclick="copiarFolio()">📋 Copiar folio</button>
+    </div>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:20px;">Guarda este número para consultar el estatus de tu solicitud en cualquier momento.</p>
+    <button class="btn-nueva" onclick="nuevaSolicitud()">+ Nueva solicitud</button>
+  </div>
+  <!-- CONSULTA DE FOLIO -->
+  <div id="consulta-section">
+    <div class="consulta-card">
+      <p class="consulta-title">🔍 Consultar mi solicitud</p>
+      <div class="consulta-input-row">
+        <input class="consulta-input" type="text" id="consulta-input" placeholder="REQ-050425-001" maxlength="20" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')consultarFolio()">
+        <button class="btn-consultar" onclick="consultarFolio()">Consultar</button>
+      </div>
+      <div class="recientes" id="recientes-wrap" style="display:none;">
+        <div class="recientes-label">Recientes:</div>
+        <div id="recientes-chips"></div>
+      </div>
+      <div class="consulta-result" id="consulta-result"></div>
+    </div>
+  </div>
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -695,7 +798,255 @@ function resetForm() {
   window.scrollTo({ top:0, behavior:"smooth" });
 }
 
+// ── PROGRESO Y NAVEGACIÓN ──
+function actualizarProgreso(paso) {
+  [1,2,3].forEach(i => {
+    const dot   = document.getElementById("pdot-"  + i);
+    const label = document.getElementById("plabel-"+ i);
+    const line  = document.getElementById("pline-" + i);
+    if (!dot) return;
+    dot.className   = "progress-dot" + (i < paso ? " done" : i === paso ? " active" : "");
+    label.className = "progress-label" + (i === paso ? " active" : "");
+    if (line) line.className = "progress-line" + (i < paso ? " done" : "");
+  });
+}
+
+function regresarPaso() {
+  if (tipoActual) {
+    // Regresar de paso 3 a paso 2
+    tipoActual = null;
+    document.querySelectorAll(".tipo-btn").forEach(b => b.classList.remove("active"));
+    document.getElementById("form-body").style.display = "none";
+    document.querySelectorAll(".modulo").forEach(m => m.classList.remove("visible"));
+    actualizarProgreso(2);
+    document.getElementById("btn-back").style.display = "block";
+    document.getElementById("tipo-section").scrollIntoView({ behavior:"smooth", block:"start" });
+  } else if (rolActual) {
+    // Regresar de paso 2 a paso 1
+    rolActual = null;
+    document.querySelectorAll(".rol-btn").forEach(b => b.classList.remove("active"));
+    document.getElementById("tipo-section").style.display = "none";
+    document.getElementById("btn-back").style.display = "none";
+    actualizarProgreso(1);
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }
+}
+
+// ── RECORDAR ROL Y NOMBRE ──
+function cargarDatosGuardados() {
+  const rolGuardado    = localStorage.getItem("frago_rol");
+  const nombreGuardado = localStorage.getItem("frago_nombre");
+  if (nombreGuardado) document.getElementById("solicitante").value = nombreGuardado;
+  if (rolGuardado) {
+    const btn = document.querySelector(`.rol-btn[onclick*="'${rolGuardado}'"]`);
+    if (btn) {
+      // Pre-seleccionar sin disparar scroll
+      rolActual = rolGuardado;
+      btn.classList.add("active");
+      const acceso = ACCESO[rolGuardado] || [];
+      const grid = document.getElementById("tipo-grid");
+      grid.innerHTML = acceso.map(tipo => {
+        const c = TIPOS_CONFIG[tipo];
+        return `<button class="tipo-btn ${c.clase}" onclick="setTipo('${tipo}',this)">
+          <span class="tipo-icon">${c.icon}</span>
+          <span class="tipo-label">${c.label}</span>
+        </button>`;
+      }).join("");
+      document.getElementById("tipo-section").style.display = "block";
+      document.getElementById("btn-back").style.display = "block";
+      actualizarProgreso(2);
+    }
+  }
+}
+
+// ── PANTALLA DE CONFIRMACIÓN ──
+function mostrarConfirmacion(folio) {
+  // Guardar en localStorage
+  guardarFolioReciente(folio);
+  // Guardar nombre para próxima vez
+  const nombre = document.getElementById("solicitante").value.trim();
+  if (nombre) localStorage.setItem("frago_nombre", nombre);
+  if (rolActual) localStorage.setItem("frago_rol", rolActual);
+
+  // Ocultar formulario y barra de progreso
+  document.querySelector(".main").style.display = "none";
+  document.getElementById("confirmacion-screen").style.display = "block";
+  document.getElementById("confirm-folio").textContent = folio;
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+
+function copiarFolio() {
+  const folio = document.getElementById("confirm-folio").textContent;
+  navigator.clipboard.writeText(folio).then(() => {
+    mostrarToast("✓ Folio copiado", "ok");
+  }).catch(() => {
+    mostrarToast("Folio: " + folio, "ok");
+  });
+}
+
+function nuevaSolicitud() {
+  document.getElementById("confirmacion-screen").style.display = "none";
+  document.querySelector(".main").style.display = "block";
+  resetForm();
+  cargarDatosGuardados();
+  mostrarFoliosRecientes();
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+
+// ── FOLIOS RECIENTES ──
+function guardarFolioReciente(folio) {
+  let recientes = JSON.parse(localStorage.getItem("frago_folios") || "[]");
+  recientes = [folio, ...recientes.filter(f => f !== folio)].slice(0, 5);
+  localStorage.setItem("frago_folios", JSON.stringify(recientes));
+}
+
+function mostrarFoliosRecientes() {
+  const recientes = JSON.parse(localStorage.getItem("frago_folios") || "[]");
+  const wrap = document.getElementById("recientes-wrap");
+  const chips = document.getElementById("recientes-chips");
+  if (!recientes.length) { wrap.style.display = "none"; return; }
+  wrap.style.display = "block";
+  chips.innerHTML = recientes.map(f =>
+    `<span class="reciente-chip" onclick="usarFolioReciente('${f}')">${f}</span>`
+  ).join("");
+}
+
+function usarFolioReciente(folio) {
+  document.getElementById("consulta-input").value = folio;
+  consultarFolio();
+}
+
+// ── CONSULTA DE FOLIO ──
+async function consultarFolio() {
+  const folio = document.getElementById("consulta-input").value.trim().toUpperCase();
+  if (!folio || !folio.startsWith("REQ")) {
+    mostrarToast("Ingresa un folio válido", "err"); return;
+  }
+  const result = document.getElementById("consulta-result");
+  result.style.display = "block";
+  result.innerHTML = '<p style="font-size:13px;color:var(--text3);">Consultando...</p>';
+
+  try {
+    const res  = await fetch(SCRIPT_URL + "?action=consultarFolio&id=" + encodeURIComponent(folio));
+    const data = await res.json();
+
+    if (data.ok && data.solicitud) {
+      const s = data.solicitud;
+      const estatusColor = {
+        Pendiente:"#e0b84a", Aprobada:"#4a90d9", Atendida:"#5db87a",
+        Rechazada:"#e05a5a", Cerrada:"#5a6275"
+      }[s.estatus] || "#8a93a8";
+
+      result.innerHTML = `
+        <div style="background:var(--surface2);border-radius:10px;padding:14px;border:1px solid var(--border);">
+          <div class="consulta-row">
+            <div class="consulta-field"><div class="consulta-field-label">Folio</div><div class="consulta-field-val" style="font-family:var(--mono);font-size:12px;">${s.id}</div></div>
+            <div class="consulta-field"><div class="consulta-field-label">Estatus</div><div class="consulta-field-val" style="color:${estatusColor};">● ${s.estatus}</div></div>
+          </div>
+          <div class="consulta-row" style="margin-top:10px;">
+            <div class="consulta-field"><div class="consulta-field-label">Tipo</div><div class="consulta-field-val">${s.tipo}</div></div>
+            <div class="consulta-field"><div class="consulta-field-label">Fecha</div><div class="consulta-field-val">${new Date(s.fecha).toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"})}</div></div>
+            <div class="consulta-field"><div class="consulta-field-label">Servicio</div><div class="consulta-field-val">${s.servicio||"—"}</div></div>
+          </div>
+          ${s.notaGestion ? `<div style="margin-top:10px;font-size:12px;color:var(--text3);">Nota: ${s.notaGestion}</div>` : ""}
+        </div>`;
+    } else {
+      result.innerHTML = '<p style="font-size:13px;color:var(--danger);">No se encontró una solicitud con ese folio.</p>';
+    }
+  } catch(e) {
+    result.innerHTML = '<p style="font-size:13px;color:var(--danger);">Error de conexión — intenta de nuevo.</p>';
+  }
+}
+
+// ── OVERRIDE setRol para progreso ──
+const _origSetRol = setRol;
+setRol = function(rol, btn) {
+  _origSetRol(rol, btn);
+  actualizarProgreso(2);
+  document.getElementById("btn-back").style.display = "block";
+};
+
+// ── OVERRIDE setTipo para progreso ──
+const _origSetTipo = setTipo;
+setTipo = function(tipo, btn) {
+  _origSetTipo(tipo, btn);
+  actualizarProgreso(3);
+};
+
+// ── OVERRIDE enviar para mostrar confirmación ──
+const _origEnviar = enviar;
+enviar = async function() {
+  if (!validar()) return;
+  const btn = document.getElementById("btn-enviar");
+  const spinner = document.getElementById("spinner");
+  const btnText = document.getElementById("btn-text");
+  btn.disabled = true; spinner.style.display = "block"; btnText.textContent = "Enviando...";
+
+  const ROLES_LABELS = {
+    guardia:"Guardia", jefe_turno:"Jefe de turno", coord_operativo:"Coordinador operativo",
+    coord_general:"Coordinador general", director_general:"Director general",
+    aux_administrativa:"Auxiliar administrativa", director_finanzas:"Director de finanzas / Administración"
+  };
+
+  const payload = {
+    tipo: tipoActual, rol: ROLES_LABELS[rolActual]||rolActual,
+    solicitante: document.getElementById("solicitante").value.trim(),
+    servicio: tipoActual === "Equipo" ? "N/A" : document.getElementById("servicio").value,
+    urgencia: urgenciaActual
+  };
+
+  if (tipoActual === "Uniforme") {
+    const prenda = document.getElementById("prenda").value;
+    const talla  = document.getElementById("talla").value;
+    payload.prenda_talla = prenda + " / " + talla;
+    payload.cantidad = document.getElementById("cantidad-uni").value;
+    payload.condicion = condicionActual;
+    payload.notas = document.getElementById("notas-uni").value.trim();
+    payload.detalle = prenda + " talla " + talla;
+  }
+  if (tipoActual === "Patrulla") {
+    payload.unidad = document.getElementById("unidad").value;
+    const tipoPat = document.getElementById("tipo-patrulla").value;
+    payload.detalle = tipoPat + ": " + document.getElementById("detalle-patrulla").value.trim();
+    const km = document.getElementById("km").value;
+    if (km) payload.notas = "Kilometraje: " + km + " km";
+  }
+  if (tipoActual === "Papeleria") {
+    payload.articulo = document.getElementById("articulo").value;
+    payload.cantidad = document.getElementById("cantidad-pap").value;
+    payload.notas = document.getElementById("notas-pap").value.trim();
+    payload.detalle = document.getElementById("articulo").value;
+  }
+  if (tipoActual === "Equipo") {
+    const tipoEq = document.getElementById("tipo-equipo").value;
+    const accion = document.getElementById("accion-equipo").value;
+    const asignado = document.getElementById("asignado-equipo").value.trim();
+    payload.articulo = tipoEq;
+    payload.cantidad = document.getElementById("cantidad-equipo").value;
+    payload.detalle = accion + ": " + document.getElementById("detalle-equipo").value.trim();
+    payload.notas = asignado ? "Asignado a: " + asignado : "";
+  }
+
+  try {
+    const res  = await fetch(SCRIPT_URL, { method:"POST", body:JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.ok) {
+      mostrarConfirmacion(data.id);
+    } else {
+      mostrarToast("Error: " + (data.error||"intenta de nuevo"), "err");
+      btn.disabled = false; spinner.style.display = "none"; btnText.textContent = "Enviar solicitud";
+    }
+  } catch(err) {
+    mostrarToast("Error de conexión — intenta de nuevo", "err");
+    btn.disabled = false; spinner.style.display = "none"; btnText.textContent = "Enviar solicitud";
+  }
+};
+
+// ── INIT ──
 cargarServicios();
+cargarDatosGuardados();
+mostrarFoliosRecientes();
+actualizarProgreso(1);
 </script>
 </body>
 </html>
