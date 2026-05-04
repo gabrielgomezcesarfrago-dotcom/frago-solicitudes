@@ -774,6 +774,9 @@ function renderTabla() {
 
   const filtradas = solicitudes.filter(s => {
     const txt = [s.id,s.solicitante,s.servicio,s.detalle,s.rol].join(" ").toLowerCase();
+    // Ocultar canceladas por defecto, mostrar solo si se filtra explícitamente
+    const mostrarCancelada = fEst === "Cancelada";
+    if (s.estatus === "Cancelada" && !mostrarCancelada) return false;
     return (!buscar || txt.includes(buscar))
       && (!fEst  || s.estatus  === fEst)
       && (!fTipo || s.tipo     === fTipo)
@@ -1277,13 +1280,15 @@ async function ejecutarCancelacion() {
   }
   errEl.style.display = "none";
   if (!motivo) { mostrarToast("Escribe el motivo de cancelación", "err"); return; }
+  // Guardar ID antes de cerrar modal (cerrarModalCancelar lo pone en null)
+  const idACancelar = solicitudACancelar;
   cerrarModalCancelar();
   try {
     const res  = await fetch(SCRIPT_URL, {
       method: "POST",
       body: JSON.stringify({
         action: "actualizarEstatus",
-        id: solicitudACancelar,
+        id: String(idACancelar || "").trim(),
         estatus: "Cancelada",
         nota: "CANCELACIÓN: " + motivo,
         gestionadoPor: usuarioActual
