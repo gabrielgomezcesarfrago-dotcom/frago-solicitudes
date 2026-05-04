@@ -712,9 +712,11 @@ async function cargarInventario() {
   }
 }
 
+function esBajoStock(i) { return Number(i.stock) <= Number(i.minimo); }
+
 function actualizarStatsInv() {
-  const bajo = inventarioData.filter(i => i.alerta === "⚠️ STOCK BAJO").length;
-  const ok   = inventarioData.filter(i => i.alerta !== "⚠️ STOCK BAJO").length;
+  const bajo = inventarioData.filter(i => esBajoStock(i)).length;
+  const ok   = inventarioData.filter(i => !esBajoStock(i)).length;
   document.getElementById("inv-bajo").textContent  = bajo || "0";
   document.getElementById("inv-ok").textContent    = ok   || "0";
   document.getElementById("inv-total-items").textContent = inventarioData.length || "0";
@@ -727,10 +729,10 @@ function renderInventario() {
 
   const filtrados = inventarioData.filter(i => {
     const txt = (i.prenda + " " + i.talla).toLowerCase();
-    const esBajo = i.alerta === "⚠️ STOCK BAJO";
+    const bajo = esBajoStock(i);
     return (!buscar || txt.includes(buscar))
       && (!fCond  || i.condicion === fCond)
-      && (!fStock || (fStock === "bajo" ? esBajo : !esBajo));
+      && (!fStock || (fStock === "bajo" ? bajo : !bajo));
   });
 
   const tbody = document.getElementById("inv-tabla-body");
@@ -740,16 +742,18 @@ function renderInventario() {
   }
 
   tbody.innerHTML = filtrados.map(i => {
-    const esBajo = i.alerta === "⚠️ STOCK BAJO";
-    const stockClass = esBajo ? "stock-bajo" : (Number(i.stock) <= Number(i.minimo) * 1.5 ? "stock-med" : "stock-ok");
+    const bajo = esBajoStock(i);
+    const stockNum = Number(i.stock);
+    const minNum   = Number(i.minimo);
+    const stockClass = bajo ? "stock-bajo" : (stockNum <= minNum * 1.5 ? "stock-med" : "stock-ok");
     const condClass = (i.condicion === "Nueva" || i.condicion === "Nuevo") ? "c-nuevo" : "c-usado";
     return `<tr>
       <td class="td-main">${i.prenda}</td>
       <td style="font-size:12px;">${i.talla||"—"}</td>
       <td><span class="badge-condicion ${condClass}">${i.condicion}</span></td>
-      <td><span class="${stockClass}" style="font-weight:500;">${i.stock}</span></td>
-      <td style="font-size:12px;color:var(--text3);">${i.minimo}</td>
-      <td style="font-size:12px;">${esBajo ? "⚠️ Bajo" : "✓"}</td>
+      <td><span class="${stockClass}" style="font-weight:500;">${stockNum}</span></td>
+      <td style="font-size:12px;color:var(--text3);">${minNum}</td>
+      <td style="font-size:12px;">${bajo ? "⚠️ Bajo" : "✓"}</td>
       <td>
         <div class="acciones">
           <button class="btn-inv btn-entrada" onclick="abrirModalInv('entrada','${i.id}')">Entrada</button>
