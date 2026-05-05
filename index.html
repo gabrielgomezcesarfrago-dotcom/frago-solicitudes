@@ -262,7 +262,7 @@
       <div class="field-row">
         <div class="field">
           <label>Prenda <span class="req">*</span></label>
-          <select id="prenda">
+          <select id="prenda" onchange="actualizarTallas()">
             <option value="">Selecciona...</option>
             <option>Camisa manga larga</option>
             <option>Pantalón</option>
@@ -284,12 +284,7 @@
         <div class="field">
           <label>Talla <span class="req">*</span></label>
           <select id="talla">
-            <option value="">Selecciona...</option>
-            <option>XS</option><option>S</option><option>M</option>
-            <option>L</option><option>XL</option><option>2XL</option><option>3XL</option>
-            <option>26</option><option>28</option><option>30</option><option>32</option>
-            <option>34</option><option>36</option><option>38</option><option>40</option>
-            <option>Único</option>
+            <option value="">Selecciona prenda primero...</option>
           </select>
         </div>
       </div>
@@ -487,6 +482,25 @@ const ACCESO = {
   director_general:  ["Uniforme","Patrulla","Papeleria","Equipo","Consulta"],
   aux_administrativa:["Uniforme","Papeleria","Equipo","Consulta"],
   director_finanzas: ["Uniforme","Patrulla","Papeleria","Equipo","Consulta"]
+};
+
+// Tallas disponibles por prenda
+const TALLAS_POR_PRENDA = {
+  "Camisa manga larga":                    ["34","36","38","40","42","44","46"],
+  "Pantalón":                              ["EXCH","CH","M","G","XG","XXG"],
+  "Chamarra":                              ["36","38","40","42","44","46","48"],
+  "Sudadera":                              ["CH","M","G","XG"],
+  "Gorra":                                 ["Unitalla"],
+  "Chaleco táctico":                       ["Unitalla"],
+  "Chaleco reflejante de seguridad (naranja)": ["XXL"],
+  "Chaleco reflejante rojo (FRAGO)":       ["XL","XXL","XXXL"],
+  "Botas":                                 ["24","24.5","25","25.5","26","26.5","27","27.5","28","28.5","29","29.5","30"],
+  "Impermeable azul":                      ["Unitalla"],
+  "Impermeable amarillo":                  ["Unitalla"],
+  "Fajilla":                              ["Unitalla"],
+  "Cinturón":                             ["Unitalla"],
+  "Broche":                               ["Unitalla"],
+  "Otro":                                 ["Unitalla","XS","S","M","L","XL","2XL","3XL","34","36","38","40","42","44","46","48"]
 };
 
 const TIPOS_CONFIG = {
@@ -693,6 +707,18 @@ function actualizarCampoCondicion() {
   const mostrar = ROLES_CON_CONDICION.includes(rolActual);
   campo.style.display = mostrar ? "block" : "none";
   if (!mostrar) { condicionActual = "Cualquiera"; }
+}
+
+function actualizarTallas() {
+  const prenda = document.getElementById("prenda").value;
+  const sel    = document.getElementById("talla");
+  const tallas = TALLAS_POR_PRENDA[prenda] || [];
+  sel.innerHTML = tallas.length
+    ? '<option value="">Selecciona...</option>' + tallas.map(t => `<option>${t}</option>`).join("")
+    : '<option value="">Selecciona prenda primero...</option>';
+
+  // Si solo hay una opción, seleccionarla automáticamente
+  if (tallas.length === 1) sel.value = tallas[0];
 }
 
 function setCondicion(cond, btn) {
