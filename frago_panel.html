@@ -140,43 +140,96 @@
   @media (max-width: 600px) { th.hide-sm, td.hide-sm { display: none; } }
 
   /* ── RESPONSIVE MÓVIL ── */
-  @media (max-width: 640px) {
-    .main { padding: 16px 12px 80px; }
-    .header { padding: 14px 16px; }
+  @media (max-width: 768px) {
+    /* Layout general */
+    .main { padding: 12px 10px 100px; max-width: 100%; }
+    .header { padding: 12px 14px; gap: 10px; }
     .header-title { font-size: 13px; }
-    .tabs { width: 100%; overflow-x: auto; flex-wrap: nowrap; }
-    .tab-btn { padding: 9px 14px; font-size: 13px; white-space: nowrap; }
+    .btn-logout { font-size: 11px; padding: 5px 10px; }
+
+    /* Pestañas — scroll horizontal */
+    .tabs { width: 100%; overflow-x: auto; flex-wrap: nowrap; border-radius: 8px; padding: 3px; -webkit-overflow-scrolling: touch; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn { padding: 9px 12px; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
 
     /* Stats */
-    .stats-grid { grid-template-columns: repeat(2,1fr); gap: 8px; }
-    .stat-num { font-size: 22px; }
-    .kpi-grid { grid-template-columns: repeat(2,1fr); gap: 8px; }
-    .dash-grid { grid-template-columns: 1fr; }
-    .inv-stats { grid-template-columns: repeat(2,1fr); gap: 8px; }
-    .unidad-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stats-grid { grid-template-columns: repeat(3,1fr); gap: 6px; margin-bottom: 16px; }
+    .stat-card { padding: 10px 8px; }
+    .stat-num { font-size: 20px; }
+    .stat-label { font-size: 10px; }
 
-    /* Filtros */
-    .filtros { gap: 8px; }
-    .filtro-buscar { min-width: 100%; }
+    /* Filtros — apilados */
+    .filtros { flex-direction: column; gap: 8px; }
+    .filtro-buscar { min-width: 100%; width: 100%; }
+    .filtro-select { width: 100%; }
+    .btn-refresh { width: 100%; }
 
-    /* Tabla → oculta en móvil para solicitudes */
-    .tabla-wrap { display: none; }
-
-    /* Cards de solicitudes para móvil */
+    /* Tabla → oculta, usar cards */
+    .tabla-wrap { display: none !important; }
     .mobile-cards { display: block; }
 
-    /* Modal más ancho en móvil */
-    .modal { padding: 20px 16px; margin: 10px; }
-    .modal-acciones { flex-direction: column; }
-    .btn-modal { min-width: unset; }
+    /* Modal — pantalla completa casi */
+    .modal-bg { padding: 0; align-items: flex-end; }
+    .modal { 
+      border-radius: 16px 16px 0 0; 
+      max-height: 92vh; 
+      width: 100%; 
+      max-width: 100%;
+      padding: 20px 16px 32px;
+      margin: 0;
+    }
+    .modal-acciones { flex-direction: column; gap: 8px; }
+    .btn-modal { min-width: unset; width: 100%; padding: 14px; font-size: 14px; }
+    .modal-key { min-width: 110px; font-size: 12px; }
+    .modal-val { font-size: 12px; }
+
+    /* Dashboard */
+    .kpi-grid { grid-template-columns: repeat(2,1fr); gap: 8px; }
+    .kpi-card { padding: 12px; }
+    .kpi-num { font-size: 22px; }
+    .dash-grid { grid-template-columns: 1fr; gap: 12px; }
+    .chart-card { padding: 14px; }
+    .dash-filtros { flex-direction: column; }
+    .dash-filtros .filtro-select { width: 100%; }
 
     /* Inventario */
-    .inv-toolbar { gap: 8px; }
+    .inv-stats { grid-template-columns: repeat(2,1fr); gap: 8px; }
+    .inv-stat { padding: 10px 12px; }
+    .inv-stat-num { font-size: 20px; }
+    .inv-toolbar { flex-direction: column; gap: 8px; }
     .inv-toolbar .filtro-buscar { min-width: 100%; }
+    .inv-toolbar .filtro-select { width: 100%; }
+    .inv-toolbar .btn-inv { width: 100%; }
+    .inv-toolbar .btn-refresh { width: 100%; }
     .inv-form-row { grid-template-columns: 1fr; }
 
+    /* Inventario tabla — mostrar solo columnas clave */
+    #inv-tabla-body td:nth-child(3),
+    #inv-tabla-body td:nth-child(5),
+    thead th:nth-child(3),
+    thead th:nth-child(5) { display: none; }
+
     /* Flota */
-    .flota-tabs { overflow-x: auto; flex-wrap: nowrap; }
+    .unidad-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .unidad-card { padding: 10px 12px; }
+    .unidad-nombre { font-size: 12px; }
+    .flota-tabs { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+    .flota-tabs::-webkit-scrollbar { display: none; }
+    .consumo-card { padding: 10px 12px; }
+    .consumo-num { font-size: 18px; }
+    #flota-detalle .tabla-wrap { display: block !important; overflow-x: auto; }
+
+    /* Modal inventario y flota */
+    #modal-inv-bg .modal,
+    #modal-flota-bg .modal,
+    #modal-cancelar-bg .modal { border-radius: 16px 16px 0 0; max-height: 92vh; }
+  }
+
+  /* Pantallas muy pequeñas */
+  @media (max-width: 380px) {
+    .stats-grid { grid-template-columns: repeat(2,1fr); }
+    .tab-btn { padding: 8px 10px; font-size: 11px; }
+    .unidad-grid { grid-template-columns: 1fr; }
   }
 
   /* Cards móvil de solicitudes */
