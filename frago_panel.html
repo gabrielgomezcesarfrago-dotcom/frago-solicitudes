@@ -294,8 +294,9 @@
   .consumo-label { font-size: 11px; color: var(--text2); }
 
   /* PESTAÑAS */
-  .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 5px; width: fit-content; }
-  .tab-btn { padding: 11px 24px; border-radius: 9px; border: none; font-family: var(--font); font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.15s; background: none; color: var(--text2); }
+  .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 5px; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn { padding: 11px 18px; border-radius: 9px; border: none; font-family: var(--font); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; background: none; color: var(--text2); white-space: nowrap; flex-shrink: 0; }
   .tab-btn.active { background: var(--surface2); color: var(--text); }
   .tab-badge { display: inline-flex; align-items: center; justify-content: center; background: var(--danger); color: #fff; border-radius: 20px; font-size: 10px; font-weight: 600; min-width: 18px; height: 18px; padding: 0 5px; margin-left: 6px; vertical-align: middle; line-height: 1; }
   .tab-content { display: none; }
@@ -757,6 +758,8 @@ function mostrarPanel(user) {
   document.getElementById("login-wrap").style.display = "none";
   document.getElementById("panel-wrap").style.display = "block";
   document.getElementById("header-user").textContent = user;
+  document.getElementById("mobile-cards-container").innerHTML =
+    '<p style="text-align:center;padding:32px;color:var(--text3);font-size:14px;">⏳ Conectando con el servidor...</p>';
   cargarSolicitudes();
   // Restaurar pestaña activa
   const tabGuardado = sessionStorage.getItem("frago_tab");
@@ -783,18 +786,33 @@ function logout() {
 async function cargarSolicitudes() {
   document.getElementById("tabla-body").innerHTML =
     '<tr><td colspan="9" class="spinner-wrap">Cargando solicitudes...</td></tr>';
+  document.getElementById("mobile-cards-container").innerHTML =
+    '<p style="text-align:center;padding:32px;color:var(--text3);">Cargando...</p>';
   try {
-    const res  = await fetch(SCRIPT_URL + "?action=getSolicitudes");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    const res  = await fetch(SCRIPT_URL + "?action=getSolicitudes", { signal: controller.signal });
+    clearTimeout(timeout);
     const data = await res.json();
     if (data.ok) {
       solicitudes = data.solicitudes || [];
       actualizarStats();
       renderTabla();
     } else {
-      mostrarError("No se pudo cargar las solicitudes");
+      mostrarError("No se pudo cargar: " + (data.error||"error desconocido"));
     }
   } catch(e) {
-    mostrarError("Error de conexión");
+    if (e.name === "AbortError") {
+      mostrarError("Tiempo de espera agotado — verifica tu conexión");
+    } else {
+      mostrarError("Error de conexión: " + e.message);
+    }
+    document.getElementById("mobile-cards-container").innerHTML =
+      `<div style="text-align:center;padding:32px;color:var(--danger);font-size:14px;">
+        Error de conexión — toca ↻ para reintentar<br>
+        <small style="color:var(--text3);font-size:11px;">${e.name}: ${e.message}</small><br>
+        <small style="color:var(--text3);font-size:11px;">URL: ${SCRIPT_URL.slice(0,50)}...</small>
+      </div>`;
   }
 }
 
@@ -1069,7 +1087,10 @@ async function cargarInventario() {
   document.getElementById("inv-tabla-body").innerHTML =
     '<tr><td colspan="7" class="spinner-wrap">Cargando inventario...</td></tr>';
   try {
-    const res  = await fetch(SCRIPT_URL + "?action=getInventario");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    const res  = await fetch(SCRIPT_URL + "?action=getInventario", { signal: controller.signal });
+    clearTimeout(timeout);
     const data = await res.json();
     if (data.ok) {
       inventarioData = data.items || [];
@@ -1077,11 +1098,11 @@ async function cargarInventario() {
       renderInventario();
     } else {
       document.getElementById("inv-tabla-body").innerHTML =
-        '<tr><td colspan="7" class="empty">No se pudo cargar el inventario</td></tr>';
+        `<tr><td colspan="7" class="empty">Error: ${data.error||"No se pudo cargar"}</td></tr>`;
     }
   } catch(e) {
     document.getElementById("inv-tabla-body").innerHTML =
-      '<tr><td colspan="7" class="empty">Error de conexión</td></tr>';
+      `<tr><td colspan="7" class="empty" style="color:var(--danger);">Error de conexión — toca ↻ para reintentar<br><small>${e.message}</small></td></tr>`;
   }
 }
 
