@@ -633,6 +633,38 @@
   </div>
 </div>
 
+<!-- MODAL DESCUENTO INVENTARIO AL ATENDER -->
+<div class="modal-bg" id="modal-descuento-bg" onclick="if(event.target===this)cerrarModalDescuento()">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">📦 Registrar entrega de uniforme</div>
+        <div class="modal-id" id="md-id"></div>
+      </div>
+      <button class="btn-close" onclick="cerrarModalDescuento()">×</button>
+    </div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6;">¿Deseas descontar esta prenda del inventario al marcarla como atendida?</p>
+    <div class="inv-form-field">
+      <label>Prenda entregada</label>
+      <input type="text" id="md-prenda" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:14px;padding:10px 14px;outline:none;" readonly>
+    </div>
+    <div class="inv-form-row">
+      <div class="inv-form-field">
+        <label>Talla entregada</label>
+        <input type="text" id="md-talla" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:14px;padding:10px 14px;outline:none;" placeholder="Confirma o ajusta la talla">
+      </div>
+      <div class="inv-form-field">
+        <label>Cantidad</label>
+        <input type="number" id="md-cantidad" min="1" value="1" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:14px;padding:10px 14px;outline:none;">
+      </div>
+    </div>
+    <div class="modal-acciones" style="margin-top:12px;">
+      <button class="btn-modal bm-atender" onclick="ejecutarDescuento(true)">📦 Atender y descontar inventario</button>
+      <button class="btn-modal bm-cerrar" onclick="ejecutarDescuento(false)">Atender sin descontar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL INVENTARIO -->
 <div class="modal-bg" id="modal-inv-bg" onclick="if(event.target===this)cerrarModalInv()">
   <div class="modal">
@@ -1085,9 +1117,68 @@ function cerrarModal() {
 async function accionModal(nuevoEstatus) {
   if (!solicitudActual) return;
   const nota = document.getElementById("m-nota").value.trim();
-  const idActual = solicitudActual.id; // guardar antes de cerrar modal
+
+  // Si es uniforme y se marca como Atendida, mostrar modal de descuento
+  if (nuevoEstatus === "Atendida" && normalizarTipo(solicitudActual.tipo) === "Uniforme") {
+    const prenda_talla = solicitudActual.prenda || "";
+    const partes = prenda_talla.split(" / ");
+    const prenda = partes[0] || "";
+    const talla  = partes[1] || "";
+    document.getElementById("md-id").textContent    = solicitudActual.id;
+    document.getElementById("md-prenda").value      = prenda;
+    document.getElementById("md-talla").value       = talla;
+    document.getElementById("md-cantidad").value    = solicitudActual.cantidad || 1;
+    window._notaAtender = nota;
+    cerrarModal();
+    document.getElementById("modal-descuento-bg").classList.add("open");
+    return;
+  }
+
+  const idActual = solicitudActual.id;
   cerrarModal();
   await actualizarEstatus(idActual, nuevoEstatus, nota);
+}
+
+let _solicitudDescuento = null;
+
+function cerrarModalDescuento() {
+  document.getElementById("modal-descuento-bg").classList.remove("open");
+}
+
+async function ejecutarDescuento(descontar) {
+  const id       = document.getElementById("md-id").textContent;
+  const prenda   = document.getElementById("md-prenda").value.trim();
+  const talla    = document.getElementById("md-talla").value.trim();
+  const cantidad = parseInt(document.getElementById("md-cantidad").value) || 1;
+  const nota     = window._notaAtender || "";
+  cerrarModalDescuento();
+
+  // Marcar como atendida
+  await actualizarEstatus(id, "Atendida", nota);
+
+  // Descontar del inventario si se eligió
+  if (descontar && prenda && talla) {
+    try {
+      const res  = await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action:        "gestionarInventario",
+          tipo:          "salidaUniforma",
+          prenda,
+          talla,
+          cantidad:      -cantidad,
+          motivo:        "Entrega a guardia (solicitud " + id + ")",
+          notas:         "Descuento automático al atender solicitud",
+          gestionadoPor: usuarioActual
+        })
+      });
+      const data = await res.json();
+      if (data.ok) mostrarToast("✓ Atendida y descontada del inventario", "ok");
+      else mostrarToast("Atendida — no se pudo descontar: " + (data.error||""), "err");
+    } catch(e) {
+      mostrarToast("Atendida — error al descontar inventario", "err");
+    }
+  }
 }
 
 async function accionRapida(id, nuevoEstatus) {
