@@ -956,6 +956,71 @@ function toggleCard(id) {
   if (body) body.classList.toggle("open");
 }
 
+// ── CADENA DE APROBACIÓN VISUAL ──
+function generarCadenaHTML(s) {
+  const pasos = {
+    Uniforme:  [
+      { label:"Pendiente",  quien:"Solicitud creada",                    icono:"📋" },
+      { label:"Aprobada",   quien:"Dir. Compras o Coord. General",        icono:"✅" },
+      { label:"Atendida",   quien:"Coord. General o Director General",    icono:"📦" },
+      { label:"Cerrada",    quien:"Coord. General o Director General",    icono:"🔒" }
+    ],
+    Patrulla:  [
+      { label:"Pendiente",  quien:"Solicitud creada",                    icono:"📋" },
+      { label:"Aprobada",   quien:"Directora de Compras",                 icono:"✅" },
+      { label:"Atendida",   quien:"Directora de Compras",                 icono:"🔧" },
+      { label:"Cerrada",    quien:"Coordinador General",                  icono:"🔒" }
+    ],
+    Papeleria: [
+      { label:"Pendiente",  quien:"Solicitud creada",                    icono:"📋" },
+      { label:"Aprobada",   quien:"Coordinador General",                  icono:"✅" },
+      { label:"Atendida",   quien:"Directora de Compras",                 icono:"📦" },
+      { label:"Cerrada",    quien:"Directora de Compras",                 icono:"🔒" }
+    ],
+    Equipo:    [
+      { label:"Pendiente",  quien:"Solicitud creada",                    icono:"📋" },
+      { label:"Aprobada",   quien:"Director General",                     icono:"✅" },
+      { label:"Atendida",   quien:"Directora de Compras",                 icono:"🔦" },
+      { label:"Cerrada",    quien:"Director General o Coordinadores",     icono:"🔒" }
+    ]
+  };
+
+  const tipo = normalizarTipo(s.tipo);
+  const cadena = pasos[tipo] || pasos["Uniforme"];
+  const estatusActual = s.estatus;
+  const ORDEN = ["Pendiente","Aprobada","Atendida","Cerrada"];
+  const idxActual = ORDEN.indexOf(estatusActual);
+  const esRechazada = estatusActual === "Rechazada";
+  const esCancelada = estatusActual === "Cancelada";
+
+  if (esRechazada || esCancelada) {
+    return `<div style="margin-top:16px;padding:12px;background:rgba(224,90,90,0.08);border-radius:8px;border:1px solid rgba(224,90,90,0.2);font-size:12px;color:var(--danger);text-align:center;">${esCancelada ? "🚫 Cancelada" : "❌ Rechazada"} — esta solicitud no continuará</div>`;
+  }
+
+  return `
+    <div style="margin-top:16px;">
+      <p style="font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px;">Cadena de aprobación</p>
+      <div style="display:flex;align-items:center;overflow-x:auto;padding:4px 0;gap:0;">
+        ${cadena.map((p, i) => {
+          const done   = i < idxActual;
+          const activo = i === idxActual;
+          const bgC    = done ? "rgba(93,184,122,0.2)" : activo ? "rgba(74,144,217,0.2)" : "var(--surface2)";
+          const borderC= done ? "var(--success)" : activo ? "var(--accent)" : "var(--border)";
+          const textC  = done ? "var(--success)" : activo ? "var(--accent)" : "var(--text3)";
+          return `
+            <div style="display:flex;align-items:center;flex:1;min-width:60px;">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+                <div style="width:30px;height:30px;border-radius:50%;background:${bgC};border:2px solid ${borderC};display:flex;align-items:center;justify-content:center;font-size:13px;">${done ? "✓" : p.icono}</div>
+                <div style="font-size:10px;color:${textC};text-align:center;white-space:nowrap;">${p.label}</div>
+                <div style="font-size:9px;color:var(--text3);text-align:center;max-width:70px;line-height:1.3;">${p.quien}</div>
+              </div>
+              ${i < cadena.length-1 ? `<div style="height:2px;flex:1;background:${done ? "var(--success)" : "var(--border)"};margin-bottom:28px;min-width:8px;"></div>` : ""}
+            </div>`;
+        }).join("")}
+      </div>
+    </div>`;
+}
+
 // ── MODAL ──
 function abrirModal(id) {
   const s = solicitudes.find(x => x.id === id);
@@ -989,7 +1054,7 @@ function abrirModal(id) {
 
   document.getElementById("m-body").innerHTML = campos.map(([k,v]) =>
     `<div class="modal-row"><span class="modal-key">${k}</span><span class="modal-val">${v||"—"}</span></div>`
-  ).join("");
+  ).join("") + generarCadenaHTML(s);
 
   const est = s.estatus;
   const tipo = s.tipo;
