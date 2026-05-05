@@ -1059,13 +1059,23 @@ function generarCadenaHTML(s) {
 }
 
 // ── MODAL ──
-function abrirModal(id) {
+function abrirModal(id, estatusPreseleccionado) {
   const s = solicitudes.find(x => x.id === id);
   if (!s) return;
   solicitudActual = s;
   document.getElementById("m-titulo").textContent = s.tipo + " — " + (s.solicitante||"");
   document.getElementById("m-id").textContent = s.id;
   document.getElementById("m-nota").value = "";
+  // Pre-seleccionar acción si viene de botón rápido
+  if (estatusPreseleccionado) {
+    const hints = {
+      "Aprobada": "Aprobado —",
+      "Atendida": "Entregado —"
+    };
+    document.getElementById("m-nota").placeholder = hints[estatusPreseleccionado] || "Agrega una nota...";
+  } else {
+    document.getElementById("m-nota").placeholder = "Agrega una nota al actualizar el estatus...";
+  }
 
   const campos = [
     ["Fecha",        formatFecha(s.fecha)],
@@ -1187,21 +1197,10 @@ async function ejecutarDescuento(descontar) {
 }
 
 async function accionRapida(id, nuevoEstatus) {
-  // Si es uniforme y se marca como Atendida, mostrar modal de descuento
-  if (nuevoEstatus === "Atendida") {
-    const s = solicitudes.find(x => x.id === id);
-    if (s && normalizarTipo(s.tipo) === "Uniforme") {
-      const partes = (s.prenda || "").split(" / ");
-      const prenda = partes[0] || "";
-      const talla  = partes[1] || "";
-      document.getElementById("md-id").textContent = s.id;
-      document.getElementById("md-prenda").value   = prenda;
-      document.getElementById("md-talla").value    = talla;
-      document.getElementById("md-cantidad").value = s.cantidad || 1;
-      window._notaAtender = "";
-      document.getElementById("modal-descuento-bg").classList.add("open");
-      return;
-    }
+  // Aprobar y Atender siempre abren el modal para revisar y agregar nota
+  if (nuevoEstatus === "Aprobada" || nuevoEstatus === "Atendida") {
+    abrirModal(id, nuevoEstatus);
+    return;
   }
   await actualizarEstatus(id, nuevoEstatus, "");
 }
