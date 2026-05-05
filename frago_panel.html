@@ -757,9 +757,7 @@ function mostrarPanel(user) {
   usuarioActual = user;
   document.getElementById("login-wrap").style.display = "none";
   document.getElementById("panel-wrap").style.display = "block";
-  document.getElementById("header-user").textContent = user;
-  document.getElementById("mobile-cards-container").innerHTML =
-    '<p style="text-align:center;padding:32px;color:var(--text3);font-size:14px;">⏳ Conectando con el servidor...</p>';
+  document.getElementById("header-user").textContent = user + " ⏳";
   cargarSolicitudes();
   // Restaurar pestaña activa
   const tabGuardado = sessionStorage.getItem("frago_tab");
@@ -802,10 +800,12 @@ async function cargarSolicitudes() {
       mostrarError("No se pudo cargar: " + (data.error||"error desconocido"));
     }
   } catch(e) {
+    const hu = document.getElementById("header-user");
+    if (hu) hu.textContent = hu.textContent.replace(" ⏳","") + " ❌";
     if (e.name === "AbortError") {
       mostrarError("Tiempo de espera agotado — verifica tu conexión");
     } else {
-      mostrarError("Error de conexión: " + e.message);
+      mostrarError("Error: " + e.message);
     }
     document.getElementById("mobile-cards-container").innerHTML =
       `<div style="text-align:center;padding:32px;color:var(--danger);font-size:14px;">
@@ -817,6 +817,9 @@ async function cargarSolicitudes() {
 }
 
 function actualizarStats() {
+  // Quitar indicador de carga del header
+  const hu = document.getElementById("header-user");
+  if (hu) hu.textContent = hu.textContent.replace(" ⏳","").replace(" ❌","");
   const c = { Pendiente:0, Aprobada:0, Atendida:0, Rechazada:0 };
   const activas = solicitudes.filter(s => s.estatus !== "Cancelada");
   activas.forEach(s => { if (c[s.estatus] !== undefined) c[s.estatus]++; });
