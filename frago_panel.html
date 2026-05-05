@@ -896,8 +896,11 @@ function renderTabla() {
     </tr>
   `).join("");
 
-  // Vista móvil — cards
-  renderMobileCards(filtradas);
+  // Vista móvil — cards (forzar en pantallas pequeñas)
+  const esMobile = window.innerWidth <= 768;
+  document.querySelector(".tabla-wrap").style.display = esMobile ? "none" : "";
+  document.getElementById("mobile-cards-container").style.display = esMobile ? "block" : "none";
+  if (esMobile) renderMobileCards(filtradas);
 }
 
 // ── MOBILE CARDS ──
@@ -1151,6 +1154,10 @@ function renderInventario() {
     tbody.innerHTML = '<tr><td colspan="7" class="empty">No hay artículos con esos filtros</td></tr>';
     return;
   }
+
+  // En móvil asegurar que la tabla de inventario sea visible con scroll
+  const invTablaWrap = document.querySelector("#inv-contenido .tabla-wrap");
+  if (invTablaWrap) invTablaWrap.style.overflowX = "auto";
 
   tbody.innerHTML = filtrados.map(i => {
     const bajo = esBajoStock(i);
