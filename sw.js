@@ -1,5 +1,5 @@
 // Frago PWA Service Worker
-const CACHE_NAME = "frago-v1";
+const CACHE_NAME = "frago-v3";
 const ASSETS = [
   "/frago-solicitudes/",
   "/frago-solicitudes/index.html",
