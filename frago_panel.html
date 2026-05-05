@@ -896,11 +896,13 @@ function renderTabla() {
     </tr>
   `).join("");
 
-  // Vista móvil — cards (forzar en pantallas pequeñas)
-  const esMobile = window.innerWidth <= 768;
-  document.querySelector(".tabla-wrap").style.display = esMobile ? "none" : "";
-  document.getElementById("mobile-cards-container").style.display = esMobile ? "block" : "none";
-  if (esMobile) renderMobileCards(filtradas);
+  // Detectar móvil por ancho Y por userAgent (iOS Safari)
+  const esMobile = window.innerWidth <= 900 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const tablaWrap = document.querySelector("#tab-solicitudes .tabla-wrap");
+  const cardsContainer = document.getElementById("mobile-cards-container");
+  if (tablaWrap) tablaWrap.style.display = esMobile ? "none" : "";
+  if (cardsContainer) cardsContainer.style.display = esMobile ? "block" : "none";
+  renderMobileCards(filtradas); // siempre renderizar cards por si acaso
 }
 
 // ── MOBILE CARDS ──
