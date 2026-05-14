@@ -233,9 +233,13 @@
 
     <p class="section-title">Información general</p>
 
-    <div class="field">
-      <label>Nombre del solicitante <span class="req">*</span></label>
+    <div class="field" id="campo-solicitante">
+      <label id="label-solicitante">Nombre del solicitante <span class="req">*</span></label>
       <input type="text" id="solicitante" placeholder="Nombre completo">
+      <select id="solicitante-select" style="display:none;">
+        <option value="">Selecciona elemento...</option>
+      </select>
+      <p id="elemento-info" style="font-size:11px;color:var(--text3);margin-top:6px;display:none;"></p>
     </div>
 
     <div class="field" id="campo-servicio">
@@ -553,6 +557,10 @@ function setRol(rol, btn) {
   }).join("");
 
   document.getElementById("tipo-section").style.display = "block";
+  actualizarCampoSolicitante();
+  // Progreso y botón regresar
+  actualizarProgreso(2);
+  document.getElementById("btn-back").style.display = "block";
   setTimeout(() => {
     document.getElementById("tipo-section").scrollIntoView({ behavior:"smooth", block:"start" });
   }, 50);
@@ -588,6 +596,8 @@ function setTipo(tipo, btn) {
     mostrarFoliosRecientesMod();
   }
 
+  // Progreso paso 3
+  actualizarProgreso(3);
   setTimeout(() => {
     document.getElementById("form-body").scrollIntoView({ behavior:"smooth", block:"start" });
   }, 50);
@@ -595,10 +605,28 @@ function setTipo(tipo, btn) {
 
 // ── SERVICIOS ──
 async function cargarServicios() {
+  // Intentar cargar de cache primero (válido 24 horas)
+  try {
+    const cached = localStorage.getItem("frago_servicios_cache");
+    if (cached) {
+      const { servicios, ts } = JSON.parse(cached);
+      const horas = (Date.now() - ts) / 3600000;
+      if (horas < 24 && servicios && servicios.length) {
+        todosLosServicios = servicios;
+        // Refrescar en segundo plano sin bloquear
+        refrescarServiciosFondo();
+        return;
+      }
+    }
+  } catch(e) {}
+
   try {
     const res  = await fetch(SCRIPT_URL);
     const data = await res.json();
-    if (data.ok && data.servicios) todosLosServicios = data.servicios.map(s => s.nombre);
+    if (data.ok && data.servicios) {
+      todosLosServicios = data.servicios.map(s => s.nombre);
+      localStorage.setItem("frago_servicios_cache", JSON.stringify({ servicios: todosLosServicios, ts: Date.now() }));
+    }
   } catch(e) {
     todosLosServicios = [
       "3 vistas","Vértice","Agua azul","Magnolia","Gasolinera","Med 100",
@@ -609,6 +637,17 @@ async function cargarServicios() {
       "Real del Lago","Oficinas"
     ];
   }
+}
+
+async function refrescarServiciosFondo() {
+  try {
+    const res  = await fetch(SCRIPT_URL);
+    const data = await res.json();
+    if (data.ok && data.servicios) {
+      todosLosServicios = data.servicios.map(s => s.nombre);
+      localStorage.setItem("frago_servicios_cache", JSON.stringify({ servicios: todosLosServicios, ts: Date.now() }));
+    }
+  } catch(e) {}
 }
 
 function tienePatrulla(nombre) {
@@ -745,7 +784,16 @@ function mostrarToast(msg, tipo) {
 function validar() {
   if (!rolActual)  { mostrarToast("Selecciona tu rol", "err"); return false; }
   if (!tipoActual) { mostrarToast("Selecciona el tipo de solicitud", "err"); return false; }
-  if (!document.getElementById("solicitante").value.trim()) { mostrarToast("Escribe tu nombre", "err"); return false; }
+  const esElemento = ROLES_ELEMENTOS.includes(rolActual);
+  if (esElemento) {
+    if (!document.getElementById("solicitante-select").value) {
+      mostrarToast("Selecciona tu nombre del listado de elementos", "err"); return false;
+    }
+  } else {
+    if (!document.getElementById("solicitante").value.trim()) {
+      mostrarToast("Escribe tu nombre", "err"); return false;
+    }
+  }
   if (tipoActual !== "Equipo" && !document.getElementById("servicio").value) { mostrarToast("Selecciona el servicio / caseta", "err"); return false; }
 
   if (tipoActual === "Uniforme") {
@@ -1089,92 +1137,7 @@ async function consultarFolio() {
   }
 }
 
-// ── OVERRIDE setRol para progreso ──
-const _origSetRol = setRol;
-setRol = function(rol, btn) {
-  _origSetRol(rol, btn);
-  actualizarProgreso(2);
-  document.getElementById("btn-back").style.display = "block";
-};
-
-// ── OVERRIDE setTipo para progreso ──
-const _origSetTipo = setTipo;
-setTipo = function(tipo, btn) {
-  _origSetTipo(tipo, btn);
-  actualizarProgreso(3);
-};
-
-// ── OVERRIDE enviar para mostrar confirmación ──
-const _origEnviar = enviar;
-enviar = async function() {
-  if (!validar()) return;
-  const btn = document.getElementById("btn-enviar");
-  const spinner = document.getElementById("spinner");
-  const btnText = document.getElementById("btn-text");
-  btn.disabled = true; spinner.style.display = "block"; btnText.textContent = "Enviando...";
-
-  const ROLES_LABELS = {
-    guardia:"Guardia", jefe_turno:"Jefe de turno", coord_operativo:"Coordinador operativo",
-    coord_general:"Coordinador general", director_general:"Director general",
-    aux_administrativa:"Auxiliar administrativa", director_finanzas:"Director de finanzas / Administración"
-  };
-
-  const payload = {
-    tipo: tipoActual, rol: ROLES_LABELS[rolActual]||rolActual,
-    solicitante: document.getElementById("solicitante").value.trim(),
-    servicio: tipoActual === "Equipo" ? "N/A" : document.getElementById("servicio").value,
-    urgencia: urgenciaActual
-  };
-
-  if (tipoActual === "Uniforme") {
-    const prenda = document.getElementById("prenda").value;
-    const talla  = document.getElementById("talla").value;
-    payload.prenda_talla = prenda + " / " + talla;
-    payload.cantidad = document.getElementById("cantidad-uni").value;
-    payload.condicion = condicionActual;
-    payload.notas = document.getElementById("notas-uni").value.trim();
-    payload.detalle = prenda + " talla " + talla;
-  }
-  if (tipoActual === "Patrulla") {
-    payload.unidad = document.getElementById("unidad").value;
-    const tipoPat = document.getElementById("tipo-patrulla").value;
-    payload.detalle = tipoPat + ": " + document.getElementById("detalle-patrulla").value.trim();
-    const km = document.getElementById("km").value;
-    if (km) payload.notas = "Kilometraje: " + km + " km";
-  }
-  if (tipoActual === "Papeleria") {
-    payload.articulo = document.getElementById("articulo").value;
-    payload.cantidad = document.getElementById("cantidad-pap").value;
-    payload.notas = document.getElementById("notas-pap").value.trim();
-    payload.detalle = document.getElementById("articulo").value;
-  }
-  if (tipoActual === "Equipo") {
-    const tipoEq = document.getElementById("tipo-equipo").value;
-    const accion = document.getElementById("accion-equipo").value;
-    const asignado = document.getElementById("asignado-equipo").value.trim();
-    payload.articulo = tipoEq;
-    payload.cantidad = document.getElementById("cantidad-equipo").value;
-    payload.detalle = accion + ": " + document.getElementById("detalle-equipo").value.trim();
-    payload.notas = asignado ? "Asignado a: " + asignado : "";
-  }
-
-  try {
-    const res  = await fetch(SCRIPT_URL, { method:"POST", body:JSON.stringify(payload) });
-    const data = await res.json();
-    if (data.ok) {
-      mostrarConfirmacion(data.id);
-    } else {
-      mostrarToast("Error: " + (data.error||"intenta de nuevo"), "err");
-      btn.disabled = false; spinner.style.display = "none"; btnText.textContent = "Enviar solicitud";
-    }
-  } catch(err) {
-    mostrarToast("Error de conexión — intenta de nuevo", "err");
-  } finally {
-    btn.disabled = false;
-    spinner.style.display = "none";
-    btnText.textContent = "Enviar solicitud";
-  }
-};
+// (overrides eliminados — la lógica ahora está en setRol, setTipo y enviar directamente)
 
 // ── INIT ──
 async function consultarFolioMod() {
@@ -1275,7 +1238,54 @@ function mostrarFoliosRecientesMod() {
   ).join("");
 }
 
+let elementosCache = [];
+
+async function cargarElementos() {
+  try {
+    const cached = localStorage.getItem("frago_elementos_cache");
+    if (cached) {
+      const { elementos, ts } = JSON.parse(cached);
+      if ((Date.now() - ts) / 3600000 < 24 && elementos.length) {
+        elementosCache = elementos;
+        return;
+      }
+    }
+  } catch(e) {}
+  try {
+    const res  = await fetch(SCRIPT_URL + "?action=getElementos");
+    const data = await res.json();
+    if (data.ok) {
+      elementosCache = data.elementos || [];
+      localStorage.setItem("frago_elementos_cache", JSON.stringify({ elementos: elementosCache, ts: Date.now() }));
+    }
+  } catch(e) {}
+}
+
+const ROLES_ELEMENTOS = ["guardia","jefe_turno","coord_operativo"];
+
+function actualizarCampoSolicitante() {
+  const esElemento = ROLES_ELEMENTOS.includes(rolActual);
+  const input  = document.getElementById("solicitante");
+  const select = document.getElementById("solicitante-select");
+  const label  = document.getElementById("label-solicitante");
+
+  if (esElemento) {
+    label.innerHTML = "Elemento <span class=\"req\">*</span>";
+    input.style.display  = "none";
+    select.style.display = "block";
+    // Llenar select
+    select.innerHTML = '<option value="">Selecciona elemento...</option>' +
+      elementosCache.map(el => `<option value="${el.id}|${el.nombre}">${el.id} — ${el.nombre}</option>`).join("");
+  } else {
+    label.innerHTML = "Nombre del solicitante <span class=\"req\">*</span>";
+    input.style.display  = "block";
+    select.style.display = "none";
+    document.getElementById("elemento-info").style.display = "none";
+  }
+}
+
 cargarServicios();
+cargarElementos();
 cargarDatosGuardados();
 mostrarFoliosRecientes();
 actualizarProgreso(1);
