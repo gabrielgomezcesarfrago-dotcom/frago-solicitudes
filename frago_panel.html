@@ -318,6 +318,36 @@
   .kpi-sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<!-- OneSignal Push Notifications -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "f70dfc23-53ee-436a-89eb-f1bbd53d5755",
+      notifyButton: { enable: false },
+      allowLocalhostAsSecureOrigin: true
+    });
+
+    // Cuando el usuario hace login, asociar su identidad con OneSignal
+    window.fragoLoginOneSignal = async function(userId, tags) {
+      try {
+        await OneSignal.login(String(userId));
+        if (tags) await OneSignal.User.addTags(tags);
+      } catch(e) { console.warn("OneSignal login error:", e); }
+    };
+
+    // Pedir permiso de notificaciones después del primer login exitoso
+    window.fragoPedirPermisoPush = async function() {
+      try {
+        const permiso = await OneSignal.Notifications.permission;
+        if (!permiso) {
+          await OneSignal.Notifications.requestPermission();
+        }
+      } catch(e) { console.warn("Push permission error:", e); }
+    };
+  });
+</script>
 </head>
 <body>
 
@@ -868,6 +898,14 @@ function doLogin() {
     }
     mostrarPanel(user);
     iniciarAutoRefresh();
+    // Asociar con OneSignal para recibir push notifications
+    if (window.fragoLoginOneSignal) {
+      window.fragoLoginOneSignal(user, {
+        rol: USUARIOS[user].rol,
+        nombre: user
+      });
+      if (window.fragoPedirPermisoPush) setTimeout(window.fragoPedirPermisoPush, 2000);
+    }
   } else {
     document.getElementById("login-err").style.display = "block";
   }
@@ -2342,6 +2380,9 @@ function detenerAutoRefresh() {
   if (user && USUARIOS[user]) {
     mostrarPanel(user);
     iniciarAutoRefresh();
+    if (window.fragoLoginOneSignal) {
+      window.fragoLoginOneSignal(user, { rol: USUARIOS[user].rol, nombre: user });
+    }
     if (userLocal) {
       const cb = document.getElementById("remember-me");
       if (cb) cb.checked = true;
