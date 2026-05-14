@@ -809,6 +809,16 @@ function formatearFechaCompleta(fecha) {
          " " + d.toLocaleTimeString("es-MX", { hour:"2-digit", minute:"2-digit" });
 }
 
+// ── BÚSQUEDA CON RESALTADO ──
+function resaltarTexto(texto, busqueda) {
+  if (!busqueda || !texto) return texto;
+  const t = String(texto);
+  const b = String(busqueda).trim();
+  if (!b) return t;
+  const regex = new RegExp("(" + b.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")", "gi");
+  return t.replace(regex, '<mark style="background:rgba(74,144,217,0.35);color:var(--text);padding:1px 2px;border-radius:3px;">$1</mark>');
+}
+
 function normalizarTipo(tipo) {
   if (!tipo) return "Papeleria";
   // Quitar acentos y normalizar
@@ -1276,7 +1286,9 @@ function abrirModal(id, estatusPreseleccionado) {
 
   const est = s.estatus;
   const tipo = s.tipo;
-  let btns = "";
+  // Botón copiar resumen (siempre disponible)
+  let btns = `<button class="btn-modal" onclick="copiarResumen()" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);font-size:13px;">📋 Copiar resumen</button>`;
+  
   if (est === "Pendiente" && puedeEjecutar("aprobar",tipo))
     btns += `<button class="btn-modal bm-aprobar"  onclick="accionModal('Aprobada')">✓ Aprobar</button>`;
   if (est === "Pendiente" && puedeEjecutar("rechazar",tipo))
@@ -1293,6 +1305,36 @@ function abrirModal(id, estatusPreseleccionado) {
   btns += `<button class="btn-modal bm-cerrar" onclick="cerrarModal()">← Cerrar</button>`;
   document.getElementById("m-acciones").innerHTML = btns;
   document.getElementById("modal-bg").classList.add("open");
+}
+
+function copiarResumen() {
+  if (!solicitudActual) return;
+  const s = solicitudActual;
+  const fecha = new Date(s.fecha).toLocaleDateString("es-MX", { day:"2-digit", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" });
+  const detalleTxt = s.tipo === "Uniforme" ? (s.prenda||"") + " · cantidad: " + (s.cantidad||1) :
+                     s.tipo === "Patrulla" ? (s.unidad||"") + " · " + (s.detalle||"") :
+                     (s.detalle||"");
+  const txt =
+`📋 *Solicitud ${s.id}*
+━━━━━━━━━━━━━━━━━━
+Tipo: ${s.tipo}
+Solicitante: ${s.solicitante||"—"}${s.rol ? " (" + s.rol + ")" : ""}
+Fecha: ${fecha}
+Servicio: ${s.servicio||"—"}
+Detalle: ${detalleTxt}
+Urgencia: ${s.urgencia||"—"}
+Estatus: ${s.estatus}${s.notaGestion ? "\nNota: " + s.notaGestion : ""}`;
+
+  navigator.clipboard.writeText(txt).then(() => {
+    mostrarToast("✓ Resumen copiado al portapapeles", "ok");
+  }).catch(() => {
+    // Fallback
+    const tmp = document.createElement("textarea");
+    tmp.value = txt; document.body.appendChild(tmp);
+    tmp.select(); document.execCommand("copy");
+    document.body.removeChild(tmp);
+    mostrarToast("✓ Resumen copiado", "ok");
+  });
 }
 
 function cerrarModal() {
@@ -2312,6 +2354,72 @@ function detenerAutoRefresh() {
 })();
 </script>
 <script>
+// ── PULL TO REFRESH (móvil) ──
+(function() {
+  let startY = 0;
+  let pulling = false;
+  let pullDistance = 0;
+  let indicador = null;
+
+  function crearIndicador() {
+    if (indicador) return indicador;
+    indicador = document.createElement("div");
+    indicador.id = "pull-indicator";
+    indicador.style.cssText = "position:fixed;top:0;left:50%;transform:translate(-50%,-60px);background:var(--surface);border:1px solid var(--border);border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;z-index:100;transition:transform 0.2s,opacity 0.2s;font-size:18px;opacity:0;box-shadow:0 4px 12px rgba(0,0,0,0.3);";
+    indicador.textContent = "↓";
+    document.body.appendChild(indicador);
+    return indicador;
+  }
+
+  document.addEventListener("touchstart", e => {
+    if (window.scrollY > 5) return;
+    startY = e.touches[0].clientY;
+    pulling = true;
+    pullDistance = 0;
+  }, { passive: true });
+
+  document.addEventListener("touchmove", e => {
+    if (!pulling) return;
+    pullDistance = e.touches[0].clientY - startY;
+    if (pullDistance > 0 && pullDistance < 200) {
+      const ind = crearIndicador();
+      const progreso = Math.min(pullDistance / 80, 1);
+      ind.style.opacity = progreso;
+      ind.style.transform = `translate(-50%, ${Math.min(pullDistance * 0.5, 50) - 60}px) rotate(${progreso * 360}deg)`;
+      if (pullDistance > 80) ind.textContent = "↻";
+      else ind.textContent = "↓";
+    }
+  }, { passive: true });
+
+  document.addEventListener("touchend", () => {
+    if (!pulling) return;
+    pulling = false;
+    if (pullDistance > 80) {
+      const ind = crearIndicador();
+      ind.textContent = "↻";
+      ind.style.opacity = "1";
+      ind.style.transform = "translate(-50%, 10px)";
+      // Disparar refresh según pestaña activa
+      const tab = sessionStorage.getItem("frago_tab") || "solicitudes";
+      const refreshFn = {
+        solicitudes: () => cargarSolicitudes(),
+        inventario:  () => cargarInventario(),
+        flota:       () => cargarFlota(),
+        dashboard:   () => { cargarSolicitudes(); cargarInventario(); }
+      }[tab];
+      if (refreshFn) refreshFn();
+      setTimeout(() => {
+        ind.style.opacity = "0";
+        ind.style.transform = "translate(-50%, -60px)";
+      }, 700);
+    } else if (indicador) {
+      indicador.style.opacity = "0";
+      indicador.style.transform = "translate(-50%, -60px)";
+    }
+    pullDistance = 0;
+  }, { passive: true });
+})();
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
