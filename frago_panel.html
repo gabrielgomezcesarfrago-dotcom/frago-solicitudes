@@ -785,6 +785,30 @@ const CADENA = {
   }
 };
 
+// ── TIEMPO RELATIVO ──
+function tiempoRelativo(fecha) {
+  if (!fecha) return "—";
+  const d = new Date(fecha);
+  if (isNaN(d)) return "—";
+  const diff = (Date.now() - d.getTime()) / 1000; // segundos
+  if (diff < 60)        return "hace unos segundos";
+  if (diff < 3600)      return "hace " + Math.floor(diff/60)   + " min";
+  if (diff < 86400)     return "hace " + Math.floor(diff/3600) + " h";
+  if (diff < 172800)    return "ayer";
+  if (diff < 604800)    return "hace " + Math.floor(diff/86400) + " días";
+  if (diff < 2592000)   return "hace " + Math.floor(diff/604800) + " sem";
+  // > 30 días: formato completo
+  return d.toLocaleDateString("es-MX", { day:"2-digit", month:"short", year:"numeric" });
+}
+
+function formatearFechaCompleta(fecha) {
+  if (!fecha) return "—";
+  const d = new Date(fecha);
+  if (isNaN(d)) return "—";
+  return d.toLocaleDateString("es-MX", { day:"2-digit", month:"short", year:"numeric" }) + 
+         " " + d.toLocaleTimeString("es-MX", { hour:"2-digit", minute:"2-digit" });
+}
+
 function normalizarTipo(tipo) {
   if (!tipo) return "Papeleria";
   // Quitar acentos y normalizar
@@ -927,6 +951,13 @@ function actualizarStats() {
   }
 }
 
+function limpiarFiltros() {
+  document.getElementById("f-estatus").value = "";
+  document.getElementById("f-tipo").value    = "";
+  document.getElementById("f-buscar").value  = "";
+  renderTabla();
+}
+
 function filtrarEstatus(estatus) {
   document.getElementById("f-estatus").value = estatus;
   if (estatus === "") {
@@ -958,7 +989,14 @@ function renderTabla() {
 
   const tbody = document.getElementById("tabla-body");
   if (!filtradas.length) {
-    tbody.innerHTML = '<tr><td colspan="9" class="empty">No hay solicitudes con esos filtros</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" class="empty">
+  <div style="padding:40px 20px;text-align:center;">
+    <div style="font-size:36px;margin-bottom:8px;opacity:0.4;">📭</div>
+    <div style="font-size:14px;color:var(--text2);margin-bottom:4px;">No hay solicitudes con esos filtros</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:14px;">Prueba cambiar el rango de fechas o el estatus</div>
+    <button onclick="limpiarFiltros()" style="padding:8px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-family:var(--font);font-size:12px;cursor:pointer;">Limpiar filtros</button>
+  </div>
+</td></tr>';
     return;
   }
 
@@ -1602,10 +1640,7 @@ async function cargarInventario() {
   document.getElementById("inv-tabla-body").innerHTML =
     '<tr><td colspan="7" class="spinner-wrap">Cargando inventario...</td></tr>';
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
-    const res  = await fetch(SCRIPT_URL + "?action=getInventario", { signal: controller.signal });
-    clearTimeout(timeout);
+    const res  = await fetchConReintentos(SCRIPT_URL + "?action=getInventario");
     const data = await res.json();
     if (data.ok) {
       inventarioData = data.items || [];
@@ -1616,8 +1651,13 @@ async function cargarInventario() {
         `<tr><td colspan="7" class="empty">Error: ${data.error||"No se pudo cargar"}</td></tr>`;
     }
   } catch(e) {
-    document.getElementById("inv-tabla-body").innerHTML =
-      `<tr><td colspan="7" class="empty" style="color:var(--danger);">Error de conexión — toca ↻ para reintentar<br><small>${e.message}</small></td></tr>`;
+    document.getElementById("inv-tabla-body").innerHTML = `<tr><td colspan="7" class="empty">
+      <div style="padding:40px 20px;text-align:center;">
+        <div style="font-size:36px;margin-bottom:8px;opacity:0.4;">📡</div>
+        <div style="font-size:14px;color:var(--danger);margin-bottom:4px;">Sin conexión</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:14px;">Reintentamos 3 veces sin éxito</div>
+        <button onclick="cargarInventario()" style="padding:8px 16px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:var(--font);font-size:12px;cursor:pointer;">↻ Reintentar</button>
+      </div></td></tr>`;
   }
 }
 
