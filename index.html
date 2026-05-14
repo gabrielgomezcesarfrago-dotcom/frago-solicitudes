@@ -191,7 +191,9 @@
     await OneSignal.init({
       appId: "f70dfc23-53ee-436a-89eb-f1bbd53d5755",
       notifyButton: { enable: false },
-      allowLocalhostAsSecureOrigin: true
+      allowLocalhostAsSecureOrigin: true,
+      serviceWorkerParam: { scope: "/frago-solicitudes/" },
+      serviceWorkerPath: "/frago-solicitudes/sw.js"
     });
 
     // Cuando el usuario hace login, asociar su identidad con OneSignal
