@@ -928,30 +928,65 @@ function mostrarPanel(user) {
 }
 
 async function activarPushManual() {
+  // Mostrar diagnóstico en pantalla
+  const debug = (msg) => {
+    let box = document.getElementById("push-debug");
+    if (!box) {
+      box = document.createElement("div");
+      box.id = "push-debug";
+      box.style.cssText = "position:fixed;bottom:20px;left:10px;right:10px;background:#1a1a1a;border:1px solid var(--accent);color:#fff;font-family:monospace;font-size:11px;padding:10px;border-radius:8px;z-index:9999;max-height:60vh;overflow-y:auto;";
+      box.innerHTML = '<div style="color:var(--accent);margin-bottom:6px;font-weight:bold;">Diagnóstico Push <button onclick="document.getElementById(\'push-debug\').remove()" style="float:right;background:none;border:none;color:#fff;font-size:14px;">×</button></div>';
+      document.body.appendChild(box);
+    }
+    const line = document.createElement("div");
+    line.textContent = "→ " + msg;
+    box.appendChild(line);
+    console.log("[PUSH]", msg);
+  };
+
+  debug("1. Iniciando...");
+
   if (typeof OneSignal === "undefined") {
-    mostrarToast("OneSignal no cargado — recarga la página", "err");
+    debug("ERROR: OneSignal no está cargado");
     return;
   }
+  debug("2. OneSignal está cargado");
+
   try {
-    const tienePermiso = OneSignal.Notifications.permission;
-    if (tienePermiso) {
-      mostrarToast("✓ Notificaciones ya activadas", "ok");
-      document.getElementById("btn-push-activate").style.display = "none";
-      return;
-    }
-    // En iOS, esto debe ejecutarse en respuesta a un toque del usuario
-    await OneSignal.Notifications.requestPermission();
-    // Verificar después de unos ms
-    setTimeout(() => {
-      if (OneSignal.Notifications.permission) {
-        mostrarToast("✓ Notificaciones activadas", "ok");
+    const permActual = OneSignal.Notifications.permission;
+    debug("3. Permiso actual: " + permActual);
+
+    const isPush = OneSignal.Notifications.isPushSupported && OneSignal.Notifications.isPushSupported();
+    debug("4. Push supported: " + isPush);
+
+    debug("5. Llamando requestPermission()...");
+    const result = await OneSignal.Notifications.requestPermission();
+    debug("6. Resultado: " + JSON.stringify(result));
+
+    setTimeout(async () => {
+      const permFinal = OneSignal.Notifications.permission;
+      debug("7. Permiso final: " + permFinal);
+
+      try {
+        const userId = await OneSignal.User.PushSubscription.id;
+        debug("8. Push Subscription ID: " + (userId || "VACÍO"));
+        const token = await OneSignal.User.PushSubscription.token;
+        debug("9. Push Token: " + (token ? token.substring(0,30) + "..." : "VACÍO"));
+        const optedIn = OneSignal.User.PushSubscription.optedIn;
+        debug("10. OptedIn: " + optedIn);
+      } catch(err) {
+        debug("ERROR en PushSubscription: " + err.message);
+      }
+
+      if (permFinal) {
+        debug("✓ ÉXITO");
         document.getElementById("btn-push-activate").style.display = "none";
       } else {
-        mostrarToast("Permiso denegado o pendiente", "err");
+        debug("✗ NO se otorgó permiso");
       }
-    }, 1500);
+    }, 2000);
   } catch(e) {
-    mostrarToast("Error: " + e.message, "err");
+    debug("EXCEPCIÓN: " + e.message);
   }
 }
 
