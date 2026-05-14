@@ -1492,6 +1492,45 @@ mostrarFoliosRecientes();
 actualizarProgreso(1);
 </script>
 <script>
+// ── PULL TO REFRESH (móvil) ──
+(function() {
+  let startY = 0, pulling = false, pullDistance = 0, indicador = null;
+  function crearIndicador() {
+    if (indicador) return indicador;
+    indicador = document.createElement("div");
+    indicador.style.cssText = "position:fixed;top:0;left:50%;transform:translate(-50%,-60px);background:var(--surface);border:1px solid var(--border);border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;z-index:100;transition:transform 0.2s,opacity 0.2s;font-size:18px;opacity:0;box-shadow:0 4px 12px rgba(0,0,0,0.3);color:var(--text);";
+    document.body.appendChild(indicador);
+    return indicador;
+  }
+  document.addEventListener("touchstart", e => {
+    if (window.scrollY > 5) return;
+    startY = e.touches[0].clientY; pulling = true; pullDistance = 0;
+  }, { passive: true });
+  document.addEventListener("touchmove", e => {
+    if (!pulling) return;
+    pullDistance = e.touches[0].clientY - startY;
+    if (pullDistance > 0 && pullDistance < 200) {
+      const ind = crearIndicador();
+      const progreso = Math.min(pullDistance / 80, 1);
+      ind.style.opacity = progreso;
+      ind.style.transform = `translate(-50%, ${Math.min(pullDistance * 0.5, 50) - 60}px) rotate(${progreso * 360}deg)`;
+      ind.textContent = pullDistance > 80 ? "↻" : "↓";
+    }
+  }, { passive: true });
+  document.addEventListener("touchend", () => {
+    if (!pulling) return;
+    pulling = false;
+    if (pullDistance > 80) {
+      const ind = crearIndicador();
+      ind.textContent = "↻"; ind.style.opacity = "1"; ind.style.transform = "translate(-50%, 10px)";
+      location.reload();
+    } else if (indicador) {
+      indicador.style.opacity = "0"; indicador.style.transform = "translate(-50%, -60px)";
+    }
+    pullDistance = 0;
+  }, { passive: true });
+})();
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
