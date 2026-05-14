@@ -1232,7 +1232,10 @@ async function cargarElementos() {
     }
   } catch(e) {}
   try {
-    const res  = await fetch(SCRIPT_URL + "?action=getElementos");
+    const res  = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "getElementos" })
+    });
     const data = await res.json();
     if (data.ok) {
       elementosCache = data.elementos || [];
