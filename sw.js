@@ -1,5 +1,7 @@
-// Frago PWA Service Worker — Network First v5
-const CACHE_NAME = "frago-v6";
+// Frago PWA Service Worker — Network First + OneSignal integration v7
+importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
+
+const CACHE_NAME = "frago-v7";
 
 self.addEventListener("install", event => {
   self.skipWaiting();
@@ -17,10 +19,11 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   const url = new URL(event.request.url);
 
-  // Apps Script y Google — nunca cachear
+  // Apps Script, Google y OneSignal — nunca cachear ni interceptar
   if (url.hostname.includes("script.google.com") ||
       url.hostname.includes("googleapis.com") ||
-      url.hostname.includes("fonts.gstatic.com")) return;
+      url.hostname.includes("fonts.gstatic.com") ||
+      url.hostname.includes("onesignal.com")) return;
 
   // Network First — siempre intentar red primero
   event.respondWith(
