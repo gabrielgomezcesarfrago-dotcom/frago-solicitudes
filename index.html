@@ -158,6 +158,29 @@
   .reciente-chip { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 4px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; color: var(--text2); cursor: pointer; margin: 3px 3px 0 0; transition: all 0.15s; }
   .reciente-chip:hover { border-color: var(--border-focus); color: var(--text); }
 
+  /* LOGIN OPERATIVO Y ADMIN */
+  .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: var(--bg); position: fixed; inset: 0; z-index: 50; }
+  .login-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px 28px; width: 100%; max-width: 380px; position: relative; }
+  .login-back { background: none; border: none; color: var(--text2); font-family: var(--font); font-size: 13px; padding: 0; margin-bottom: 16px; cursor: pointer; }
+  .login-back:hover { color: var(--text); }
+  .login-title { font-size: 20px; font-weight: 500; margin-bottom: 4px; color: var(--text); }
+  .login-sub { font-size: 13px; color: var(--text2); margin-bottom: 24px; }
+  .login-field { margin-bottom: 16px; position: relative; }
+  .login-field label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 6px; }
+  .login-field input { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 10px; color: var(--text); font-family: var(--font); font-size: 14px; padding: 12px 14px; outline: none; transition: border-color 0.15s; -webkit-appearance: none; }
+  .login-field input:focus { border-color: var(--accent); }
+  .sugerencias-box { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; margin-top: 4px; max-height: 200px; overflow-y: auto; display: none; z-index: 10; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+  .sugerencia-item { padding: 10px 14px; font-size: 13px; color: var(--text); cursor: pointer; border-bottom: 1px solid var(--border); }
+  .sugerencia-item:last-child { border-bottom: none; }
+  .sugerencia-item:hover, .sugerencia-item.active { background: var(--accent); color: #fff; }
+  .sugerencia-id { font-size: 10px; opacity: 0.6; margin-left: 6px; font-family: var(--mono); }
+  .login-err { font-size: 12px; color: var(--danger); text-align: center; margin: 0 0 12px; min-height: 16px; }
+  .btn-login-op { width: 100%; padding: 14px; border: none; border-radius: 10px; background: var(--accent); color: #fff; font-family: var(--font); font-size: 15px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
+  .btn-login-op:hover { opacity: 0.88; }
+  .remember-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; cursor: pointer; }
+  .remember-row input { width: 16px; height: 16px; accent-color: var(--accent); }
+  .remember-row span { font-size: 13px; color: var(--text2); }
+
   @media (max-width: 400px) { .field-row { grid-template-columns: 1fr; } .roles-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -169,6 +192,49 @@
   <div>
     <div class="header-title">Frago — Solicitudes</div>
     <div class="header-sub">Sistema de gestión operativa</div>
+  </div>
+</div>
+
+<!-- LOGIN OPERATIVO (autocompletado + PIN) -->
+<div id="login-operativo" class="login-screen" style="display:none;">
+  <div class="login-card">
+    <button class="login-back" onclick="cerrarLogin()">← Cambiar rol</button>
+    <h2 class="login-title">Identifícate</h2>
+    <p class="login-sub" id="login-op-rol-sub"></p>
+    <div class="login-field" style="position:relative;">
+      <label>Tu nombre</label>
+      <input type="text" id="op-nombre" autocomplete="off" placeholder="Empieza a escribir..." oninput="filtrarNombres()" autocapitalize="words">
+      <div id="op-sugerencias" class="sugerencias-box"></div>
+    </div>
+    <div class="login-field">
+      <label>Tu PIN</label>
+      <input type="text" id="op-pin" placeholder="Ej. E001" autocapitalize="characters" autocomplete="off" onkeydown="if(event.key==='Enter')validarOperativo()">
+    </div>
+    <p id="op-error" class="login-err"></p>
+    <button class="btn-login-op" onclick="validarOperativo()">Continuar</button>
+  </div>
+</div>
+
+<!-- LOGIN ADMIN (usuario + contraseña) -->
+<div id="login-admin" class="login-screen" style="display:none;">
+  <div class="login-card">
+    <button class="login-back" onclick="cerrarLogin()">← Cambiar rol</button>
+    <h2 class="login-title">Acceso administrativo</h2>
+    <p class="login-sub" id="login-ad-rol-sub"></p>
+    <div class="login-field">
+      <label>Usuario</label>
+      <input type="text" id="ad-user" autocomplete="off" placeholder="Tu usuario" autocapitalize="none">
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="ad-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')validarAdmin()">
+    </div>
+    <label class="remember-row" id="remember-wrap">
+      <input type="checkbox" id="ad-remember">
+      <span>Recordar mi sesión</span>
+    </label>
+    <p id="ad-error" class="login-err"></p>
+    <button class="btn-login-op" onclick="validarAdmin()">Entrar</button>
   </div>
 </div>
 
@@ -536,16 +602,18 @@ let todosLosServicios = [];
 
 // ── PASO 1: ROL ──
 function setRol(rol, btn) {
-  rolActual = rol;
   document.querySelectorAll(".rol-btn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
+  rolPendiente = rol;
+  mostrarLogin(rol);
+}
 
-  // Resetear tipo y formulario si cambia el rol
+function continuarConRol(rol) {
+  rolActual = rol;
   tipoActual = null;
   document.getElementById("form-body").style.display = "none";
   document.querySelectorAll(".modulo").forEach(m => m.classList.remove("visible"));
 
-  // Construir grilla de tipos según rol
   const acceso = ACCESO[rol] || [];
   const grid = document.getElementById("tipo-grid");
   grid.innerHTML = acceso.map(tipo => {
@@ -558,7 +626,6 @@ function setRol(rol, btn) {
 
   document.getElementById("tipo-section").style.display = "block";
   actualizarCampoSolicitante();
-  // Progreso y botón regresar
   actualizarProgreso(2);
   document.getElementById("btn-back").style.display = "block";
   setTimeout(() => {
@@ -784,15 +851,8 @@ function mostrarToast(msg, tipo) {
 function validar() {
   if (!rolActual)  { mostrarToast("Selecciona tu rol", "err"); return false; }
   if (!tipoActual) { mostrarToast("Selecciona el tipo de solicitud", "err"); return false; }
-  const esElemento = ROLES_ELEMENTOS.includes(rolActual);
-  if (esElemento) {
-    if (!document.getElementById("solicitante-select").value) {
-      mostrarToast("Selecciona tu nombre del listado de elementos", "err"); return false;
-    }
-  } else {
-    if (!document.getElementById("solicitante").value.trim()) {
-      mostrarToast("Escribe tu nombre", "err"); return false;
-    }
+  if (!usuarioLogeadoNombre) {
+    mostrarToast("Debes iniciar sesión primero", "err"); return false;
   }
   if (tipoActual !== "Equipo" && !document.getElementById("servicio").value) { mostrarToast("Selecciona el servicio / caseta", "err"); return false; }
 
@@ -1219,6 +1279,147 @@ function mostrarFoliosRecientesMod() {
 }
 
 let elementosCache = [];
+let rolPendiente = null;
+let usuarioLogeadoNombre = null;
+let usuarioLogeadoId = null;
+
+const ROLES_LOGIN_OPERATIVO = ["guardia","jefe_turno","coord_operativo"];
+const ROLES_LOGIN_ADMIN     = ["coord_general","director_general","aux_administrativa","director_finanzas"];
+
+const ROLES_ADMIN_PUEDEN_RECORDAR = ["coord_general","director_general","aux_administrativa","director_finanzas"];
+
+const USUARIOS_ADMIN = {
+  "gabriel":  { pass: "fqEVDmty0Hr0", nombre: "Gabriel Gomez Cesar",        rol: "coord_general" },
+  "emiliano": { pass: "OMwqCm0FcyvS", nombre: "Emiliano Alba",              rol: "coord_general" },
+  "gigi":     { pass: "@apDwM#$YdST", nombre: "Gigi Soto",                  rol: "director_finanzas" },
+  "othon":    { pass: "GAQhutq66yCF", nombre: "Othón G.C.",                 rol: "director_general" },
+  "samantha": { pass: "Ofzbhj3uO52A", nombre: "Samantha",                   rol: "aux_administrativa" }
+};
+
+const ROLES_LABELS_LOGIN = {
+  guardia:            "Guardia",
+  jefe_turno:         "Jefe de turno",
+  coord_operativo:    "Coordinador operativo",
+  coord_general:      "Coordinador general",
+  director_general:   "Director general",
+  aux_administrativa: "Auxiliar administrativa",
+  director_finanzas:  "Director de finanzas / Administración"
+};
+
+function mostrarLogin(rol) {
+  // Verificar sesión recordada para admin
+  if (ROLES_LOGIN_ADMIN.includes(rol)) {
+    const recordado = localStorage.getItem("frago_form_admin");
+    if (recordado) {
+      try {
+        const datos = JSON.parse(recordado);
+        if (datos.user && USUARIOS_ADMIN[datos.user] && datos.rol === rol) {
+          usuarioLogeadoNombre = USUARIOS_ADMIN[datos.user].nombre;
+          continuarConRol(rol);
+          return;
+        }
+      } catch(e) {}
+    }
+  }
+
+  if (ROLES_LOGIN_OPERATIVO.includes(rol)) {
+    document.getElementById("login-op-rol-sub").textContent = "Como " + ROLES_LABELS_LOGIN[rol];
+    document.getElementById("op-nombre").value = "";
+    document.getElementById("op-pin").value = "";
+    document.getElementById("op-error").textContent = "";
+    document.getElementById("op-sugerencias").style.display = "none";
+    document.getElementById("login-operativo").style.display = "flex";
+    setTimeout(() => document.getElementById("op-nombre").focus(), 100);
+  } else {
+    document.getElementById("login-ad-rol-sub").textContent = "Como " + ROLES_LABELS_LOGIN[rol];
+    document.getElementById("ad-user").value = "";
+    document.getElementById("ad-pass").value = "";
+    document.getElementById("ad-error").textContent = "";
+    document.getElementById("ad-remember").checked = false;
+    document.getElementById("remember-wrap").style.display = ROLES_ADMIN_PUEDEN_RECORDAR.includes(rol) ? "flex" : "none";
+    document.getElementById("login-admin").style.display = "flex";
+    setTimeout(() => document.getElementById("ad-user").focus(), 100);
+  }
+}
+
+function cerrarLogin() {
+  document.getElementById("login-operativo").style.display = "none";
+  document.getElementById("login-admin").style.display = "none";
+  document.querySelectorAll(".rol-btn").forEach(b => b.classList.remove("active"));
+  rolPendiente = null;
+}
+
+function filtrarNombres() {
+  const q = document.getElementById("op-nombre").value.trim().toLowerCase();
+  const box = document.getElementById("op-sugerencias");
+  if (q.length < 2) { box.style.display = "none"; return; }
+  const norm = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  const qn = norm(q);
+  const matches = elementosCache.filter(el => norm(el.nombre).includes(qn)).slice(0, 6);
+  if (!matches.length) { box.innerHTML = '<div class="sugerencia-item" style="color:var(--text3);">Sin coincidencias</div>'; box.style.display = "block"; return; }
+  box.innerHTML = matches.map(el =>
+    `<div class="sugerencia-item" onclick="seleccionarNombre('${el.id}','${el.nombre.replace(/'/g,"\\'")}')">${el.nombre}<span class="sugerencia-id">${el.id}</span></div>`
+  ).join("");
+  box.style.display = "block";
+}
+
+function seleccionarNombre(id, nombre) {
+  document.getElementById("op-nombre").value = nombre;
+  document.getElementById("op-nombre").dataset.id = id;
+  document.getElementById("op-sugerencias").style.display = "none";
+  document.getElementById("op-pin").focus();
+}
+
+function validarOperativo() {
+  const nombre = document.getElementById("op-nombre").value.trim();
+  const pin    = document.getElementById("op-pin").value.trim().toUpperCase();
+  const errEl  = document.getElementById("op-error");
+
+  if (!nombre) { errEl.textContent = "Escribe tu nombre"; return; }
+  if (!pin)    { errEl.textContent = "Ingresa tu PIN";   return; }
+
+  // Buscar coincidencia exacta o por ID
+  const norm = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  const elemento = elementosCache.find(el => norm(el.nombre) === norm(nombre)) ||
+                   elementosCache.find(el => el.id === pin);
+
+  if (!elemento) { errEl.textContent = "Nombre no encontrado en el sistema"; return; }
+  if (elemento.id !== pin) { errEl.textContent = "PIN incorrecto"; return; }
+
+  usuarioLogeadoId     = elemento.id;
+  usuarioLogeadoNombre = elemento.nombre;
+  document.getElementById("login-operativo").style.display = "none";
+  continuarConRol(rolPendiente);
+}
+
+function validarAdmin() {
+  const user  = document.getElementById("ad-user").value.trim().toLowerCase();
+  const pass  = document.getElementById("ad-pass").value;
+  const errEl = document.getElementById("ad-error");
+
+  const u = USUARIOS_ADMIN[user];
+  if (!u) { errEl.textContent = "Usuario no encontrado"; return; }
+  if (u.pass !== pass) { errEl.textContent = "Contraseña incorrecta"; return; }
+
+  // Verificar que el rol del usuario coincida con el rol seleccionado
+  if (u.rol !== rolPendiente) {
+    errEl.textContent = "Este usuario no tiene acceso a este rol (" + ROLES_LABELS_LOGIN[rolPendiente] + ")";
+    return;
+  }
+
+  usuarioLogeadoNombre = u.nombre;
+  usuarioLogeadoId = "";
+
+  // Recordar si lo solicitó
+  if (document.getElementById("ad-remember").checked && ROLES_ADMIN_PUEDEN_RECORDAR.includes(rolPendiente)) {
+    localStorage.setItem("frago_form_admin", JSON.stringify({ user, rol: rolPendiente }));
+  } else {
+    localStorage.removeItem("frago_form_admin");
+  }
+
+  document.getElementById("login-admin").style.display = "none";
+  continuarConRol(rolPendiente);
+}
 
 async function cargarElementos() {
   try {
@@ -1247,41 +1448,27 @@ async function cargarElementos() {
 const ROLES_ELEMENTOS = ["guardia","jefe_turno","coord_operativo"];
 
 async function actualizarCampoSolicitante() {
-  const esElemento = ROLES_ELEMENTOS.includes(rolActual);
   const input  = document.getElementById("solicitante");
   const select = document.getElementById("solicitante-select");
   const label  = document.getElementById("label-solicitante");
 
-  if (esElemento) {
-    label.innerHTML = "Elemento <span class=\"req\">*</span>";
-    input.style.display  = "none";
-    select.style.display = "block";
-
-    // Si los elementos no han cargado, esperar
-    if (!elementosCache.length) {
-      select.innerHTML = '<option value="">Cargando elementos...</option>';
-      await cargarElementos();
-    }
-
-    if (!elementosCache.length) {
-      select.innerHTML = '<option value="">No hay elementos cargados</option>';
-      return;
-    }
-
-    select.innerHTML = '<option value="">Selecciona elemento...</option>' +
-      elementosCache.map(el => `<option value="${el.id}|${el.nombre}">${el.id} — ${el.nombre}</option>`).join("");
-  } else {
-    label.innerHTML = "Nombre del solicitante <span class=\"req\">*</span>";
-    input.style.display  = "block";
-    select.style.display = "none";
-    const info = document.getElementById("elemento-info");
-    if (info) info.style.display = "none";
+  // El nombre ya viene del login — solo mostrar como información
+  label.innerHTML = "Solicitante";
+  input.style.display  = "block";
+  input.readOnly = true;
+  input.value = usuarioLogeadoNombre || "";
+  input.style.background = "var(--surface2)";
+  input.style.color = "var(--text3)";
+  select.style.display = "none";
+  const info = document.getElementById("elemento-info");
+  if (info) {
+    info.style.display = usuarioLogeadoId ? "block" : "none";
+    info.textContent = usuarioLogeadoId ? "ID: " + usuarioLogeadoId : "";
   }
 }
 
 cargarServicios();
 cargarElementos();
-cargarDatosGuardados();
 mostrarFoliosRecientes();
 actualizarProgreso(1);
 </script>
