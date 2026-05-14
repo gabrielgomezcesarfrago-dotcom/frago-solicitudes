@@ -1039,6 +1039,19 @@ async function cargarSolicitudes() {
       solicitudes = data.solicitudes || [];
       actualizarStats();
       renderTabla();
+      // Si llegamos con ?solicitud=REQ-xxx, abrir el modal de esa solicitud
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const folioParam = params.get("solicitud");
+        if (folioParam && solicitudes.find(s => s.id === folioParam)) {
+          setTimeout(() => {
+            abrirModal(folioParam);
+            // Limpiar el parámetro de la URL para no reabrir si refresca
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, "", newUrl);
+          }, 300);
+        }
+      } catch(e) { console.warn("Error al abrir modal por URL:", e); }
     } else {
       mostrarError("No se pudo cargar: " + (data.error||"error desconocido"));
     }
