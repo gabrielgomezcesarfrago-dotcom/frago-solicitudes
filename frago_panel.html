@@ -606,6 +606,28 @@
   </div>
 </div>
 
+<!-- MODAL RECHAZAR -->
+<div class="modal-bg" id="modal-rechazar-bg" onclick="if(event.target===this)cerrarModalRechazar()">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" style="color:var(--danger);">Rechazar solicitud</div>
+        <div class="modal-id" id="mr-id"></div>
+      </div>
+      <button class="btn-close" onclick="cerrarModalRechazar()">×</button>
+    </div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6;">La solicitud quedará marcada como <strong style="color:var(--danger);">Rechazada</strong>. Indica el motivo para informar al solicitante.</p>
+    <div class="inv-form-field">
+      <label style="display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;">Motivo del rechazo <span style="color:var(--danger);">*</span></label>
+      <textarea class="modal-nota" id="mr-motivo" placeholder="Ejemplo: No hay stock disponible, fuera de presupuesto, no aplica para este servicio..."></textarea>
+    </div>
+    <div class="modal-acciones">
+      <button class="btn-modal bm-rechazar" onclick="ejecutarRechazo()">✗ Confirmar rechazo</button>
+      <button class="btn-modal bm-cerrar"   onclick="cerrarModalRechazar()">Volver</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL CANCELAR -->
 <div class="modal-bg" id="modal-cancelar-bg" onclick="if(event.target===this)cerrarModalCancelar()">
   <div class="modal">
@@ -643,7 +665,37 @@
       </div>
       <button class="btn-close" onclick="cerrarModalDescuento()">×</button>
     </div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6;">¿Deseas descontar esta prenda del inventario al marcarla como atendida?</p>
+
+    <!-- Alerta de cobro (oculta por defecto) -->
+    <div id="md-alerta-cobro" style="display:none;background:rgba(224,123,74,0.1);border:1.5px solid rgba(224,123,74,0.4);border-radius:8px;padding:12px;margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:500;color:var(--accent3);margin-bottom:6px;" id="md-alerta-titulo">⚠️ Posible cobro a nómina</div>
+      <p style="font-size:11px;color:var(--text2);margin-bottom:10px;">Selecciona el motivo de la reposición:</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <button data-motivo="accidente"   onclick="seleccionarMotivo('accidente',this)"   class="md-motivo-btn" style="padding:9px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text2);font-family:var(--font);font-size:12px;cursor:pointer;">🩹 Accidente laboral<br><span style="font-size:10px;opacity:0.7;">sin cobro</span></button>
+        <button data-motivo="dano"        onclick="seleccionarMotivo('dano',this)"        class="md-motivo-btn" style="padding:9px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text2);font-family:var(--font);font-size:12px;cursor:pointer;">⚠️ Daño<br><span style="font-size:10px;opacity:0.7;">rotura/modificación</span></button>
+        <button data-motivo="malUso"      onclick="seleccionarMotivo('malUso',this)"      class="md-motivo-btn" style="padding:9px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text2);font-family:var(--font);font-size:12px;cursor:pointer;">🧺 Mal uso<br><span style="font-size:10px;opacity:0.7;">lavado/cuidado</span></button>
+        <button data-motivo="perdida"     onclick="seleccionarMotivo('perdida',this)"     class="md-motivo-btn" style="padding:9px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text2);font-family:var(--font);font-size:12px;cursor:pointer;">❌ Pérdida<br><span style="font-size:10px;opacity:0.7;">monto fijo</span></button>
+        <button data-motivo="cambioTalla" onclick="seleccionarMotivo('cambioTalla',this)" class="md-motivo-btn" style="grid-column:span 2;padding:9px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text2);font-family:var(--font);font-size:12px;cursor:pointer;">📏 Cambio de talla<br><span style="font-size:10px;opacity:0.7;" id="md-cambio-talla-sub">$50 (gratis primera semana)</span></button>
+      </div>
+    </div>
+
+    <!-- Campos extras según motivo -->
+    <div id="md-campos-extras" style="display:none;">
+      <div class="inv-form-field" id="md-reporte-wrap">
+        <label id="md-reporte-label">Descripción</label>
+        <textarea id="md-reporte" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;padding:10px 12px;outline:none;resize:vertical;min-height:60px;" placeholder="Describe brevemente..."></textarea>
+      </div>
+      <div class="inv-form-field" id="md-foto-wrap" style="display:none;">
+        <label>URL de foto de evidencia <span style="color:var(--danger);">*</span></label>
+        <input type="text" id="md-foto" placeholder="Pega el link de la foto (Drive, WhatsApp, etc.)" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:13px;padding:10px 12px;outline:none;">
+      </div>
+      <div class="inv-form-field" id="md-costo-wrap" style="display:none;">
+        <label>Monto a descontar de nómina (MXN) <span id="md-rango-hint" style="font-size:11px;color:var(--text3);font-weight:400;"></span></label>
+        <input type="number" id="md-costo" min="0" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:14px;padding:10px 14px;outline:none;font-weight:500;">
+      </div>
+    </div>
+
+    <p style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6;">Confirma los datos de la prenda entregada:</p>
     <div class="inv-form-field">
       <label>Prenda entregada</label>
       <input type="text" id="md-prenda" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:14px;padding:10px 14px;outline:none;" readonly>
@@ -781,6 +833,7 @@ function doLogin() {
       localStorage.removeItem("frago_remember");
     }
     mostrarPanel(user);
+    iniciarAutoRefresh();
   } else {
     document.getElementById("login-err").style.display = "block";
   }
@@ -801,6 +854,7 @@ function mostrarPanel(user) {
 }
 
 function logout() {
+  detenerAutoRefresh();
   usuarioActual = "";
   sessionStorage.removeItem("frago_user");
   localStorage.removeItem("frago_user");
@@ -993,7 +1047,78 @@ function toggleCard(id) {
   if (body) body.classList.toggle("open");
 }
 
+// ── TABULADOR DE COSTOS POR PRENDA Y MOTIVO ──
+const COSTOS_PRENDA = {
+  "Camisa manga larga":                          { dano:[200,300], malUso:[150,300], perdida:300 },
+  "Pantalón":                                    { dano:[200,350], malUso:[175,350], perdida:350 },
+  "Chamarra":                                    { dano:[300,500], malUso:[250,500], perdida:500 },
+  "Sudadera":                                    { dano:[200,350], malUso:[175,350], perdida:350 },
+  "Chaleco reflejante rojo (FRAGO)":             { dano:[200,250], malUso:[125,250], perdida:250 },
+  "Chaleco reflejante de seguridad (naranja)":   { dano:[200,250], malUso:[125,250], perdida:250 },
+  "Chaleco táctico":                             { dano:[300,500], malUso:[250,500], perdida:500 },
+  "Gorra":                                       { dano:[100,130], malUso:[ 70,130], perdida:130 },
+  "Botas":                                       { dano:null,      malUso:null,      perdida:800 }
+};
+
+const COSTO_CAMBIO_TALLA = 50;
+
+function obtenerRangoCosto(prenda, motivo) {
+  const t = COSTOS_PRENDA[prenda];
+  if (!t) return null;
+  if (motivo === "dano")    return t.dano;
+  if (motivo === "malUso")  return t.malUso;
+  if (motivo === "perdida") return t.perdida !== null ? [t.perdida, t.perdida] : null;
+  if (motivo === "cambioTalla") return [COSTO_CAMBIO_TALLA, COSTO_CAMBIO_TALLA];
+  return null;
+}
+
 // ── CADENA DE APROBACIÓN VISUAL ──
+async function consultarHistorialPrenda(idElemento, prenda) {
+  const wrap = document.getElementById("historial-prenda");
+  if (!wrap) return;
+  wrap.innerHTML = '<p style="font-size:12px;color:var(--text3);margin-top:12px;">Verificando historial de entregas...</p>';
+  try {
+    const url = SCRIPT_URL + "?action=getHistorialPrenda&id=" + encodeURIComponent(idElemento) + "&prenda=" + encodeURIComponent(prenda);
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (!data.ok) { wrap.innerHTML = ""; return; }
+
+    if (!data.ultimaFecha) {
+      wrap.innerHTML = `
+        <div style="margin-top:16px;padding:10px 12px;background:rgba(93,184,122,0.08);border-radius:8px;border:1px solid rgba(93,184,122,0.2);font-size:12px;color:var(--success);">
+          ✓ Primera entrega de "${prenda}" para este elemento
+        </div>`;
+      return;
+    }
+
+    const fecha = new Date(data.ultimaFecha);
+    const fechaTxt = fecha.toLocaleDateString("es-MX", { day:"2-digit", month:"short", year:"numeric" });
+    const meses = Math.floor(data.diasDesdeUltima / 30);
+    const costo = calcularCosto(prenda);
+
+    if (data.requiereDecision) {
+      wrap.innerHTML = `
+        <div style="margin-top:16px;padding:12px;background:rgba(224,123,74,0.1);border-radius:8px;border:1.5px solid rgba(224,123,74,0.4);">
+          <div style="font-size:13px;font-weight:500;color:var(--accent3);margin-bottom:6px;">⚠️ Posible cobro a nómina</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.6;">
+            Última entrega de <strong>${prenda}</strong>: ${fechaTxt} (hace ${meses === 0 ? data.diasDesdeUltima + " días" : meses + " mes" + (meses>1?"es":"")})<br>
+            Total entregas históricas: ${data.totalEntregas}<br>
+            Costo estimado si aplica cobro: <strong style="color:var(--text);">$${costo} MXN</strong>
+          </div>
+          <p style="font-size:11px;color:var(--text3);margin-top:8px;">Coord. operativo o general debe decidir al atender: accidente (sin costo) o mal uso (con cobro + foto + reporte).</p>
+        </div>`;
+    } else {
+      wrap.innerHTML = `
+        <div style="margin-top:16px;padding:10px 12px;background:rgba(93,184,122,0.08);border-radius:8px;border:1px solid rgba(93,184,122,0.2);font-size:12px;color:var(--success);">
+          ✓ Última entrega de "${prenda}": ${fechaTxt} (hace ${meses} meses) — sin cobro aplicable<br>
+          <span style="color:var(--text3);">Total entregas: ${data.totalEntregas}</span>
+        </div>`;
+    }
+  } catch(e) {
+    wrap.innerHTML = "";
+  }
+}
+
 function generarCadenaHTML(s) {
   const pasos = {
     Uniforme:  [
@@ -1101,7 +1226,13 @@ function abrirModal(id, estatusPreseleccionado) {
 
   document.getElementById("m-body").innerHTML = campos.map(([k,v]) =>
     `<div class="modal-row"><span class="modal-key">${k}</span><span class="modal-val">${v||"—"}</span></div>`
-  ).join("") + generarCadenaHTML(s);
+  ).join("") + generarCadenaHTML(s) + '<div id="historial-prenda"></div>';
+
+  // Si es uniforme con ID elemento, consultar historial de esa prenda
+  if (normalizarTipo(s.tipo) === "Uniforme" && s.idElemento) {
+    const prenda = (s.prenda || "").split(" / ")[0];
+    if (prenda) consultarHistorialPrenda(s.idElemento, prenda);
+  }
 
   const est = s.estatus;
   const tipo = s.tipo;
@@ -1109,11 +1240,11 @@ function abrirModal(id, estatusPreseleccionado) {
   if (est === "Pendiente" && puedeEjecutar("aprobar",tipo))
     btns += `<button class="btn-modal bm-aprobar"  onclick="accionModal('Aprobada')">✓ Aprobar</button>`;
   if (est === "Pendiente" && puedeEjecutar("rechazar",tipo))
-    btns += `<button class="btn-modal bm-rechazar" onclick="accionModal('Rechazada')">✗ Rechazar</button>`;
+    btns += `<button class="btn-modal bm-rechazar" onclick="cerrarModal();abrirModalRechazar('${s.id}')">✗ Rechazar</button>`;
   if (est === "Aprobada" && puedeEjecutar("atender",tipo))
     btns += `<button class="btn-modal bm-atender"  onclick="accionModal('Atendida')">📦 Marcar atendida</button>`;
   if (est === "Aprobada" && puedeEjecutar("rechazar",tipo))
-    btns += `<button class="btn-modal bm-rechazar" onclick="accionModal('Rechazada')">✗ Rechazar</button>`;
+    btns += `<button class="btn-modal bm-rechazar" onclick="cerrarModal();abrirModalRechazar('${s.id}')">✗ Rechazar</button>`;
   if (["Atendida","Rechazada"].includes(est) && puedeEjecutar("cerrar",tipo))
     btns += `<button class="btn-modal bm-aprobar" onclick="accionModal('Cerrada')" style="background:var(--accent);">🔒 Cerrar solicitud</button>`;
   if (ROLES_CANCELAR.includes(usuarioActual) && !["Cerrada","Cancelada"].includes(est))
@@ -1144,8 +1275,16 @@ async function accionModal(nuevoEstatus) {
     document.getElementById("md-talla").value       = talla;
     document.getElementById("md-cantidad").value    = solicitudActual.cantidad || 1;
     window._notaAtender = nota;
+    window._idElemento  = solicitudActual.idElemento || "";
+    window._motivoEntrega = "Reposición";
+    window._datosCobro  = null;
+    // Resetear UI del modal
+    document.getElementById("md-alerta-cobro").style.display    = "none";
+    document.getElementById("md-campos-extras").style.display   = "none";
     cerrarModal();
     document.getElementById("modal-descuento-bg").classList.add("open");
+    // Verificar historial si hay ID elemento
+    if (window._idElemento && prenda) verificarHistorialEnModal(window._idElemento, prenda);
     return;
   }
 
@@ -1158,6 +1297,122 @@ let _solicitudDescuento = null;
 
 function cerrarModalDescuento() {
   document.getElementById("modal-descuento-bg").classList.remove("open");
+  document.getElementById("md-alerta-cobro").style.display    = "none";
+  document.getElementById("md-campos-extras").style.display   = "none";
+  if (document.getElementById("md-reporte")) document.getElementById("md-reporte").value = "";
+  if (document.getElementById("md-foto"))    document.getElementById("md-foto").value    = "";
+  if (document.getElementById("md-costo"))   document.getElementById("md-costo").value   = "";
+}
+
+async function verificarHistorialEnModal(idElemento, prenda) {
+  try {
+    const url = SCRIPT_URL + "?action=getHistorialPrenda&id=" + encodeURIComponent(idElemento) + "&prenda=" + encodeURIComponent(prenda);
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.ok) {
+      window._diasUltimaEntrega = data.diasDesdeUltima;
+      if (data.requiereDecision) {
+        const meses = Math.floor(data.diasDesdeUltima / 30);
+        const tiempo = meses > 0 ? "hace " + meses + " mes" + (meses>1?"es":"") : "hace " + data.diasDesdeUltima + " días";
+        document.getElementById("md-alerta-titulo").textContent = "⚠️ " + prenda + " entregada " + tiempo;
+        document.getElementById("md-alerta-cobro").style.display = "block";
+      }
+    }
+  } catch(e) {}
+}
+
+function seleccionarMotivo(motivo, btn) {
+  // Resetear estilos de todos los botones
+  document.querySelectorAll(".md-motivo-btn").forEach(b => {
+    b.style.background  = "var(--surface2)";
+    b.style.borderColor = "var(--border)";
+    b.style.color       = "var(--text2)";
+  });
+
+  // Estilo del seleccionado según tipo
+  const colores = {
+    accidente:   { bg:"rgba(93,184,122,0.15)", border:"var(--success)", text:"var(--success)" },
+    dano:        { bg:"rgba(224,123,74,0.15)", border:"var(--accent3)", text:"var(--accent3)" },
+    malUso:      { bg:"rgba(224,90,90,0.15)",  border:"var(--danger)",  text:"var(--danger)"  },
+    perdida:     { bg:"rgba(224,90,90,0.2)",   border:"var(--danger)",  text:"var(--danger)"  },
+    cambioTalla: { bg:"rgba(74,144,217,0.15)", border:"var(--accent)",  text:"var(--accent)"  }
+  };
+  const c = colores[motivo];
+  btn.style.background  = c.bg;
+  btn.style.borderColor = c.border;
+  btn.style.color       = c.text;
+
+  // Etiquetas legibles para guardar en el Sheet
+  const etiquetas = {
+    accidente:   "Accidente laboral",
+    dano:        "Daño",
+    malUso:      "Mal uso",
+    perdida:     "Pérdida",
+    cambioTalla: "Cambio de talla"
+  };
+  window._motivoEntrega   = etiquetas[motivo];
+  window._motivoEntregaId = motivo;
+
+  // Mostrar campos extras según motivo
+  const extras    = document.getElementById("md-campos-extras");
+  const fotoWrap  = document.getElementById("md-foto-wrap");
+  const costoWrap = document.getElementById("md-costo-wrap");
+  const reporteLab= document.getElementById("md-reporte-label");
+  const rangoHint = document.getElementById("md-rango-hint");
+  const costoInp  = document.getElementById("md-costo");
+  const prenda    = document.getElementById("md-prenda").value;
+
+  extras.style.display = "block";
+
+  if (motivo === "accidente") {
+    fotoWrap.style.display  = "none";
+    costoWrap.style.display = "none";
+    reporteLab.textContent  = "Descripción del accidente laboral";
+  } else if (motivo === "dano" || motivo === "malUso") {
+    const rango = obtenerRangoCosto(prenda, motivo);
+    if (!rango) {
+      mostrarToast("Esta prenda no aplica para " + etiquetas[motivo], "err");
+      btn.style.background = "var(--surface2)";
+      btn.style.borderColor = "var(--border)";
+      btn.style.color = "var(--text2)";
+      return;
+    }
+    fotoWrap.style.display  = "block";
+    costoWrap.style.display = "block";
+    reporteLab.textContent  = "Reporte del coordinador";
+    rangoHint.textContent   = "(rango sugerido: $" + rango[0] + " - $" + rango[1] + ")";
+    costoInp.min = rango[0];
+    costoInp.max = rango[1];
+    costoInp.value = rango[0]; // pre-llenar con mínimo
+  } else if (motivo === "perdida") {
+    const rango = obtenerRangoCosto(prenda, motivo);
+    if (!rango) { mostrarToast("Esta prenda no tiene costo de pérdida", "err"); return; }
+    fotoWrap.style.display  = "none";
+    costoWrap.style.display = "block";
+    reporteLab.textContent  = "Detalles de la pérdida";
+    rangoHint.textContent   = "(monto fijo)";
+    costoInp.value = rango[0];
+    costoInp.readOnly = true;
+  } else if (motivo === "cambioTalla") {
+    // Verificar si la entrega original fue hace menos de 7 días
+    const diasUltima = window._diasUltimaEntrega || 999;
+    fotoWrap.style.display  = "none";
+    costoWrap.style.display = "block";
+    reporteLab.textContent  = "Motivo del cambio de talla";
+    if (diasUltima <= 7) {
+      rangoHint.textContent = "(gratis — primera semana)";
+      costoInp.value = 0;
+    } else {
+      rangoHint.textContent = "($50 fijo)";
+      costoInp.value = 50;
+    }
+    costoInp.readOnly = true;
+  }
+
+  // Restaurar editable para daño/mal uso
+  if (motivo === "dano" || motivo === "malUso") {
+    costoInp.readOnly = false;
+  }
 }
 
 async function ejecutarDescuento(descontar) {
@@ -1168,31 +1423,74 @@ async function ejecutarDescuento(descontar) {
   const nota     = window._notaAtender || "";
   cerrarModalDescuento();
 
+  // Validar campos si se eligió motivo
+  const motivoEntrega = window._motivoEntrega || "Reposición";
+  const reporte = document.getElementById("md-reporte")?.value?.trim() || "";
+  const fotoURL = document.getElementById("md-foto")?.value?.trim() || "";
+  const costo   = parseFloat(document.getElementById("md-costo")?.value) || 0;
+
+  // Validar campos según motivo
+  if (["Daño","Mal uso"].includes(motivoEntrega)) {
+    if (!reporte) { mostrarToast("Escribe el reporte del coordinador", "err"); return; }
+    if (!fotoURL) { mostrarToast("Pega el link de la foto de evidencia", "err"); return; }
+    // Validar rango
+    const motivoId = window._motivoEntregaId;
+    const rango = obtenerRangoCosto(prenda, motivoId);
+    if (rango && (costo < rango[0] || costo > rango[1])) {
+      mostrarToast("El monto debe estar entre $" + rango[0] + " y $" + rango[1], "err"); return;
+    }
+  }
+  if (motivoEntrega === "Pérdida" && !reporte) {
+    mostrarToast("Describe los detalles de la pérdida", "err"); return;
+  }
+
+  cerrarModalDescuento();
+
   // Marcar como atendida
   await actualizarEstatus(id, "Atendida", nota);
 
   // Descontar del inventario si se eligió
   if (descontar && prenda && talla) {
     try {
-      const res  = await fetch(SCRIPT_URL, {
+      await fetch(SCRIPT_URL, {
         method: "POST",
         body: JSON.stringify({
           action:        "gestionarInventario",
           tipo:          "salidaUniforma",
-          prenda,
-          talla,
+          prenda, talla,
           cantidad:      -cantidad,
           motivo:        "Entrega a guardia (solicitud " + id + ")",
           notas:         "Descuento automático al atender solicitud",
           gestionadoPor: usuarioActual
         })
       });
-      const data = await res.json();
-      if (data.ok) mostrarToast("✓ Atendida y descontada del inventario", "ok");
-      else mostrarToast("Atendida — no se pudo descontar: " + (data.error||""), "err");
-    } catch(e) {
-      mostrarToast("Atendida — error al descontar inventario", "err");
-    }
+    } catch(e) {}
+  }
+
+  // Registrar entrega en historial si hay ID elemento
+  if (window._idElemento && prenda) {
+    try {
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action:      "registrarEntrega",
+          idElemento:  window._idElemento,
+          prenda, talla,
+          condicion:   "Nuevo",
+          solicitudId: id,
+          costo:       costo,
+          motivo:      motivoEntrega,
+          reporte:     reporte,
+          fotoURL:     fotoURL
+        })
+      });
+    } catch(e) {}
+  }
+
+  if (motivoEntrega === "Mal uso") {
+    mostrarToast("✓ Atendida — registrado cobro de $" + costo + " a nómina", "ok");
+  } else {
+    mostrarToast("✓ Atendida y registrada en historial", "ok");
   }
 }
 
@@ -1202,7 +1500,35 @@ async function accionRapida(id, nuevoEstatus) {
     abrirModal(id, nuevoEstatus);
     return;
   }
+  // Rechazar pide confirmación con motivo
+  if (nuevoEstatus === "Rechazada") {
+    abrirModalRechazar(id);
+    return;
+  }
   await actualizarEstatus(id, nuevoEstatus, "");
+}
+
+// ── RECHAZAR CON MOTIVO ──
+let solicitudARechazar = null;
+
+function abrirModalRechazar(id) {
+  solicitudARechazar = id;
+  document.getElementById("mr-id").textContent = id;
+  document.getElementById("mr-motivo").value = "";
+  document.getElementById("modal-rechazar-bg").classList.add("open");
+}
+
+function cerrarModalRechazar() {
+  document.getElementById("modal-rechazar-bg").classList.remove("open");
+  solicitudARechazar = null;
+}
+
+async function ejecutarRechazo() {
+  const motivo = document.getElementById("mr-motivo").value.trim();
+  if (!motivo) { mostrarToast("Escribe el motivo del rechazo", "err"); return; }
+  const idARechazar = solicitudARechazar;
+  cerrarModalRechazar();
+  await actualizarEstatus(idARechazar, "Rechazada", "RECHAZO: " + motivo);
 }
 
 async function actualizarEstatus(id, nuevoEstatus, nota) {
@@ -1900,20 +2226,41 @@ async function guardarRegistroFlota(tipo) {
 
 function cerrarModalFlota() { document.getElementById("modal-flota-bg").classList.remove("open"); }
 
-// Recuperar sesión al cargar — localStorage (recuerda) o sessionStorage (sesión)
+// ── AUTO-REFRESH ──
+let autoRefreshInterval = null;
+
+function iniciarAutoRefresh() {
+  if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+  autoRefreshInterval = setInterval(() => {
+    // Solo refrescar si está en pestaña solicitudes y no hay modal abierto
+    const tabActiva = sessionStorage.getItem("frago_tab") || "solicitudes";
+    const modalAbierto = document.querySelector(".modal-bg.open");
+    if (tabActiva === "solicitudes" && !modalAbierto && document.visibilityState === "visible") {
+      cargarSolicitudes();
+    }
+  }, 60000); // 60 segundos
+}
+
+function detenerAutoRefresh() {
+  if (autoRefreshInterval) {
+    clearInterval(autoRefreshInterval);
+    autoRefreshInterval = null;
+  }
+}
+
+// Recuperar sesión al cargar
 (function() {
   const userLocal   = localStorage.getItem("frago_user");
   const userSession = sessionStorage.getItem("frago_user");
   const user = userLocal || userSession;
   if (user && USUARIOS[user]) {
     mostrarPanel(user);
-    // Marcar checkbox si está recordado
+    iniciarAutoRefresh();
     if (userLocal) {
       const cb = document.getElementById("remember-me");
       if (cb) cb.checked = true;
     }
   }
-  // Pre-llenar usuario si estaba recordado
   if (userLocal) {
     const input = document.getElementById("login-user");
     if (input) { input.value = userLocal; }
