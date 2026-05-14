@@ -952,29 +952,9 @@ function regresarPaso() {
 
 // ── RECORDAR ROL Y NOMBRE ──
 function cargarDatosGuardados() {
-  const rolGuardado    = localStorage.getItem("frago_rol");
+  // Solo pre-llenar el nombre, NO el rol (el rol siempre debe seleccionarse manualmente)
   const nombreGuardado = localStorage.getItem("frago_nombre");
   if (nombreGuardado) document.getElementById("solicitante").value = nombreGuardado;
-  if (rolGuardado) {
-    const btn = document.querySelector(`.rol-btn[onclick*="'${rolGuardado}'"]`);
-    if (btn) {
-      // Pre-seleccionar sin disparar scroll
-      rolActual = rolGuardado;
-      btn.classList.add("active");
-      const acceso = ACCESO[rolGuardado] || [];
-      const grid = document.getElementById("tipo-grid");
-      grid.innerHTML = acceso.map(tipo => {
-        const c = TIPOS_CONFIG[tipo];
-        return `<button class="tipo-btn ${c.clase}" onclick="setTipo('${tipo}',this)">
-          <span class="tipo-icon">${c.icon}</span>
-          <span class="tipo-label">${c.label}</span>
-        </button>`;
-      }).join("");
-      document.getElementById("tipo-section").style.display = "block";
-      document.getElementById("btn-back").style.display = "block";
-      actualizarProgreso(2);
-    }
-  }
 }
 
 // ── PANTALLA DE CONFIRMACIÓN ──
@@ -1263,7 +1243,7 @@ async function cargarElementos() {
 
 const ROLES_ELEMENTOS = ["guardia","jefe_turno","coord_operativo"];
 
-function actualizarCampoSolicitante() {
+async function actualizarCampoSolicitante() {
   const esElemento = ROLES_ELEMENTOS.includes(rolActual);
   const input  = document.getElementById("solicitante");
   const select = document.getElementById("solicitante-select");
@@ -1273,14 +1253,26 @@ function actualizarCampoSolicitante() {
     label.innerHTML = "Elemento <span class=\"req\">*</span>";
     input.style.display  = "none";
     select.style.display = "block";
-    // Llenar select
+
+    // Si los elementos no han cargado, esperar
+    if (!elementosCache.length) {
+      select.innerHTML = '<option value="">Cargando elementos...</option>';
+      await cargarElementos();
+    }
+
+    if (!elementosCache.length) {
+      select.innerHTML = '<option value="">No hay elementos cargados</option>';
+      return;
+    }
+
     select.innerHTML = '<option value="">Selecciona elemento...</option>' +
       elementosCache.map(el => `<option value="${el.id}|${el.nombre}">${el.id} — ${el.nombre}</option>`).join("");
   } else {
     label.innerHTML = "Nombre del solicitante <span class=\"req\">*</span>";
     input.style.display  = "block";
     select.style.display = "none";
-    document.getElementById("elemento-info").style.display = "none";
+    const info = document.getElementById("elemento-info");
+    if (info) info.style.display = "none";
   }
 }
 
