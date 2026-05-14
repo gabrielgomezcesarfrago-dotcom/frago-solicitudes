@@ -1,22 +1,7 @@
-// Frago PWA Service Worker — Network First
-// Siempre intenta la red primero, usa caché solo sin conexión
-const CACHE_NAME = "frago-v4";
-const OFFLINE_ASSETS = [
-  "/frago-solicitudes/",
-  "/frago-solicitudes/index.html",
-  "/frago-solicitudes/frago_panel.html",
-  "/frago-solicitudes/manifest.json",
-  "/frago-solicitudes/manifest-admin.json",
-  "/frago-solicitudes/icon-192x192.png",
-  "/frago-solicitudes/icon-512x512.png"
-];
+// Frago PWA Service Worker — Network First v5
+const CACHE_NAME = "frago-v6";
 
 self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(OFFLINE_ASSETS))
-      .catch(err => console.log("Cache install error:", err))
-  );
   self.skipWaiting();
 });
 
@@ -32,37 +17,21 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   const url = new URL(event.request.url);
 
-  // Apps Script — nunca cachear
-  if (url.hostname.includes("script.google.com")) return;
+  // Apps Script y Google — nunca cachear
+  if (url.hostname.includes("script.google.com") ||
+      url.hostname.includes("googleapis.com") ||
+      url.hostname.includes("fonts.gstatic.com")) return;
 
-  // Google Fonts — cache first
-  if (url.hostname.includes("fonts.gstatic.com") || url.hostname.includes("fonts.googleapis.com")) {
-    event.respondWith(
-      caches.match(event.request).then(cached => {
-        if (cached) return cached;
-        return fetch(event.request).then(res => {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
-          return res;
-        });
-      })
-    );
-    return;
-  }
-
-  // Todo lo demás — Network First
+  // Network First — siempre intentar red primero
   event.respondWith(
     fetch(event.request)
       .then(res => {
-        if (res.ok) {
+        if (res.ok && res.status === 200) {
           const clone = res.clone();
           caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
         }
         return res;
       })
-      .catch(() => {
-        return caches.match(event.request)
-          .then(cached => cached || caches.match("/frago-solicitudes/"));
-      })
+      .catch(() => caches.match(event.request))
   );
 });
