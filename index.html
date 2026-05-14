@@ -15,17 +15,36 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f1117; --surface: #161b27; --surface2: #1c2235;
-    --border: #252d42; --border-focus: #4a6fa5;
-    --accent: #4a90d9; --accent2: #5db87a; --accent3: #e07b4a; --accent4: #9b6dd6;
-    --text: #e8eaf0; --text2: #8a93a8; --text3: #5a6275;
-    --danger: #e05a5a; --success: #5db87a;
-    --radius: 10px; --font: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
+  /* ── PALETA NOTION / STRIPE — oscuro cálido ── */
+  --bg:        #1c1c1e;
+  --bg-elev:   #232325;
+  --surface:   #252527;
+  --surface2:  #2c2c2e;
+  --surface3:  #3a3a3c;
+  --border:    #3a3a3c;
+  --border2:   #48484a;
+  --text:      #f5f5f4;
+  --text2:     #a8a8a8;
+  --text3:     #6e6e72;
+  --accent:    #635bff;        /* violeta Stripe */
+  --accent2:   #1ea672;        /* verde Stripe */
+  --accent3:   #ff9159;        /* naranja cálido */
+  --danger:    #e75767;
+  --success:   #1ea672;
+  --warning:   #f5a623;
+  --info:      #4a90e2;
+  --radius:    10px;
+  --radius-lg: 14px;
+  --font:      'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --mono:      'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+  --shadow:    0 1px 2px rgba(0,0,0,0.3), 0 1px 1px rgba(0,0,0,0.18);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.25);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.4);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
 
-  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 18px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
+  .header { background: rgba(28,28,30,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 0.5px solid var(--border); position: sticky; top: 0; z-index: 30; padding: 18px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
   .header-logo { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; color: #fff; flex-shrink: 0; }
   .header-title { font-size: 15px; font-weight: 500; margin-left: 4px; }
   .header-sub { font-size: 12px; color: var(--text2); margin-top: 1px; }
@@ -36,7 +55,7 @@
 
   /* ROL SELECTOR */
   .roles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
-  .rol-btn { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 12px 14px; cursor: pointer; text-align: left; transition: all 0.18s; color: var(--text2); font-family: var(--font); }
+  .rol-btn { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 12px 14px; cursor: pointer; text-align: left; transition: all 0.18s; color: var(--text2); font-family: var(--font); }
   .rol-btn:hover { border-color: var(--border-focus); color: var(--text); }
   .rol-btn.active { border-color: var(--accent); background: rgba(74,144,217,0.09); color: var(--text); }
   .rol-name { font-size: 13px; font-weight: 500; display: block; }
@@ -44,7 +63,7 @@
 
   /* TIPO SELECTOR */
   .tipo-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 28px; }
-  .tipo-btn { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 16px 8px; cursor: pointer; text-align: center; transition: all 0.18s; color: var(--text2); font-family: var(--font); }
+  .tipo-btn { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px 8px; cursor: pointer; text-align: center; transition: all 0.18s; color: var(--text2); font-family: var(--font); }
   .tipo-btn:hover { border-color: var(--border-focus); color: var(--text); }
   .tipo-btn.active.t-uniforme  { border-color: var(--accent);  background: rgba(74,144,217,0.09);  color: var(--text); }
   .tipo-btn.active.t-patrulla  { border-color: var(--accent3); background: rgba(224,123,74,0.09);  color: var(--text); }
@@ -182,6 +201,83 @@
   .remember-row span { font-size: 13px; color: var(--text2); }
 
   @media (max-width: 400px) { .field-row { grid-template-columns: 1fr; } .roles-grid { grid-template-columns: 1fr; } }
+
+  /* ── MICROINTERACCIONES Y TRANSICIONES ── */
+  * { transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease; }
+  body { font-feature-settings: 'cv11', 'ss01', 'ss03'; -webkit-font-smoothing: antialiased; }
+
+  button:active { transform: scale(0.97); }
+  .tab-btn:hover { background: rgba(99,91,255,0.08); }
+  .tab-btn.active { background: var(--accent) !important; color: #fff !important; }
+
+  .stat-card, .kpi-card, .unidad-card, .chart-card, .consumo-card, .inv-stat {
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .stat-card:hover, .kpi-card:hover, .unidad-card:hover {
+    transform: translateY(-1px);
+    border-color: var(--border2);
+    box-shadow: var(--shadow);
+  }
+
+  .solicitud-card, tr {
+    transition: background 0.15s ease;
+  }
+  .solicitud-card:hover { background: var(--surface2) !important; }
+  tbody tr:hover { background: rgba(99,91,255,0.06) !important; }
+
+  /* Modal animation */
+  .modal-bg {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(0,0,0,0.5) !important;
+  }
+  .modal-bg.open { animation: fadeIn 0.18s ease; }
+  .modal { animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: var(--shadow-lg); }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  /* Toast */
+  .toast {
+    box-shadow: var(--shadow-md) !important;
+    animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Inputs y selects */
+  input, select, textarea {
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  input:focus, select:focus, textarea:focus {
+    box-shadow: 0 0 0 3px rgba(99,91,255,0.2);
+  }
+
+  /* Botones principales */
+  .btn-modal, .btn-nueva, .btn-login-op, .btn-aprobar {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    transition: all 0.15s ease;
+  }
+  .btn-modal:hover, .btn-nueva:hover, .btn-login-op:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+  }
+
+  /* Scrollbars suaves */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border2); }
+
+  /* Mejor tipografía */
+  h1, h2, h3, .header-title, .login-title, .modal-title { letter-spacing: -0.02em; }
+
+  /* Badges más finos */
+  .badge {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    font-size: 11px;
+    padding: 3px 9px;
+  }
+
 </style>
 <!-- OneSignal Push Notifications -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
@@ -215,6 +311,7 @@
     };
   });
 </script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 </head>
 <body>
 
