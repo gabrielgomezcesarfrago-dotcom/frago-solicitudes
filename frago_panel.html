@@ -1078,8 +1078,10 @@ async function consultarHistorialPrenda(idElemento, prenda) {
   if (!wrap) return;
   wrap.innerHTML = '<p style="font-size:12px;color:var(--text3);margin-top:12px;">Verificando historial de entregas...</p>';
   try {
-    const url = SCRIPT_URL + "?action=getHistorialPrenda&id=" + encodeURIComponent(idElemento) + "&prenda=" + encodeURIComponent(prenda);
-    const res  = await fetch(url);
+    const res  = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "getHistorialPrenda", id: idElemento, prenda: prenda })
+    });
     const data = await res.json();
     if (!data.ok) { wrap.innerHTML = ""; return; }
 
@@ -1306,8 +1308,10 @@ function cerrarModalDescuento() {
 
 async function verificarHistorialEnModal(idElemento, prenda) {
   try {
-    const url = SCRIPT_URL + "?action=getHistorialPrenda&id=" + encodeURIComponent(idElemento) + "&prenda=" + encodeURIComponent(prenda);
-    const res  = await fetch(url);
+    const res  = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "getHistorialPrenda", id: idElemento, prenda: prenda })
+    });
     const data = await res.json();
     if (data.ok) {
       window._diasUltimaEntrega = data.diasDesdeUltima;
