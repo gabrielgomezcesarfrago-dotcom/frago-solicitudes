@@ -289,6 +289,18 @@
   * { max-width: 100%; box-sizing: border-box; }
   img, svg, canvas { max-width: 100%; height: auto; }
   /* CONTENCION_HORIZONTAL */
+  /* ── ÁREAS SEGURAS iOS (Dynamic Island / Notch) ── */
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  .header {
+    padding-top: calc(12px + env(safe-area-inset-top));
+  }
+  /* SAFE_AREAS */
+
 </style>
 <!-- OneSignal Push Notifications -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
