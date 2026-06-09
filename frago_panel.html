@@ -988,9 +988,11 @@ function normalizarTipo(tipo) {
 }
 
 function puedeEjecutar(accion, tipo) {
-  const cadena = CADENA[normalizarTipo(tipo)] || CADENA["Papeleria"];
-  const permitidos = cadena[accion] || [];
-  return permitidos.includes(usuarioActual);
+  // Todos los roles admin (Gabriel, Emiliano, Gigi, Othón, Samantha) pueden:
+  // - aprobar, rechazar, atender y cerrar cualquier tipo de solicitud
+  // Cancelar también lo pueden hacer todos
+  if (!usuarioActual) return false;
+  return USUARIOS[usuarioActual] !== undefined;
 }
 
 const USUARIOS = {
@@ -1909,7 +1911,7 @@ function mostrarError(msg) {
 }
 // ── ROLES CON ACCESO A INVENTARIO ──
 const ROLES_INV = ["gigi","gabriel","emiliano","othon"];
-const ROLES_CANCELAR = ["gigi","gabriel","emiliano","othon"];
+const ROLES_CANCELAR = ["gabriel","emiliano","gigi","othon","samantha"];
 
 // ── PESTAÑAS ──
 function setTab(tab, btn) {
