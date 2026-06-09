@@ -554,14 +554,45 @@
         <label>Tipo de solicitud <span class="req">*</span></label>
         <select id="tipo-patrulla" onchange="onTipoPatrullaChange()">
           <option value="">Selecciona...</option>
-          <option value="Carga de gasolina">Carga de gasolina</option>
-          <option value="Mantenimiento preventivo" class="opt-restringida">Mantenimiento preventivo</option>
-          <option value="Reparacion" class="opt-restringida-mono">Reparación</option>
-          <option value="Revision general" class="opt-restringida-jefe">Revisión general</option>
+          <option value="Carga de gasolina">⛽ Carga de gasolina</option>
+          <option value="Insumos">🛢️ Insumos</option>
+          <option value="Revision general" class="opt-restringida-jefe">🔧 Revisión / Servicio</option>
+          <option value="Mantenimiento preventivo" class="opt-restringida">🔧 Mantenimiento preventivo</option>
+          <option value="Reparacion" class="opt-restringida-mono">🔨 Reparación</option>
         </select>
       </div>
+
+      <!-- Bloque INSUMOS (solo visible si tipo = Insumos) -->
+      <div id="bloque-insumos-patrulla" style="display:none;">
+        <div class="field">
+          <label>Insumo <span class="req">*</span></label>
+          <select id="insumo-patrulla">
+            <option value="">Selecciona un insumo...</option>
+            <option>Aceite de motor</option>
+            <option>Anticongelante / refrigerante</option>
+            <option>Líquido limpiaparabrisas</option>
+            <option>Líquido de frenos</option>
+            <option>Líquido de dirección hidráulica</option>
+            <option>Líquido de transmisión</option>
+            <option>Aire para llantas</option>
+            <option>Limpiaparabrisas (escobillas)</option>
+            <option>Focos / bombillas</option>
+            <option>Fusibles</option>
+            <option>Filtro de aire</option>
+            <option>Filtro de aceite</option>
+            <option>Batería</option>
+            <option>Llanta de refacción</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Cantidad</label>
+          <input type="number" id="cantidad-insumo" min="1" value="1" placeholder="Ej. 1">
+        </div>
+      </div>
+
       <div class="field">
-        <label>Descripción <span class="req">*</span></label>
+        <label id="label-desc-patrulla">Descripción <span class="req">*</span></label>
         <textarea id="detalle-patrulla" placeholder="Describe el problema o servicio requerido..."></textarea>
       </div>
       <div class="field">
@@ -737,9 +768,9 @@ const TIPOS_CONFIG = {
 // Roles con acceso a condición de uniforme
 const ROLES_CON_CONDICION = ["coord_operativo","coord_general","director_general","director_finanzas"];
 // Roles solo gasolina en patrulla
-const ROLES_SOLO_GASOLINA = ["jefe_turno"];
+const ROLES_GASOLINA_INSUMOS_REVISION = ["jefe_turno","coord_operativo"]; // pueden solicitar gasolina, insumos y revisión
 // Roles gasolina + revisión en patrulla
-const ROLES_GAS_REVISION  = ["coord_operativo"];
+
 // Roles sin Virtus Auto
 const ROLES_SIN_VIRTUS    = ["jefe_turno","coord_operativo"];
 // Roles con Oficinas en papelería
@@ -938,15 +969,17 @@ async function poblarServicios() {
 
 // ── RESTRICCIONES PATRULLA ──
 function aplicarRestriccionesPatrulla() {
-  const soloGasolina  = ROLES_SOLO_GASOLINA.includes(rolActual);
-  const gasRevision   = ROLES_GAS_REVISION.includes(rolActual);
-  const sinVirtus     = ROLES_SIN_VIRTUS.includes(rolActual);
-  const aviso         = document.getElementById("aviso-patrulla");
+  const operativos = ROLES_GASOLINA_INSUMOS_REVISION.includes(rolActual);
+  const sinVirtus  = ROLES_SIN_VIRTUS.includes(rolActual);
+  const aviso      = document.getElementById("aviso-patrulla");
 
   // Aviso
-  if (soloGasolina) { aviso.textContent = "⚠️ Tu rol solo permite solicitar carga de gasolina."; aviso.classList.add("visible"); }
-  else if (gasRevision) { aviso.textContent = "⚠️ Tu rol solo permite solicitar gasolina o revisión general."; aviso.classList.add("visible"); }
-  else { aviso.classList.remove("visible"); }
+  if (operativos) {
+    aviso.textContent = "ⓘ Tu rol permite solicitar carga de gasolina, insumos y revisión / servicio.";
+    aviso.classList.add("visible");
+  } else {
+    aviso.classList.remove("visible");
+  }
 
   // Virtus Auto
   const optVirtus = document.getElementById("opt-virtus-auto");
@@ -954,24 +987,33 @@ function aplicarRestriccionesPatrulla() {
   if (sinVirtus && document.getElementById("unidad").value === "Virtus Automatico 2023")
     document.getElementById("unidad").value = "";
 
-  // Tipos de solicitud
+  // Tipos de solicitud — para operativos solo: gasolina, insumos, revisión
   const tp = document.getElementById("tipo-patrulla");
   document.querySelectorAll(".opt-restringida").forEach(opt => {
-    const hide = soloGasolina || gasRevision;
-    opt.disabled = hide; opt.style.display = hide ? "none" : "";
+    opt.disabled = operativos; opt.style.display = operativos ? "none" : "";
   });
-  const optRevision = document.querySelector('[value="Revision general"]');
-  if (optRevision) { optRevision.disabled = soloGasolina; optRevision.style.display = soloGasolina ? "none" : ""; }
-
-  if (soloGasolina && tp.value !== "Carga de gasolina") tp.value = "";
-  else if (gasRevision && !["Carga de gasolina","Revision general"].includes(tp.value)) tp.value = "";
+  const TIPOS_PERMITIDOS_OPERATIVOS = ["Carga de gasolina","Insumos","Revision general"];
+  if (operativos && tp.value && !TIPOS_PERMITIDOS_OPERATIVOS.includes(tp.value)) tp.value = "";
 }
 
 function esMonopatin() { return document.getElementById("unidad").value === "Monopatin Electrico Real del Lago"; }
 
 function onTipoPatrullaChange() {
-  if (esMonopatin() && !["Reparacion","Revision general"].includes(document.getElementById("tipo-patrulla").value))
+  const tp = document.getElementById("tipo-patrulla").value;
+  if (esMonopatin() && !["Reparacion","Revision general"].includes(tp))
     document.getElementById("tipo-patrulla").value = "";
+
+  // Mostrar bloque de insumos si aplica
+  const bloque = document.getElementById("bloque-insumos-patrulla");
+  if (bloque) bloque.style.display = (tp === "Insumos") ? "block" : "none";
+
+  // Cambiar label de descripción según tipo
+  const lbl = document.getElementById("label-desc-patrulla");
+  if (lbl) {
+    if (tp === "Insumos") lbl.innerHTML = "Notas adicionales <span class=\"req\">*</span>";
+    else if (tp === "Carga de gasolina") lbl.innerHTML = "Litros / detalles <span class=\"req\">*</span>";
+    else lbl.innerHTML = "Descripción <span class=\"req\">*</span>";
+  }
 }
 
 // Restringe opciones cuando se selecciona el monopatín
@@ -1055,8 +1097,12 @@ function validar() {
     const tipoPat = document.getElementById("tipo-patrulla").value;
     if (!unidad)  { mostrarToast("Selecciona la unidad", "err"); return false; }
     if (!tipoPat) { mostrarToast("Selecciona el tipo de solicitud", "err"); return false; }
-    if (ROLES_SOLO_GASOLINA.includes(rolActual) && tipoPat !== "Carga de gasolina") { mostrarToast("Tu rol solo puede solicitar gasolina", "err"); return false; }
-    if (ROLES_GAS_REVISION.includes(rolActual) && !["Carga de gasolina","Revision general"].includes(tipoPat)) { mostrarToast("Tu rol solo puede solicitar gasolina o revisión general", "err"); return false; }
+    if (ROLES_GASOLINA_INSUMOS_REVISION.includes(rolActual) && !["Carga de gasolina","Insumos","Revision general"].includes(tipoPat)) {
+      mostrarToast("Tu rol solo puede solicitar gasolina, insumos o revisión general", "err"); return false;
+    }
+    if (tipoPat === "Insumos" && !document.getElementById("insumo-patrulla").value) {
+      mostrarToast("Selecciona un insumo", "err"); return false;
+    }
     if (esMonopatin() && !["Reparacion","Revision general"].includes(tipoPat)) { mostrarToast("El monopatín solo permite reparación o revisión general", "err"); return false; }
     if (!document.getElementById("detalle-patrulla").value.trim()) { mostrarToast("Describe la solicitud", "err"); return false; }
   }
