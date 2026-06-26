@@ -1609,8 +1609,16 @@ function filtrarNombres() {
   if (q.length < 2) { box.style.display = "none"; return; }
   const norm = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
   const qn = norm(q);
-  const matches = elementosCache.filter(el => norm(el.nombre).includes(qn)).slice(0, 6);
-  if (!matches.length) { box.innerHTML = '<div class="sugerencia-item" style="color:var(--text3);">Sin coincidencias</div>'; box.style.display = "block"; return; }
+
+  // Filtrar SOLO elementos cuyo rol coincide con el rol seleccionado
+  const elementosDelRol = elementosCache.filter(el => el.rol === rolPendiente);
+
+  const matches = elementosDelRol.filter(el => norm(el.nombre).includes(qn)).slice(0, 6);
+  if (!matches.length) {
+    box.innerHTML = '<div class="sugerencia-item" style="color:var(--text3);">Sin coincidencias en este rol</div>';
+    box.style.display = "block";
+    return;
+  }
   box.innerHTML = matches.map(el =>
     `<div class="sugerencia-item" onclick="seleccionarNombre('${el.id}','${el.nombre.replace(/'/g,"\\'")}')">${el.nombre}<span class="sugerencia-id">${el.id}</span></div>`
   ).join("");
@@ -1632,12 +1640,13 @@ function validarOperativo() {
   if (!nombre) { errEl.textContent = "Escribe tu nombre"; return; }
   if (!pin)    { errEl.textContent = "Ingresa tu PIN";   return; }
 
-  // Buscar coincidencia exacta o por ID
+  // Buscar coincidencia exacta o por ID, SOLO entre elementos del rol seleccionado
   const norm = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-  const elemento = elementosCache.find(el => norm(el.nombre) === norm(nombre)) ||
-                   elementosCache.find(el => el.id === pin);
+  const elementosDelRol = elementosCache.filter(el => el.rol === rolPendiente);
+  const elemento = elementosDelRol.find(el => norm(el.nombre) === norm(nombre)) ||
+                   elementosDelRol.find(el => el.id === pin);
 
-  if (!elemento) { errEl.textContent = "Nombre no encontrado en el sistema"; return; }
+  if (!elemento) { errEl.textContent = "Nombre no encontrado para este rol"; return; }
   if (elemento.id !== pin) { errEl.textContent = "PIN incorrecto"; return; }
 
   usuarioLogeadoId     = elemento.id;
