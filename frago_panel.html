@@ -515,6 +515,7 @@
       <button class="tab-btn" onclick="setTab('dashboard',this)">📊 Dashboard</button>
       <button class="tab-btn" id="tab-btn-inventario" onclick="setTab('inventario',this)">📦 Inventario</button>
       <button class="tab-btn" onclick="setTab('flota',this)">🚗 Flota</button>
+      <button class="tab-btn" onclick="setTab('elementos',this)">👤 Elementos</button>
     </div>
 
     <!-- ── TAB: SOLICITUDES ── -->
@@ -738,6 +739,22 @@
             </tbody>
           </table>
         </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: ELEMENTOS ── -->
+    <div class="tab-content" id="tab-elementos">
+      <div style="position:relative;margin-bottom:20px;">
+        <input class="filtro-buscar" type="text" id="elem-buscar" placeholder="🔍 Busca un elemento por nombre o ID..." oninput="filtrarElementosDash()" autocomplete="off" style="width:100%;font-size:15px;padding:14px 16px;">
+        <div id="elem-sugerencias" style="position:absolute;top:100%;left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-top:4px;max-height:280px;overflow-y:auto;display:none;z-index:20;box-shadow:var(--shadow-lg);"></div>
+      </div>
+
+      <div id="elem-detalle" style="display:none;"></div>
+
+      <div id="elem-placeholder" style="text-align:center;padding:60px 20px;color:var(--text3);">
+        <div style="font-size:48px;margin-bottom:12px;opacity:0.3;">👤</div>
+        <div style="font-size:15px;margin-bottom:4px;">Busca un elemento</div>
+        <div style="font-size:13px;">Escribe un nombre o ID para ver su información completa</div>
       </div>
     </div>
 
@@ -1923,6 +1940,172 @@ function setTab(tab, btn) {
   if (tab === "dashboard") renderDashboard();
   if (tab === "inventario") iniciarInventario();
   if (tab === "flota") iniciarFlota();
+  if (tab === "elementos") iniciarElementos();
+}
+
+// ── PESTAÑA ELEMENTOS ──
+let elementosListaDash = [];
+
+async function iniciarElementos() {
+  // Cargar lista de elementos si no la tenemos
+  if (elementosListaDash.length === 0) {
+    try {
+      const res = await fetchConReintentos(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "getElementos" })
+      });
+      const data = await res.json();
+      if (data.ok) elementosListaDash = data.elementos || [];
+    } catch(e) {}
+  }
+}
+
+function filtrarElementosDash() {
+  const q = document.getElementById("elem-buscar").value.trim().toLowerCase();
+  const box = document.getElementById("elem-sugerencias");
+  if (q.length < 2) { box.style.display = "none"; return; }
+  const norm = s => String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  const qn = norm(q);
+  const matches = elementosListaDash.filter(el =>
+    norm(el.nombre).includes(qn) || el.id.toLowerCase().includes(qn)
+  ).slice(0, 8);
+
+  if (!matches.length) {
+    box.innerHTML = '<div style="padding:12px 16px;color:var(--text3);font-size:13px;">Sin coincidencias</div>';
+    box.style.display = "block";
+    return;
+  }
+  box.innerHTML = matches.map(el =>
+    `<div onclick="verDetalleElemento('${el.id}')" style="padding:12px 16px;font-size:14px;color:var(--text);cursor:pointer;border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;" onmouseover="this.style.background='var(--accent)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='var(--text)'">
+      <span>${el.nombre}</span>
+      <span style="font-family:var(--mono);font-size:11px;opacity:0.6;">${el.id} · ${el.rol}</span>
+    </div>`
+  ).join("");
+  box.style.display = "block";
+}
+
+async function verDetalleElemento(idElemento) {
+  document.getElementById("elem-sugerencias").style.display = "none";
+  document.getElementById("elem-placeholder").style.display = "none";
+  const cont = document.getElementById("elem-detalle");
+  cont.style.display = "block";
+  cont.innerHTML = '<p style="text-align:center;padding:40px;color:var(--text3);">Cargando información...</p>';
+
+  try {
+    const res = await fetchConReintentos(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "getDetalleElemento", id: idElemento })
+    });
+    const data = await res.json();
+    if (!data.ok) { cont.innerHTML = '<p style="text-align:center;padding:40px;color:var(--danger);">Error: ' + (data.error||"") + '</p>'; return; }
+
+    const e = data.elemento;
+    const fechaIngreso = new Date(e.fechaIngreso);
+    const antiguedadDias = Math.floor((Date.now() - fechaIngreso) / 86400000);
+    const antiguedadTxt = antiguedadDias > 365 ? Math.floor(antiguedadDias/365) + " año" + (Math.floor(antiguedadDias/365)>1?"s":"") :
+                          Math.floor(antiguedadDias/30) + " meses";
+
+    const rolLabels = { guardia:"Guardia", jefe_turno:"Jefe de turno", coord_operativo:"Coordinador operativo" };
+
+    const motivoColor = {
+      "Ingreso": "#6e6e72", "Reposición": "#4a90e2",
+      "Daño accidental": "#1ea672", "Accidente laboral": "#1ea672",
+      "Daño": "#ff9159", "Mal uso": "#e75767", "Pérdida": "#e75767",
+      "Cambio de talla": "#635bff"
+    };
+
+    cont.innerHTML = `
+      <!-- Datos generales -->
+      <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+          <div style="width:56px;height:56px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;font-weight:600;">${e.nombre.charAt(0)}</div>
+          <div>
+            <div style="font-size:20px;font-weight:600;color:var(--text);">${e.nombre}</div>
+            <div style="font-size:13px;color:var(--text2);">${e.id} · ${rolLabels[e.rol]||e.rol}</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <div style="background:var(--surface2);border-radius:10px;padding:12px;">
+            <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Ingreso</div>
+            <div style="font-size:14px;color:var(--text);">${fechaIngreso.toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"})}</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:10px;padding:12px;">
+            <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Antigüedad</div>
+            <div style="font-size:14px;color:var(--text);">${antiguedadTxt}</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:10px;padding:12px;">
+            <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Estatus</div>
+            <div style="font-size:14px;color:var(--success);">● Activo</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Uniformes asignados -->
+      <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px;">📦 Uniformes asignados actualmente</div>
+        ${data.asignadas.length ? data.asignadas.map(a => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--border);">
+            <div>
+              <div style="font-size:14px;color:var(--text);">${a.prenda}</div>
+              <div style="font-size:11px;color:var(--text3);">Talla ${a.talla} · entregada ${new Date(a.fecha).toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"})}</div>
+            </div>
+            <span style="font-size:11px;padding:4px 10px;border-radius:12px;background:${a.dentroCobertura?'rgba(231,87,103,0.15)':'rgba(30,166,114,0.15)'};color:${a.dentroCobertura?'#e75767':'#1ea672'};">
+              ${a.dentroCobertura? 'En cobertura ('+Math.floor((180-a.diasDesde)/30)+' meses)' : 'Renovable'}
+            </span>
+          </div>
+        `).join("") : '<p style="font-size:13px;color:var(--text3);padding:8px 0;">Sin uniformes registrados</p>'}
+      </div>
+
+      <!-- Resumen de cobros -->
+      <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px;">💰 Resumen de cobros</div>
+        <div style="font-size:28px;font-weight:600;color:${data.totalCobrado>0?'#e75767':'var(--text)'};margin-bottom:12px;">$${data.totalCobrado.toLocaleString('es-MX')} <span style="font-size:13px;font-weight:400;color:var(--text3);">MXN total histórico</span></div>
+        ${Object.keys(data.cobrosPorMotivo).length ? `
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            ${Object.entries(data.cobrosPorMotivo).map(([motivo, monto]) => `
+              <span style="font-size:12px;padding:5px 12px;border-radius:8px;background:var(--surface2);color:var(--text2);">${motivo}: <strong style="color:var(--text);">$${monto}</strong></span>
+            `).join("")}
+          </div>
+        ` : '<p style="font-size:13px;color:var(--text3);">Sin cobros registrados</p>'}
+      </div>
+
+      <!-- Historial de entregas -->
+      <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px;">📋 Historial completo de entregas (${data.historial.length})</div>
+        ${data.historial.length ? data.historial.map(h => `
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:12px 0;border-bottom:0.5px solid var(--border);">
+            <div style="flex:1;">
+              <div style="font-size:14px;color:var(--text);">${h.prenda} <span style="color:var(--text3);font-size:12px;">· Talla ${h.talla}</span></div>
+              <div style="font-size:11px;color:var(--text3);margin-top:2px;">${new Date(h.fecha).toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"})}${h.reporte? ' · '+h.reporte : ''}</div>
+            </div>
+            <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+              <span style="font-size:10px;padding:3px 8px;border-radius:8px;background:${(motivoColor[h.motivo]||'#6e6e72')}22;color:${motivoColor[h.motivo]||'#6e6e72'};">${h.motivo}</span>
+              ${h.costo>0? '<span style="font-size:12px;color:#e75767;font-weight:500;">$'+h.costo+'</span>' : '<span style="font-size:11px;color:var(--text3);">Sin costo</span>'}
+            </div>
+          </div>
+        `).join("") : '<p style="font-size:13px;color:var(--text3);">Sin entregas registradas</p>'}
+      </div>
+
+      <!-- Solicitudes hechas -->
+      <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:14px;padding:20px;">
+        <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px;">📝 Solicitudes realizadas (${data.solicitudes.length})</div>
+        ${data.solicitudes.length ? data.solicitudes.slice(0,15).map(s => {
+          const estColor = { Pendiente:"#f5a623", Aprobada:"#4a90e2", Atendida:"#1ea672", Cerrada:"#6e6e72", Rechazada:"#e75767", Cancelada:"#6e6e72" }[s.estatus] || "#6e6e72";
+          return `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--border);cursor:pointer;" onclick="setTab('solicitudes',document.querySelector('.tab-btn'));setTimeout(()=>abrirModal('${s.id}'),400);">
+              <div>
+                <div style="font-size:13px;color:var(--text);">${s.tipo} <span style="font-family:var(--mono);font-size:10px;color:var(--text3);">${s.id}</span></div>
+                <div style="font-size:11px;color:var(--text3);">${new Date(s.fecha).toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"})} · ${(s.detalle||"").substring(0,50)}</div>
+              </div>
+              <span style="font-size:11px;color:${estColor};">● ${s.estatus}</span>
+            </div>
+          `;
+        }).join("") : '<p style="font-size:13px;color:var(--text3);">Sin solicitudes registradas</p>'}
+      </div>
+    `;
+  } catch(err) {
+    cont.innerHTML = '<p style="text-align:center;padding:40px;color:var(--danger);">Error de conexión</p>';
+  }
 }
 
 // ── INVENTARIO ──
