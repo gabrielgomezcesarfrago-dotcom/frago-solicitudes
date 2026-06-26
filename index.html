@@ -1,1205 +1,1795 @@
-// ============================================================
-// FRAGO — Sistema de Requisiciones
-// Apps Script backend
-// Pegar en: Extensiones → Apps Script (desde el Google Sheet)
-// ============================================================
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Frago — Solicitudes</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f1117">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FRAGO">
+<link rel="apple-touch-icon" href="icon-192x192.png">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+  /* ── PALETA NOTION / STRIPE — oscuro cálido ── */
+  --bg:        #1c1c1e;
+  --bg-elev:   #232325;
+  --surface:   #252527;
+  --surface2:  #2c2c2e;
+  --surface3:  #3a3a3c;
+  --border:    #3a3a3c;
+  --border2:   #48484a;
+  --text:      #f5f5f4;
+  --text2:     #a8a8a8;
+  --text3:     #6e6e72;
+  --accent:    #635bff;        /* violeta Stripe */
+  --accent2:   #1ea672;        /* verde Stripe */
+  --accent3:   #ff9159;        /* naranja cálido */
+  --danger:    #e75767;
+  --success:   #1ea672;
+  --warning:   #f5a623;
+  --info:      #4a90e2;
+  --radius:    10px;
+  --radius-lg: 14px;
+  --font:      'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --mono:      'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+  --shadow:    0 1px 2px rgba(0,0,0,0.3), 0 1px 1px rgba(0,0,0,0.18);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.25);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
 
-const SHEET_ID = "1JVP_uxW8BqazKIYzYGxQywmcplOBcZyzSg2Tq_zPnUQ";
+  .header { background: rgba(28,28,30,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 0.5px solid var(--border); position: sticky; top: 0; z-index: 30; padding: 18px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
+  .header-logo { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; color: #fff; flex-shrink: 0; }
+  .header-title { font-size: 15px; font-weight: 500; margin-left: 4px; }
+  .header-sub { font-size: 12px; color: var(--text2); margin-top: 1px; }
 
-// OneSignal Push Notifications
-const ONESIGNAL_APP_ID  = "f70dfc23-53ee-436a-89eb-f1bbd53d5755";
-const ONESIGNAL_API_KEY = "os_v2_app_64g7yi2t5zbwvcpl6g55kpkxkwjmka4aejpujwmnhht3wuvfrbjyr34gnxydaygfegta2pk46sf54yqenxskxd5t7mc2g7ri2hzdcky";
-const PANEL_URL_PWA     = "https://gabrielgomezcesarfrago-dotcom.github.io/frago-solicitudes/frago_panel.html";
+  .main { max-width: 560px; margin: 0 auto; padding: 28px 20px 80px; }
 
-function urlPanelConSolicitud(id) {
-  return PANEL_URL_PWA + (id ? "?solicitud=" + encodeURIComponent(id) : "");
-}
-const HOJA_REQUISICIONES = "Requisiciones";
-const HOJA_SERVICIOS = "Catalogo_Servicios";
+  .section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; margin-top: 24px; }
 
-// Correos del equipo — solo Gabriel durante pruebas
-// Usuarios admin que reciben push (external_user_id = nombre de usuario)
-const USERS_ADMIN = {
-  gabriel:  "gabriel",
-  emiliano: "emiliano",
-  gigi:     "gigi",
-  othon:    "othon",
-  samantha: "samantha"
+  /* ROL SELECTOR */
+  .roles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
+  .rol-btn { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 12px 14px; cursor: pointer; text-align: left; transition: all 0.18s; color: var(--text2); font-family: var(--font); }
+  .rol-btn:hover { border-color: var(--border-focus); color: var(--text); }
+  .rol-btn.active { border-color: var(--accent); background: rgba(74,144,217,0.09); color: var(--text); }
+  .rol-name { font-size: 13px; font-weight: 500; display: block; }
+  .rol-sub { font-size: 11px; color: var(--text3); margin-top: 2px; display: block; }
+
+  /* TIPO SELECTOR */
+  .tipo-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 28px; }
+  .tipo-btn { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px 8px; cursor: pointer; text-align: center; transition: all 0.18s; color: var(--text2); font-family: var(--font); }
+  .tipo-btn:hover { border-color: var(--border-focus); color: var(--text); }
+  .tipo-btn.active.t-uniforme  { border-color: var(--accent);  background: rgba(74,144,217,0.09);  color: var(--text); }
+  .tipo-btn.active.t-patrulla  { border-color: var(--accent3); background: rgba(224,123,74,0.09);  color: var(--text); }
+  .tipo-btn.active.t-papeleria { border-color: var(--accent2); background: rgba(93,184,122,0.09);  color: var(--text); }
+  .tipo-btn.active.t-equipo    { border-color: var(--accent4); background: rgba(155,109,214,0.09); color: var(--text); }
+  .tipo-btn.active.t-consulta  { border-color: #4abfbf; background: rgba(74,191,191,0.09); color: var(--text); }
+  .tipo-icon { font-size: 24px; display: block; margin-bottom: 8px; }
+  .tipo-label { font-size: 12px; font-weight: 500; display: block; }
+
+  /* FIELDS */
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 6px; }
+  .field label .req { color: var(--danger); margin-left: 3px; }
+  input[type="text"], input[type="number"], select, textarea {
+    width: 100%; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius);
+    color: var(--text); font-family: var(--font); font-size: 14px; padding: 11px 14px;
+    outline: none; transition: border-color 0.15s; -webkit-appearance: none; appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--border-focus); }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a93a8' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+  select option { background: #1c2235; }
+  textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* URGENCIA */
+  .urgencia-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+  .urg-btn { border: 1.5px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--text2); background: var(--surface); transition: all 0.15s; font-family: var(--font); }
+  .urg-btn:hover { border-color: var(--border-focus); color: var(--text); }
+  .urg-btn.active[data-urg="Normal"]  { border-color: var(--accent2); color: var(--accent2); background: rgba(93,184,122,0.09); }
+  .urg-btn.active[data-urg="Urgente"] { border-color: #e0b84a; color: #e0b84a; background: rgba(224,184,74,0.09); }
+  .urg-btn.active[data-urg="Critico"] { border-color: var(--danger); color: var(--danger); background: rgba(224,90,90,0.09); }
+
+  /* CONDICIÓN */
+  .cond-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+  .cond-btn { border: 1.5px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--text2); background: var(--surface); transition: all 0.15s; font-family: var(--font); }
+  .cond-btn:hover { border-color: var(--border-focus); color: var(--text); }
+  .cond-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(74,144,217,0.09); }
+
+  .modulo { display: none; }
+  .modulo.visible { display: block; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+  .aviso { background: rgba(224,123,74,0.08); border: 1px solid rgba(224,123,74,0.3); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #e07b4a; margin-bottom: 14px; display: none; line-height: 1.5; }
+  .aviso.visible { display: block; }
+
+  .btn-submit { width: 100%; padding: 14px; border: none; border-radius: var(--radius); font-family: var(--font); font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.18s; margin-top: 8px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn-submit:active { transform: translateY(0); }
+  .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-submit.t-patrulla  { background: var(--accent3); }
+  .btn-submit.t-papeleria { background: var(--accent2); }
+  .btn-submit.t-equipo    { background: var(--accent4); }
+
+  .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 22px; font-size: 14px; color: var(--text); opacity: 0; transition: all 0.3s ease; pointer-events: none; z-index: 999; box-shadow: 0 8px 32px rgba(0,0,0,0.4); max-width: 90vw; text-align: center; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.ok { border-color: var(--success); } .toast.err { border-color: var(--danger); }
+
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #tipo-section { display: none; }
+  #form-body { display: none; }
+  #confirmacion-screen { display: none; }
+  #consulta-section { margin-top: 32px; }
+
+  /* Barra de progreso */
+  .progress-bar { display: flex; align-items: center; gap: 0; margin-bottom: 28px; }
+  .progress-step { display: flex; align-items: center; gap: 6px; }
+  .progress-dot { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; transition: all 0.2s; background: var(--surface2); color: var(--text3); border: 1.5px solid var(--border); }
+  .progress-dot.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .progress-dot.done { background: var(--accent2); color: #fff; border-color: var(--accent2); }
+  .progress-label { font-size: 12px; color: var(--text3); white-space: nowrap; }
+  .progress-label.active { color: var(--text); font-weight: 500; }
+  .progress-line { flex: 1; height: 1.5px; background: var(--border); margin: 0 8px; min-width: 20px; }
+  .progress-line.done { background: var(--accent2); }
+
+  /* Botón regresar */
+  .btn-back { background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--text2); font-family: var(--font); font-size: 13px; padding: 7px 14px; cursor: pointer; margin-bottom: 16px; transition: all 0.15s; display: none; }
+  .btn-back:hover { border-color: var(--border-focus); color: var(--text); }
+
+  /* Pantalla de confirmación */
+  .confirm-screen { text-align: center; padding: 20px 0; }
+  .confirm-icon { font-size: 56px; margin-bottom: 16px; }
+  .confirm-title { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .confirm-sub { font-size: 14px; color: var(--text2); margin-bottom: 24px; }
+  .folio-box { background: var(--surface2); border: 1.5px solid var(--accent4); border-radius: 12px; padding: 18px; margin: 0 auto 20px; max-width: 320px; }
+  .folio-label { font-size: 11px; color: var(--text3); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 8px; }
+  .folio-num { font-family: var(--mono); font-size: 22px; font-weight: 600; color: var(--accent4); letter-spacing: 2px; margin-bottom: 12px; }
+  .btn-copy { background: rgba(155,109,214,0.15); color: var(--accent4); border: none; border-radius: 8px; padding: 8px 18px; font-family: var(--font); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+  .btn-copy:hover { opacity: 0.8; }
+  .btn-nueva { width: 100%; padding: 13px; border: none; border-radius: var(--radius); background: var(--accent); color: #fff; font-family: var(--font); font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 8px; transition: opacity 0.15s; }
+  .btn-nueva:hover { opacity: 0.88; }
+
+  /* Consulta de folio */
+  .consulta-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; }
+  .consulta-title { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; }
+  .consulta-input-row { display: flex; gap: 8px; }
+  .consulta-input { flex: 1; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--mono); font-size: 14px; padding: 10px 14px; outline: none; text-transform: uppercase; }
+  .consulta-input:focus { border-color: var(--border-focus); }
+  .btn-consultar { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 10px 16px; font-family: var(--font); font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: opacity 0.15s; }
+  .btn-consultar:hover { opacity: 0.88; }
+  .consulta-result { margin-top: 14px; display: none; }
+  .consulta-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .consulta-field { flex: 1; min-width: 80px; }
+  .consulta-field-label { font-size: 10px; color: var(--text3); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .consulta-field-val { font-size: 13px; color: var(--text); font-weight: 500; }
+
+  /* Folios recientes */
+  .recientes { margin-top: 12px; }
+  .recientes-label { font-size: 11px; color: var(--text3); margin-bottom: 8px; }
+  .reciente-chip { display: inline-block; font-family: var(--mono); font-size: 11px; padding: 4px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; color: var(--text2); cursor: pointer; margin: 3px 3px 0 0; transition: all 0.15s; }
+  .reciente-chip:hover { border-color: var(--border-focus); color: var(--text); }
+
+  /* LOGIN OPERATIVO Y ADMIN */
+  .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: var(--bg); position: fixed; inset: 0; z-index: 50; }
+  .login-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px 28px; width: 100%; max-width: 380px; position: relative; }
+  .login-back { background: none; border: none; color: var(--text2); font-family: var(--font); font-size: 13px; padding: 0; margin-bottom: 16px; cursor: pointer; }
+  .login-back:hover { color: var(--text); }
+  .login-title { font-size: 20px; font-weight: 500; margin-bottom: 4px; color: var(--text); }
+  .login-sub { font-size: 13px; color: var(--text2); margin-bottom: 24px; }
+  .login-field { margin-bottom: 16px; position: relative; }
+  .login-field label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 6px; }
+  .login-field input { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 10px; color: var(--text); font-family: var(--font); font-size: 14px; padding: 12px 14px; outline: none; transition: border-color 0.15s; -webkit-appearance: none; }
+  .login-field input:focus { border-color: var(--accent); }
+  .sugerencias-box { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; margin-top: 4px; max-height: 200px; overflow-y: auto; display: none; z-index: 10; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+  .sugerencia-item { padding: 10px 14px; font-size: 13px; color: var(--text); cursor: pointer; border-bottom: 1px solid var(--border); }
+  .sugerencia-item:last-child { border-bottom: none; }
+  .sugerencia-item:hover, .sugerencia-item.active { background: var(--accent); color: #fff; }
+  .sugerencia-id { font-size: 10px; opacity: 0.6; margin-left: 6px; font-family: var(--mono); }
+  .login-err { font-size: 12px; color: var(--danger); text-align: center; margin: 0 0 12px; min-height: 16px; }
+  .btn-login-op { width: 100%; padding: 14px; border: none; border-radius: 10px; background: var(--accent); color: #fff; font-family: var(--font); font-size: 15px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
+  .btn-login-op:hover { opacity: 0.88; }
+  .remember-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; cursor: pointer; }
+  .remember-row input { width: 16px; height: 16px; accent-color: var(--accent); }
+  .remember-row span { font-size: 13px; color: var(--text2); }
+
+  @media (max-width: 400px) { .field-row { grid-template-columns: 1fr; } .roles-grid { grid-template-columns: 1fr; } }
+
+  /* ── MICROINTERACCIONES Y TRANSICIONES ── */
+  * { transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease; }
+  body { font-feature-settings: 'cv11', 'ss01', 'ss03'; -webkit-font-smoothing: antialiased; }
+
+  button:active { transform: scale(0.97); }
+  .tab-btn:hover { background: rgba(99,91,255,0.08); }
+  .tab-btn.active { background: var(--accent) !important; color: #fff !important; }
+
+  .stat-card, .kpi-card, .unidad-card, .chart-card, .consumo-card, .inv-stat {
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .stat-card:hover, .kpi-card:hover, .unidad-card:hover {
+    transform: translateY(-1px);
+    border-color: var(--border2);
+    box-shadow: var(--shadow);
+  }
+
+  .solicitud-card, tr {
+    transition: background 0.15s ease;
+  }
+  .solicitud-card:hover { background: var(--surface2) !important; }
+  tbody tr:hover { background: rgba(99,91,255,0.06) !important; }
+
+  /* Modal animation */
+  .modal-bg {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(0,0,0,0.5) !important;
+  }
+  .modal-bg.open { animation: fadeIn 0.18s ease; }
+  .modal { animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: var(--shadow-lg); }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  /* Toast */
+  .toast {
+    box-shadow: var(--shadow-md) !important;
+    animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Inputs y selects */
+  input, select, textarea {
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  input:focus, select:focus, textarea:focus {
+    box-shadow: 0 0 0 3px rgba(99,91,255,0.2);
+  }
+
+  /* Botones principales */
+  .btn-modal, .btn-nueva, .btn-login-op, .btn-aprobar {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    transition: all 0.15s ease;
+  }
+  .btn-modal:hover, .btn-nueva:hover, .btn-login-op:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+  }
+
+  /* Scrollbars suaves */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border2); }
+
+  /* Mejor tipografía */
+  h1, h2, h3, .header-title, .login-title, .modal-title { letter-spacing: -0.02em; }
+
+  /* Badges más finos */
+  .badge {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    font-size: 11px;
+    padding: 3px 9px;
+  }
+
+
+  /* ── CONTENCIÓN HORIZONTAL — evita zoom-out en iOS ── */
+  html, body { 
+    width: 100%; 
+    max-width: 100vw; 
+    overflow-x: hidden; 
+    -webkit-text-size-adjust: 100%;
+  }
+  * { max-width: 100%; box-sizing: border-box; }
+  img, svg, canvas { max-width: 100%; height: auto; }
+  /* CONTENCION_HORIZONTAL */
+  /* ── ÁREAS SEGURAS iOS (Dynamic Island / Notch) ── */
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  .header {
+    padding-top: calc(12px + env(safe-area-inset-top));
+  }
+  /* SAFE_AREAS */
+
+</style>
+<!-- OneSignal Push Notifications -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "f70dfc23-53ee-436a-89eb-f1bbd53d5755",
+      notifyButton: { enable: false },
+      allowLocalhostAsSecureOrigin: true,
+      serviceWorkerParam: { scope: "/frago-solicitudes/" },
+      serviceWorkerPath: "/frago-solicitudes/sw.js"
+    });
+
+    // Cuando el usuario hace login, asociar su identidad con OneSignal
+    window.fragoLoginOneSignal = async function(userId, tags) {
+      try {
+        await OneSignal.login(String(userId));
+        if (tags) await OneSignal.User.addTags(tags);
+      } catch(e) { console.warn("OneSignal login error:", e); }
+    };
+
+    // Pedir permiso de notificaciones después del primer login exitoso
+    window.fragoPedirPermisoPush = async function() {
+      try {
+        const permiso = await OneSignal.Notifications.permission;
+        if (!permiso) {
+          await OneSignal.Notifications.requestPermission();
+        }
+      } catch(e) { console.warn("Push permission error:", e); }
+    };
+  });
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+</head>
+<body>
+
+<div class="header">
+  <button onclick="location.reload()" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px 8px;margin-right:4px;" title="Recargar">↻</button>
+  <button id="btn-push-activate" onclick="activarPushManual()" style="background:none;border:none;color:var(--accent);font-size:18px;cursor:pointer;padding:4px 8px;margin-right:4px;display:none;" title="Activar notificaciones">🔔</button>
+  <a href="#" onclick="resetForm();window.scrollTo(0,0);return false;" style="text-decoration:none;cursor:pointer;" title="Inicio"><div class="header-logo" style="background:transparent;padding:0;"><img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCACOAP4DASIAAhEBAxEB/8QAHQABAAIDAAMBAAAAAAAAAAAAAAYHBAUIAQMJAv/EAE8QAAEDAwIDAgkFCQwLAAAAAAEAAgMEBQYHERIhMQhBExQiUWFxgZHSGDJWlaEVN0JVdYKUwtEWFyMkJVJTY3KSo7IzNDiTorGztMHT8P/EABsBAQACAgMAAAAAAAAAAAAAAAABBgUHAgME/8QAMBEAAgEDAgMFBwUBAAAAAAAAAAECAwQRBSESMVEGQWFxoRMiIzKRseFygcHR8GP/2gAMAwEAAhEDEQA/AOqkREOQREQBERAEREAREQBERAEREAREQBERAEREAReCQASTsB1KNIc0OaQQRuCEB5REQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBEXpq6mmpIHT1U8UETebnyPDWj2lG8EpOTwj3IoLk2quI2ZhEdd90Z9uUdJ5Y9rugVQZvq1kGQMkpaPa10L2lro4nbveD/Of+zZYu71e2tl82X0RaNK7H6nqLT4OCHWW30XN/bxLB1i1Hp6Gmmx2xTia4TDwc80ZBbC08i0H+cfs9atGgjdFQ08Tju5kTWk+kBcu6QYtPk2XU5fG/xGkeJqmTh3HI7hu/nJG3q3XVC6tJuK10516myeEl5Hq7W2FnpSo2Fu8yjlyfe28Y8uWy7l5nlERZkpgREQBERAEREAREQBERAEREAREQBERAEREAX5c5rfnOA9ZX6Vd5FphBkVbV3C6Xy5tqpZXGIRSjwcUe/kNDSPNtv6V01p1Ir4ceJ+eD22NC3qzauKvBHrji9NjOzLU3GcZrHUVRLNV1bduOGmaHFnrJIHs3WTh2oWM5RI2noKt0NWRv4vUN4Hn1dx9hXPuo2BXfD6oPqXeN0UriI6pgOx9DvM5YuAi30lfLfro4OprYBKyEHY1EpPkMHtG59AKrT1m7hdezqRSXTouuTZa7F6TW0z29vVlOWNpLvfLHD3b7Yzld7OrbxdLfaKF9bc6uKlp2Dm+R23sHnPoVVZTrhbqZ74Mft7q1w6Tzksj9jep+xU/l2TXfKLm6tulS5/M+CiB2ZE3zNH/wAVlY1geVZBwvoLTKIHc/DS/wAGzbz7nr7N1wuNbuLifs7WPpl/g7tP7D6dp9JV9VqJvpnEV++zf+2Nne9V80uYcwXIUMZ/BpGcBH53zvtUSuV1ulydxXG4VVWR0M0rn7e8qwmaQVtGQ+/ZHZrZF3l0u7vcdh9q9/3H0isT2mvvlde5W8zHACGH+6B/mWPqWt7V3rzx+qX8fgsFtqejWySsKXG/+cG/XCXqVdTQT1MrYaeGSaRx2axjS4n2BWNiWkN+uDmVV8LLPQAccjpXDwhb6B3e3ZbiXVfHbFAafDcVhg/rZmhu/r23J9pWgpLpmWqOQRWqWskZSOdxTMhbwwws73EDr6Nz1U0rezpyUcupLotl9Tjc6hq9enKagrekllym+KWPCK2T8y9NOqbH6Sxup8ah/iMUhj8Z2/1h45Odv+Fz5b9PNyUmWHZLbS2i00tso2cNPTRNjYO/YDqfSeqzFeaMOCmo4xjpyNGXtZV7idRNtN83u34vxCIi7DzBERAEREAREQBERAEREAREQBERAEREAREQBERAYV7tdFebXPbbjA2amnbwvaf+Y8xHUFcoZzYqzFr3VY/O7jibIJY5A3bwrSPJPuJHr3XXirPWPHqa5ZBilbJAHNdcWUtQ7b5zHOBAPuPvWF1qyVekpx+ZfZl27E63Kwu3RqPNOSbx0aWU/TH06EMx+w2DT/H6fJ8ugFbdKgB9Hb+W7Rt1IPLfnuSenrUZyrVHK74XxR1n3OpCfJhpfIO3mLupWXr/AFlRU6iVFLI8mKlijjhb3NBaHH7SVhUmM2CyUcdXmlxniqZGh8drpADPwnoXk8mb8uXXmq/XnUU5W9u+GEdm+WfFv+DYNjQtp0qeo369pWqLMVjiwnulGPdhYy+vNkLmllmeXzSPkcTuXOcSSvZS01TVSiKlp5Z5D0bGwuJ9gUwnzOxUzDHZ8Gs8QHJslZxVDz6TvsN1jfvh5UxhjoqyC3Rn8CjpY4h9g3WPdOgn71TPkv7wWCNzfTj8Ogo/qkl6RUvuZti0zu88Pj2QTQ4/bm83TVrg1x9AaTvv69lfWmVsx234zE/G4n+KTEnw8rdnz7HbiJPPbkdugVH4XiWUahXWOtvNXWutrT/CVc7ieID8FgP/AI5BdJUNLT0NHDR0kTYoIWBkbG9GtHIBWjRLeKzVjDC7m+b/AKX+yau7cajUko21SupTzlxjtGPg+bb83t0WT3oiKxGuQiIgCIiAIiIAiIgCIiAIiIAiIgCIq8z7WjTrBb+bFk98fRV4ibL4MUk0nku6HdrSO5AWGipz5TWjP0ql+rqj4E+U1oz9Kpfq6o+BCC40VOt7TOjTnBoymXcnYfydUfAsi69ozSK2XOqttbk0kdVSTPgmZ4hUHhe0lrhuGbHmD0QFtIqc+U1oz9Kpfq6o+BeW9pnRkkD91Ug389uqPgQFxLBvlD90Lc+Bpa2VrmywucNw2Rjg5p94C1GD55h+bQSS4tkFFc/BAGRkTiJGA9C5jtnD2hbm9XS32W1VF1utXFSUVMwyTTynZrGjvJUSipLDOdOcqclOPNFF9oa01FuyqgyWGAujnjaJCW8TWysPQ+gjb3FQTG8YyTNbhPLQwSVUm/FNUzP2bufO49SrsverGjF6tstuuWZWOoppR5THTe4jzEedNL820uoqaixHHc0ttwqZZniCNsg8JK5xLtvSduXsVfuNDVa6c3L3Hu/M2FYduXZ6XGjGCdaHupvlw/jljyZHrDoQfIkvl6A5eVFSs/Wd+xTrHtLsOs0omjtxrJm9H1bvCbfm/N+xTOeWKCF888jIoo2lz3vOzWgdST3BVbee0No/a6k08+ZU8z2nYmmp5Zm/3mNIPsKyVDS7Wj8sF++5Wr3tTq17lVKzSfctl6Y9S0oo44o2xxMaxjRs1rRsAPQF+1TnymtGfpVL9XVHwLZ4/r/pFe6ttJSZlSxTPOzRVRSQAn+1I0D7V7zAN5LQRavIshseO2h13vl1pLfQN2BnnkDWEnoAe8nzBVpU9pTRqCZ0Ry0vLeW7KCocPfwIQW+ipz5TOjP0pl+rqj4FK8H1a06zSsZRY5lNFV1jwS2meHRSu267NeAT7EBOEREJCIiAIiIAiIgCIiAIiIAuA+3b9/V/5Mp/1l34uA+3b9/V/wCTKf8AWQhkKwDRPUTOsebfsas0VXQOldEJHVcUZ4m9Rs5wKkHyYtZPo3T/AFhB8ahWJ6oZ/ilobaMdymvt1C17pBBCRwhx6nmFt/39dXPp3df7zf2IQSCLsyaxtla443T7Agn+UIPjVdaoAt1Lydp6i8VQ/wAZyk8WumrZlYDnd12LgD5Tf2KManknUrJyTzN3qj/jOQE8oOzZq9W0MFbTY7A+GeNssbvH4Ru1w3B24vMV+qvs06w01LLUPxmJzImF7gyuhc4gDfkA7mVoaXW7ValpYqanze6RwwsDI2BzdmtA2A6eZeKzWzVaspJqSozm7OhmYWPaJA3dpGxG4G4QGu0Yyq44bqZY73bp3ROZVsinaOkkL3Br2Ed4IJ9R2PULsft0ZTJZNHG2inIEt8q2U7j3iJn8I7b1lrR6nFcjaB4Ndc81LtNuoad5pYKllRWzlp4IYmO4nbnbkTtsB3khWr2/MnfcdRrZi8UgNPaKMSPaP6aXmd/zAz3lAc4U9PUVL3MpoJZnNaXkRtLiGjqeXcFtsEv0+L5pZ8ipxxSW6siqA0nYODXAlp9Y3HtXQ/YIw6mu9xyq/wBczjijoxbY2kbg+G3Mh9YDWj84rmzIbZU2S/V9nrGhtTRVMlPKB04mOLT9oQHZ/boziak0wsdptE72RZFIZZJWOI4qdjWu4eXc4vYfUD51yhprptl+otRWQYnbW1r6JjXz8U7Iw0OJA5uI332PuU91sycZToTpXUPe11RQxVdvmA6gwiFjd/SWBh9qmfYXpK+uteo1Haq2Shr5rbCylqWfOilIl4Hew7FAQb5MWsn0bp/rCD41AdRsBynT67wWvKrcKKqnhE0TWytkDmbkb7tJHUHkpHU636wU9RJBLnN2bJG8scCW8iDse5YVRrLqbUVLaqfLq2WdjeFsj2Ruc0eYEt32QGpyvNskyHHbFj93rppaOywuipmPc7mC4kF255kAho8wACkWDaG6lZrjdPkWPWOOpttQ54ilfVxR8XC4tdyc4HqCPYoPkl9u2R3eW7Xuukra6YNEk0m3E7YADp6AF9BOxp/s541/aq/+6lQHJ/yY9ZPo3B9YQfGqxraa94blstLMZrdebVVFrjHJs+GVh7nNPcR1C+r6+Y3aK+/lmP5Vm/zID6M6b3uXJNPsfyCdobNcbbBUygdA98Yc4e8lSBQbQD7yWGfkWl/6bVOUJCIiEhERAEREAREQBERAFwH27fv6v/JlP+su/Fy72l9AMz1H1Ldkdiq7TFSGjig4amZzX8Td9+QaeXNCGevsiaYYDlejsF2yLFrfca51bPGZ5mEuLQRsOquD94zST6CWj/dn9q9PZswS8adaZRY3fJaWWsZVyzF1M8uZwuI25kDnyVmICuRobpKDuMEtAI/qz+1fPPVMAan5SAOQvNWP8Zy+qK4ozbsrai3nM73eKWusLaeuuE9TEH1Dw4NfI5w38jrsUDLMzHs34dlul1tkxm3Utjv4oopo6mMO4JnFgJbIN+hPf1HvC4ru9ru+JZNJbrzbTS3GgmHhaaqiDhuOY3adw5p9oIK+qOOUctvx+3UE5aZaaliheWncFzWgHb0clV/aN0TteqVn8bpPA0OSUrP4tVluwlA32ikIG5b5j1HvCDBidlnUnCsuxDxCz2u147d6RgNdbaaNkQk2ABmYBtxNPvHQ9xPEOs2SnMNUshyISGSKrrX+Acf6JvkR/wDA1quiwdl3WKwXNlzsuQWWgrGNc1s0NZI12zgQ4fM6EEghYHyRNTSedxx79Jk+BAX/ANifGhYdD6OuewtqLzUSVr+Ic+HfgZ7OFm/5y5L7V1JbaXXvJvuVUwzwTTtmf4J4cGSuY0yNJHeH8W47ui7iyjH8xtuj9Hien1RQU12gooaFlVUPLGwsawNc9uwPlcuXm337lynJ2RtT5JHSSXPH3vcd3OdVSEk+f5iAoaS5SSY9BaHbmOGqkqGc+QL2saf8gVwdk/VvHdK7lfpMipLjPFcYoWxOo42vLXMLuoc5vXi+xbf5Iepn4wx79Jk+BeT2QtTPxjjv6TJ8CEEordU+y5W1k1ZVab3CWeeR0krzQR7uc47k/wCl85VJ67ZDp7kGSUc2nONyWO2w03BMySNrHSycRPFsHO7th1Vh/JD1M/GGPfpMnwLaY52O8xnuDBf8itFDRA+W6m45pCPQCGj3lAcyua5oa4tIDhu0kdV1f2ee0dhGB6UWvFL7b72+soXzcT6aGN8bw+V8gIJeD+Ht07lZuo3ZlxTIsHslistW+0V1lgMNPWGMSeHBPE7wo5bkuJduOhceW3JUZP2QdSWSubHdMdkYDyd4xIN/ZwISXN8r3TD8XZN+iRf+1caaoZDT5ZqJfskpIJYKe41slRFHJtxta48gduW6uL5Iepn4wx79Jk+BTXS/sh1NJfKa5Z1eqKopaeVshoKIOcJ9jvwve4DZp7wASfOEBO9PNU4MZ0+xLH4rLNWS01opI6iR83gQZC2NpjjJBDnBz2tPEWt4jw777gXjYLrRXyzUt2t8jn01SzjYXNLXDuIIPMEEEEHoQVU+YaP11blDbpaKi3uiZUeMUfjJLHW2QyxyuLGhjhKC5nzSW7Bzhv0ItDD7JHjuN0dnZUSVJga4yTvADpZHOL3vIHIFznOOw86A26IiEhERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAEREAREQBERAf/2Q==" style="height:32px;width:auto;object-fit:contain;" alt="Frago"></div></a>
+  <div>
+    <div class="header-title">Frago — Solicitudes</div>
+    <div class="header-sub">Sistema de gestión operativa</div>
+  </div>
+</div>
+
+<!-- LOGIN OPERATIVO (autocompletado + PIN) -->
+<div id="login-operativo" class="login-screen" style="display:none;">
+  <div class="login-card">
+    <button class="login-back" onclick="cerrarLogin()">← Cambiar rol</button>
+    <h2 class="login-title">Identifícate</h2>
+    <p class="login-sub" id="login-op-rol-sub"></p>
+    <div class="login-field" style="position:relative;">
+      <label>Tu nombre</label>
+      <input type="text" id="op-nombre" autocomplete="off" placeholder="Empieza a escribir..." oninput="filtrarNombres()" autocapitalize="words">
+      <div id="op-sugerencias" class="sugerencias-box"></div>
+    </div>
+    <div class="login-field">
+      <label>Tu PIN</label>
+      <input type="text" id="op-pin" placeholder="Ej. E001" autocapitalize="characters" autocomplete="off" onkeydown="if(event.key==='Enter')validarOperativo()">
+    </div>
+    <p id="op-error" class="login-err"></p>
+    <button class="btn-login-op" onclick="validarOperativo()">Continuar</button>
+  </div>
+</div>
+
+<!-- LOGIN ADMIN (usuario + contraseña) -->
+<div id="login-admin" class="login-screen" style="display:none;">
+  <div class="login-card">
+    <button class="login-back" onclick="cerrarLogin()">← Cambiar rol</button>
+    <h2 class="login-title">Acceso administrativo</h2>
+    <p class="login-sub" id="login-ad-rol-sub"></p>
+    <div class="login-field">
+      <label>Usuario</label>
+      <input type="text" id="ad-user" autocomplete="off" placeholder="Tu usuario" autocapitalize="none">
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="ad-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')validarAdmin()">
+    </div>
+    <label class="remember-row" id="remember-wrap">
+      <input type="checkbox" id="ad-remember">
+      <span>Recordar mi sesión</span>
+    </label>
+    <p id="ad-error" class="login-err"></p>
+    <button class="btn-login-op" onclick="validarAdmin()">Entrar</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- BARRA DE PROGRESO -->
+  <div class="progress-bar" id="progress-bar">
+    <div class="progress-step">
+      <div class="progress-dot active" id="pdot-1">1</div>
+      <span class="progress-label active" id="plabel-1">Rol</span>
+    </div>
+    <div class="progress-line" id="pline-1"></div>
+    <div class="progress-step">
+      <div class="progress-dot" id="pdot-2">2</div>
+      <span class="progress-label" id="plabel-2">Tipo</span>
+    </div>
+    <div class="progress-line" id="pline-2"></div>
+    <div class="progress-step">
+      <div class="progress-dot" id="pdot-3">3</div>
+      <span class="progress-label" id="plabel-3">Solicitud</span>
+    </div>
+  </div>
+
+  <!-- BOTÓN REGRESAR -->
+  <button class="btn-back" id="btn-back" onclick="regresarPaso()">← Regresar</button>
+
+  <!-- PASO 1: ROL -->
+  <p class="section-title">¿Cuál es tu rol?</p>
+  <div class="roles-grid">
+    <button class="rol-btn" onclick="setRol('guardia',this)">
+      <span class="rol-name">Guardia</span>
+    </button>
+    <button class="rol-btn" onclick="setRol('jefe_turno',this)">
+      <span class="rol-name">Jefe de turno</span>
+    </button>
+    <button class="rol-btn" onclick="setRol('coord_operativo',this)">
+      <span class="rol-name">Coordinador operativo</span>
+    </button>
+    <button class="rol-btn" onclick="setRol('coord_general',this)">
+      <span class="rol-name">Coordinador general</span>
+    </button>
+    <button class="rol-btn" onclick="setRol('director_general',this)">
+      <span class="rol-name">Director general</span>
+    </button>
+    <button class="rol-btn" onclick="setRol('aux_administrativa',this)">
+      <span class="rol-name">Auxiliar administrativa</span>
+    </button>
+    <button class="rol-btn" onclick="setRol('director_finanzas',this)">
+      <span class="rol-name">Director de finanzas</span>
+      <span class="rol-sub">/ Administración</span>
+    </button>
+  </div>
+
+  <!-- PASO 2: TIPO -->
+  <div id="tipo-section">
+    <p class="section-title" style="margin-top:28px;">Tipo de solicitud</p>
+    <div class="tipo-grid" id="tipo-grid"></div>
+  </div>
+
+  <!-- PASO 3: FORMULARIO -->
+  <div id="form-body">
+
+    <p class="section-title">Información general</p>
+
+    <div class="field" id="campo-solicitante">
+      <label id="label-solicitante">Nombre del solicitante <span class="req">*</span></label>
+      <input type="text" id="solicitante" placeholder="Nombre completo">
+      <select id="solicitante-select" style="display:none;">
+        <option value="">Selecciona elemento...</option>
+      </select>
+      <p id="elemento-info" style="font-size:11px;color:var(--text3);margin-top:6px;display:none;"></p>
+    </div>
+
+    <div class="field" id="campo-servicio">
+      <label>Servicio / Caseta <span class="req">*</span></label>
+      <select id="servicio">
+        <option value="">Selecciona un servicio...</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Urgencia</label>
+      <div class="urgencia-grid">
+        <button class="urg-btn active" data-urg="Normal"  onclick="setUrgencia('Normal',this)">Normal</button>
+        <button class="urg-btn"        data-urg="Urgente" onclick="setUrgencia('Urgente',this)">Urgente</button>
+        <button class="urg-btn"        data-urg="Critico" onclick="setUrgencia('Critico',this)">Crítico</button>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- UNIFORME -->
+    <div class="modulo" id="mod-Uniforme">
+      <p class="section-title">Detalles del uniforme</p>
+      <div class="field-row">
+        <div class="field">
+          <label>Prenda <span class="req">*</span></label>
+          <select id="prenda" onchange="actualizarTallas()">
+            <option value="">Selecciona...</option>
+            <option>Camisa manga larga</option>
+            <option>Pantalón</option>
+            <option>Chamarra</option>
+            <option>Sudadera</option>
+            <option>Chaleco reflejante rojo (FRAGO)</option>
+            <option>Chaleco reflejante de seguridad (naranja)</option>
+            <option>Chaleco táctico</option>
+            <option>Gorra</option>
+            <option>Botas</option>
+            <option>Impermeable azul</option>
+            <option>Impermeable amarillo</option>
+            <option>Fajilla</option>
+            <option>Cinturón</option>
+            <option>Broche</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Talla <span class="req">*</span></label>
+          <select id="talla">
+            <option value="">Selecciona prenda primero...</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Cantidad <span class="req">*</span></label>
+        <input type="number" id="cantidad-uni" min="1" placeholder="1">
+      </div>
+      <div class="field" id="campo-condicion" style="display:none;">
+        <label>¿Acepta uniforme en buen estado (usado)?</label>
+        <div class="cond-grid">
+          <button class="cond-btn active" data-cond="Cualquiera" onclick="setCondicion('Cualquiera',this)">Sí, cualquiera</button>
+          <button class="cond-btn" data-cond="Nuevo"      onclick="setCondicion('Nuevo',this)">Solo nuevo</button>
+          <button class="cond-btn" data-cond="Usado"      onclick="setCondicion('Usado',this)">Solo usado</button>
+        </div>
+        <p style="font-size:11px;color:var(--text3);margin-top:6px;">Si acepta usado, el sistema asignará primero del inventario disponible.</p>
+      </div>
+      <div class="field">
+        <label>Notas adicionales</label>
+        <textarea id="notas-uni" placeholder="Motivo, desgaste, reposición, etc."></textarea>
+      </div>
+    </div>
+
+    <!-- PATRULLA -->
+    <div class="modulo" id="mod-Patrulla">
+      <p class="section-title">Detalles de la patrulla</p>
+      <div id="aviso-patrulla" class="aviso"></div>
+      <div class="field">
+        <label>Unidad <span class="req">*</span></label>
+        <select id="unidad">
+          <option value="">Selecciona una unidad...</option>
+          <option value="Saveiro Pickup (con caja en batea)">Saveiro Pickup (con caja en batea)</option>
+          <option value="Saveiro Pickup">Saveiro Pickup</option>
+          <option value="Virtus 2023 Cumbres del lago">Virtus 2023 Cumbres del lago</option>
+          <option value="Virtus 2023 Lomas de Juriquilla">Virtus 2023 Lomas de Juriquilla</option>
+          <option value="Virtus 2023 Automatico" id="opt-virtus-auto">Virtus 2023 Automático</option>
+          <option value="Vento 2017 Lomas de Juriquilla">Vento 2017 Lomas de Juriquilla</option>
+          <option value="Motocicleta Caseta 1 - Lomas de Juriquilla">Motocicleta Caseta 1 - Lomas de Juriquilla</option>
+          <option value="Motocicleta Caseta 2 - Lomas de Juriquilla">Motocicleta Caseta 2 - Lomas de Juriquilla</option>
+          <option value="Motocicleta - Balcones de Juriquilla">Motocicleta - Balcones de Juriquilla</option>
+          <option value="Monopatin Electrico - Real del Lago" id="opt-monopatin">Monopatín Eléctrico - Real del Lago</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Tipo de solicitud <span class="req">*</span></label>
+        <select id="tipo-patrulla" onchange="onTipoPatrullaChange()">
+          <option value="">Selecciona...</option>
+          <option value="Carga de gasolina">⛽ Carga de gasolina</option>
+          <option value="Insumos">🛢️ Insumos</option>
+          <option value="Revision general" class="opt-restringida-jefe">🔧 Revisión / Servicio</option>
+          <option value="Mantenimiento preventivo" class="opt-restringida">🔧 Mantenimiento preventivo</option>
+          <option value="Reparacion" class="opt-restringida-mono">🔨 Reparación</option>
+        </select>
+      </div>
+
+      <!-- Bloque INSUMOS (solo visible si tipo = Insumos) -->
+      <div id="bloque-insumos-patrulla" style="display:none;">
+        <div class="field">
+          <label>Insumo <span class="req">*</span></label>
+          <select id="insumo-patrulla">
+            <option value="">Selecciona un insumo...</option>
+            <option>Aceite de motor</option>
+            <option>Anticongelante / refrigerante</option>
+            <option>Líquido limpiaparabrisas</option>
+            <option>Líquido de frenos</option>
+            <option>Líquido de dirección hidráulica</option>
+            <option>Líquido de transmisión</option>
+            <option>Aire para llantas</option>
+            <option>Limpiaparabrisas (escobillas)</option>
+            <option>Focos / bombillas</option>
+            <option>Fusibles</option>
+            <option>Filtro de aire</option>
+            <option>Filtro de aceite</option>
+            <option>Batería</option>
+            <option>Llanta de refacción</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Cantidad</label>
+          <input type="number" id="cantidad-insumo" min="1" value="1" placeholder="Ej. 1">
+        </div>
+      </div>
+
+      <div class="field">
+        <label id="label-desc-patrulla">Descripción <span class="req">*</span></label>
+        <textarea id="detalle-patrulla" placeholder="Describe el problema o servicio requerido..."></textarea>
+      </div>
+      <div class="field">
+        <label>Kilometraje actual (opcional)</label>
+        <input type="number" id="km" placeholder="Ej. 45000">
+      </div>
+    </div>
+
+    <!-- PAPELERÍA -->
+    <div class="modulo" id="mod-Papeleria">
+      <p class="section-title">Detalles de papelería</p>
+      <div class="field">
+        <label>Artículo <span class="req">*</span></label>
+        <select id="articulo">
+          <option value="">Selecciona...</option>
+          <option>Bitácora / Libro de registro</option>
+          <option>Bolígrafos</option>
+          <option>Formato de acceso vehicular</option>
+          <option>Formato de acceso peatonal</option>
+          <option>Carpeta</option>
+          <option>Hojas blancas</option>
+          <option>Cinta adhesiva</option>
+          <option>Marcadores</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Cantidad <span class="req">*</span></label>
+        <input type="number" id="cantidad-pap" min="1" placeholder="1">
+      </div>
+      <div class="field">
+        <label>Notas adicionales</label>
+        <textarea id="notas-pap" placeholder="Especificaciones, color, tamaño, etc."></textarea>
+      </div>
+    </div>
+
+    <!-- EQUIPO ESPECIAL -->
+    <div class="modulo" id="mod-Equipo">
+      <p class="section-title">Detalles del equipo</p>
+      <div class="field">
+        <label>Tipo de equipo <span class="req">*</span></label>
+        <select id="tipo-equipo">
+          <option value="">Selecciona...</option>
+          <option>Lámpara / Linterna</option>
+          <option>Radio de comunicación</option>
+          <option>Equipo celular</option>
+          <option>Cámara de vigilancia</option>
+          <option>Bodycam</option>
+          <option>Cargador / Batería</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Cantidad <span class="req">*</span></label>
+          <input type="number" id="cantidad-equipo" min="1" placeholder="1">
+        </div>
+        <div class="field">
+          <label>Acción solicitada <span class="req">*</span></label>
+          <select id="accion-equipo">
+            <option value="">Selecciona...</option>
+            <option>Asignación nueva</option>
+            <option>Reemplazo</option>
+            <option>Reparación</option>
+            <option>Baja / Retiro</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Descripción / Justificación <span class="req">*</span></label>
+        <textarea id="detalle-equipo" placeholder="Especifica el motivo, número de serie si aplica..."></textarea>
+      </div>
+      <div class="field">
+        <label>Servicio o guardia asignado (opcional)</label>
+        <input type="text" id="asignado-equipo" placeholder="¿Para quién o dónde se destina el equipo?">
+      </div>
+    </div>
+
+    <!-- CONSULTA DE FOLIO -->
+    <div class="modulo" id="mod-Consulta">
+      <p class="section-title">Consultar mi solicitud</p>
+      <div class="field">
+        <label>Folio de seguimiento</label>
+        <div style="display:flex;gap:8px;">
+          <input class="consulta-input" type="text" id="consulta-input-mod" placeholder="REQ-040525-143022" maxlength="25" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')consultarFolioMod()" style="flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:14px;padding:11px 14px;outline:none;">
+          <button onclick="consultarFolioMod()" style="background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:11px 18px;font-family:var(--font);font-size:14px;font-weight:500;cursor:pointer;">Buscar</button>
+        </div>
+      </div>
+      <div id="recientes-mod-wrap" style="display:none;margin-top:8px;">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px;">Recientes:</div>
+        <div id="recientes-mod-chips"></div>
+      </div>
+      <div id="consulta-mod-result" style="margin-top:14px;"></div>
+      <button onclick="consultarFolioMod()" style="width:100%;margin-top:16px;padding:14px;border:none;border-radius:var(--radius);background:#4abfbf;color:#fff;font-family:var(--font);font-size:15px;font-weight:500;cursor:pointer;">🔍 Consultar estatus</button>
+    </div>
+
+    <button class="btn-submit" id="btn-enviar" onclick="enviar()">
+      <span class="spinner" id="spinner"></span>
+      <span id="btn-text">Enviar solicitud</span>
+    </button>
+
+  </div>
+</div>
+
+<!-- PANTALLA DE CONFIRMACIÓN -->
+<div id="confirmacion-screen" class="main" style="display:none;max-width:560px;margin:0 auto;padding:28px 20px 80px;">
+  <div class="confirm-screen">
+    <div class="confirm-icon">✅</div>
+    <div class="confirm-title">¡Solicitud enviada!</div>
+    <div class="confirm-sub">Tu solicitud fue registrada correctamente</div>
+    <div class="folio-box">
+      <div class="folio-label">Folio de seguimiento</div>
+      <div class="folio-num" id="confirm-folio">—</div>
+      <button class="btn-copy" onclick="copiarFolio()">📋 Copiar folio</button>
+    </div>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:20px;">Guarda este número para consultar el estatus de tu solicitud en cualquier momento.</p>
+
+    <!-- Cadena de aprobación -->
+    <div id="confirm-cadena" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;max-width:320px;margin:0 auto 20px;text-align:left;"></div>
+
+    <div style="display:flex;gap:10px;flex-direction:column;max-width:320px;margin:0 auto;">
+      <button class="btn-nueva" onclick="nuevaSolicitud()">+ Nueva solicitud</button>
+      <button onclick="verEstatusDesdeConfirmacion()" style="width:100%;padding:13px;border:1.5px solid var(--border);border-radius:var(--radius);background:none;color:var(--text2);font-family:var(--font);font-size:14px;font-weight:500;cursor:pointer;">← Regresar al inicio</button>
+    </div>
+  </div>
+
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx0QUTM1VC_CAXgIJC4gVwBdkxE0a8WYwR05eagd0Y7I7wQk3zctVTyxDAXR_ReOdkuEQ/exec";
+
+// ── ACCESO POR ROL ──
+const ACCESO = {
+  guardia:           ["Uniforme","Papeleria","Consulta"],
+  jefe_turno:        ["Uniforme","Patrulla","Papeleria","Consulta"],
+  coord_operativo:   ["Uniforme","Patrulla","Papeleria","Equipo","Consulta"],
+  coord_general:     ["Uniforme","Patrulla","Papeleria","Equipo","Consulta"],
+  director_general:  ["Uniforme","Patrulla","Papeleria","Equipo","Consulta"],
+  aux_administrativa:["Uniforme","Papeleria","Equipo","Consulta"],
+  director_finanzas: ["Uniforme","Patrulla","Papeleria","Equipo","Consulta"]
 };
 
-const CORREOS = {
-  coord1: "gabrielgomezcesar.frago@gmail.com",
-  coord2: "gabrielgomezcesar.frago@gmail.com",
-  compras: "gabrielgomezcesar.frago@gmail.com",
-  director: "gabrielgomezcesar.frago@gmail.com"
+// Tallas disponibles por prenda
+const TALLAS_POR_PRENDA = {
+  "Camisa manga larga":                    ["34","36","38","40","42","44","46"],
+  "Pantalón":                              ["EXCH","CH","M","G","XG","XXG"],
+  "Chamarra":                              ["36","38","40","42","44","46","48"],
+  "Sudadera":                              ["CH","M","G","XG"],
+  "Gorra":                                 ["Unitalla"],
+  "Chaleco táctico":                       ["Unitalla"],
+  "Chaleco reflejante de seguridad (naranja)": ["XXL"],
+  "Chaleco reflejante rojo (FRAGO)":       ["XL","XXL","XXXL"],
+  "Botas":                                 ["24","24.5","25","25.5","26","26.5","27","27.5","28","28.5","29","29.5","30"],
+  "Impermeable azul":                      ["Unitalla"],
+  "Impermeable amarillo":                  ["Unitalla"],
+  "Fajilla":                              ["Unitalla"],
+  "Cinturón":                             ["Unitalla"],
+  "Broche":                               ["Unitalla"],
+  "Otro":                                 ["Unitalla","XS","S","M","L","XL","2XL","3XL","34","36","38","40","42","44","46","48"]
 };
 
-// ============================================================
-// ENDPOINT PRINCIPAL — recibe el formulario HTML
-// ============================================================
-function doPost(e) {
+const TIPOS_CONFIG = {
+  Uniforme:  { icon:"👕", label:"Uniforme",         clase:"t-uniforme"  },
+  Patrulla:  { icon:"🚗", label:"Patrulla",          clase:"t-patrulla"  },
+  Papeleria: { icon:"📋", label:"Papelería",         clase:"t-papeleria" },
+  Equipo:    { icon:"🔦", label:"Equipo especial",   clase:"t-equipo"    },
+  Consulta:  { icon:"🔍", label:"Consultar folio",   clase:"t-consulta"  }
+};
+
+// Roles con acceso a condición de uniforme
+const ROLES_CON_CONDICION = ["coord_operativo","coord_general","director_general","director_finanzas"];
+// Roles solo gasolina en patrulla
+const ROLES_GASOLINA_INSUMOS_REVISION = ["jefe_turno","coord_operativo"]; // pueden solicitar gasolina, insumos y revisión
+// Roles gasolina + revisión en patrulla
+
+// Roles sin Virtus Auto
+const ROLES_SIN_VIRTUS    = ["jefe_turno","coord_operativo"];
+// Roles con Oficinas en papelería
+const ROLES_CON_OFICINAS  = ["coord_general","director_general","aux_administrativa","director_finanzas"];
+// Servicios con patrulla
+const SERVICIOS_PATRULLA  = ["cumbres del lago","lomas de juriquilla","oficinas","real del lago"];
+
+let rolActual      = null;
+let tipoActual     = null;
+let urgenciaActual = "Normal";
+let condicionActual= "Cualquiera";
+let todosLosServicios = [];
+
+// ── PASO 1: ROL ──
+function setRol(rol, btn) {
+  document.querySelectorAll(".rol-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  rolPendiente = rol;
+  mostrarLogin(rol);
+}
+
+async function activarPushManual() {
+  if (typeof OneSignal === "undefined") {
+    mostrarToast("OneSignal no cargado — recarga la página", "err");
+    return;
+  }
   try {
-    const datos = JSON.parse(e.postData.contents);
-
-    // Acciones del panel y consultas
-    if (datos.action === "actualizarEstatus")    return actualizarEstatusDesdePanel(datos);
-    if (datos.action === "gestionarInventario")  return gestionarInventario(datos);
-    if (datos.action === "registrarFlota")       return registrarFlota(datos);
-    if (datos.action === "consultarFolio")       return consultarFolioPost(datos);
-    if (datos.action === "registrarEntrega")     return registrarEntrega(datos);
-    if (datos.action === "getElementos")         return getElementos();
-    if (datos.action === "getHistorialPrenda")   return getHistorialPrendaPost(datos);
-    if (datos.action === "getDetalleElemento")   return getDetalleElemento(datos);
-
-    const ss = SpreadsheetApp.openById(SHEET_ID);
-    const hoja = ss.getSheetByName(HOJA_REQUISICIONES);
-
-    const ahora = new Date();
-    const id = generarID(ahora);
-
-    // Si es uniforme, resolver condición de inventario
-    let condicionResuelta = datos.condicion || "";
-    if (datos.tipo === "Uniforme" && datos.condicion === "Cualquiera") {
-      condicionResuelta = resolverCondicionInventario(datos.prenda_talla);
+    if (OneSignal.Notifications.permission) {
+      mostrarToast("✓ Notificaciones ya activadas", "ok");
+      document.getElementById("btn-push-activate").style.display = "none";
+      return;
     }
-
-    const fila = [
-      id,                          // ID_Req
-      ahora,                       // Fecha_Hora
-      datos.tipo || "",            // Tipo
-      datos.rol || "",             // Rol
-      datos.solicitante || "",     // Solicitante
-      datos.servicio || "",        // Servicio_Caseta
-      datos.detalle || "",         // Detalle
-      datos.unidad || "",          // Unidad_Patrulla
-      datos.prenda_talla || "",    // Prenda_Talla
-      condicionResuelta,           // Condicion_Uniforme
-      datos.articulo || "",        // Articulo_Papeleria
-      datos.cantidad || "",        // Cantidad
-      datos.urgencia || "Normal",  // Urgencia
-      "Pendiente",                 // Estatus
-      "",                          // Aprobado_Por
-      "",                          // Fecha_Aprobacion
-      "",                          // Atendido_Por
-      "",                          // Fecha_Entrega
-      // Notas + idElemento embebido si existe (formato: "[E001] notas")
-      ((datos.idElemento ? "[" + datos.idElemento + "] " : "") + (datos.notas || ""))
-    ];
-
-    hoja.appendRow(fila);
-    enviarNotificacionNuevaRequisicion(datos, id, condicionResuelta);
-
-    // Push notification a los aprobadores según tipo
-    try {
-      const tipoNorm = normalizarTipoApp(datos.tipo);
-      const pushDestinatarios = {
-        Uniforme:  [USERS_ADMIN.gigi, USERS_ADMIN.gabriel, USERS_ADMIN.emiliano],
-        Patrulla:  [USERS_ADMIN.gigi],
-        Papeleria: [USERS_ADMIN.gabriel, USERS_ADMIN.emiliano],
-        Equipo:    [USERS_ADMIN.othon]
-      }[tipoNorm] || [];
-
-      const urgenciaIcono = datos.urgencia === "Crítico" ? "🚨 " :
-                            datos.urgencia === "Urgente" ? "⚡ " : "";
-      enviarPush(
-        pushDestinatarios,
-        urgenciaIcono + "Nueva solicitud de " + datos.tipo,
-        (datos.solicitante || "Alguien") + " — " + (datos.detalle || datos.tipo).substring(0, 80),
-        urlPanelConSolicitud(id)
-      );
-    } catch(pushErr) {
-      Logger.log("Error push nueva solicitud: " + pushErr);
-    }
-
-    return respuestaOK({ id: id });
-
-  } catch (err) {
-    return respuestaError(err.toString());
+    await OneSignal.Notifications.requestPermission();
+    setTimeout(() => {
+      if (OneSignal.Notifications.permission) {
+        mostrarToast("✓ Notificaciones activadas", "ok");
+        document.getElementById("btn-push-activate").style.display = "none";
+      } else {
+        mostrarToast("Permiso denegado o pendiente", "err");
+      }
+    }, 1500);
+  } catch(e) {
+    mostrarToast("Error: " + e.message, "err");
   }
 }
 
-// ============================================================
-// ENDPOINT GET — catálogo de servicios O lista de solicitudes
-// ============================================================
-function doGet(e) {
-  // Permitir CORS para Safari iOS
-  const action = e && e.parameter && e.parameter.action;
-
-  if (action === "getSolicitudes")     return getSolicitudes();
-  if (action === "getInventario")      return getInventario();
-  if (action === "getFlota")           return getFlota();
-  if (action === "getElementos")       return getElementos();
-  if (action === "getHistorialPrenda") return getHistorialPrenda(e);
-
-  // Default: catálogo de servicios para el formulario
+async function verificarEstadoPush() {
   try {
-    const ss = SpreadsheetApp.openById(SHEET_ID);
-    const hoja = ss.getSheetByName(HOJA_SERVICIOS);
-    const datos = hoja.getDataRange().getValues();
-    const servicios = datos.slice(1).map(fila => ({
-      id: fila[0], nombre: fila[1], caseta: fila[2], elementos: fila[3]
-    }));
-    return ContentService
-      .createTextOutput(JSON.stringify({ ok: true, servicios: servicios }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return respuestaError(err.toString());
-  }
-}
-
-// ============================================================
-// OBTENER TODAS LAS SOLICITUDES — para el panel
-// ============================================================
-function getSolicitudes() {
-  try {
-    const ss = SpreadsheetApp.openById(SHEET_ID);
-    const hoja = ss.getSheetByName(HOJA_REQUISICIONES);
-    const datos = hoja.getDataRange().getValues();
-
-    const solicitudes = datos.slice(1).reverse().map(fila => ({
-      id:               fila[0],
-      fecha:            fila[1],
-      tipo:             fila[2],
-      rol:              fila[3],
-      solicitante:      fila[4],
-      servicio:         fila[5],
-      detalle:          fila[6],
-      unidad:           fila[7],
-      prenda:           fila[8],
-      condicion:        fila[9],
-      articulo:         fila[10],
-      cantidad:         fila[11],
-      urgencia:         fila[12],
-      estatus:          fila[13],
-      aprobadoPor:      fila[14],
-      fechaAprobacion:  fila[15],
-      atendidoPor:      fila[16],
-      fechaEntrega:     fila[17],
-      notaGestion:      fila[18]
-    }));
-
-    return ContentService
-      .createTextOutput(JSON.stringify({ ok: true, solicitudes: solicitudes }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return respuestaError(err.toString());
-  }
-}
-
-// ============================================================
-// ACTUALIZAR ESTATUS — desde el panel
-// ============================================================
-function actualizarEstatusDesdePanel(datos) {
-  try {
-    const ss = SpreadsheetApp.openById(SHEET_ID);
-    const hoja = ss.getSheetByName(HOJA_REQUISICIONES);
-    const filas = hoja.getDataRange().getValues();
-    const ahora = new Date();
-
-    // Comparar IDs como strings para evitar problemas de tipo
-    let filaIdx = -1;
-    for (let i = 1; i < filas.length; i++) {
-      if (String(filas[i][0]).trim() === String(datos.id).trim()) { filaIdx = i + 1; break; }
-    }
-    if (filaIdx === -1) return respuestaError("Solicitud no encontrada: " + datos.id);
-
-    const nuevoEstatus = datos.estatus;
-
-    // Columnas del Sheet (base 1):
-    // 1:ID, 2:Fecha, 3:Tipo, 4:Rol, 5:Solicitante, 6:Servicio, 7:Detalle,
-    // 8:Unidad, 9:Prenda, 10:Condicion, 11:Articulo, 12:Cantidad,
-    // 13:Urgencia, 14:Estatus, 15:Aprobado_Por, 16:Fecha_Aprobacion,
-    // 17:Atendido_Por, 18:Fecha_Entrega, 19:Notas
-    hoja.getRange(filaIdx, 14).setValue(nuevoEstatus);
-
-    // Resetear contador de avisos al cambiar estatus
-    const headersResp = hoja.getRange(1,1,1,hoja.getLastColumn()).getValues()[0];
-    const colNumAv = headersResp.indexOf("Num_Avisos");
-    const colUltRec = headersResp.indexOf("Ultimo_Recordatorio");
-    if (colNumAv > -1)  hoja.getRange(filaIdx, colNumAv+1).setValue(0);
-    if (colUltRec > -1) hoja.getRange(filaIdx, colUltRec+1).setValue("");
-
-    // Push al solicitante cuando cambia estatus (solo si es admin user)
-    const solicitanteFila = String(filas[filaIdx-1][3] || ""); // col 3 = solicitante
-    const idElementoFila = extraerIdElemento(filas[filaIdx-1][18]); // notas con [E001]
-    const externalIdPush = idElementoFila || solicitanteFila.toLowerCase();
-    const tipoSol = String(filas[filaIdx-1][2] || ""); // tipo
-
-    const iconoEstatus = {
-      "Aprobada":  "✅ ",
-      "Atendida":  "📦 ",
-      "Cerrada":   "🔒 ",
-      "Rechazada": "❌ ",
-      "Cancelada": "🚫 "
-    }[nuevoEstatus] || "";
-
-    if (externalIdPush) {
-      enviarPush(
-        [externalIdPush],
-        iconoEstatus + "Tu solicitud fue " + nuevoEstatus.toLowerCase(),
-        tipoSol + " " + datos.id + (datos.nota ? " — " + datos.nota : ""),
-        urlPanelConSolicitud(datos.id)
-      );
-    }
-
-    if (nuevoEstatus === "Aprobada") {
-      hoja.getRange(filaIdx, 15).setValue(datos.gestionadoPor || "");
-      hoja.getRange(filaIdx, 16).setValue(ahora);
-
-      // Push a quien debe atender (siguiente paso)
-      const siguientes = {
-        Uniforme:  [USERS_ADMIN.gabriel, USERS_ADMIN.emiliano, USERS_ADMIN.othon],
-        Patrulla:  [USERS_ADMIN.gigi],
-        Papeleria: [USERS_ADMIN.gigi],
-        Equipo:    [USERS_ADMIN.gigi]
-      }[normalizarTipoApp(tipoSol)] || [];
-      enviarPush(siguientes, "📋 Solicitud aprobada — toca atender", tipoSol + " " + datos.id, urlPanelConSolicitud(datos.id));
-    }
-    if (nuevoEstatus === "Atendida") {
-      hoja.getRange(filaIdx, 17).setValue(datos.gestionadoPor || "");
-      hoja.getRange(filaIdx, 18).setValue(ahora);
-    }
-    if (nuevoEstatus === "Cerrada") {
-      hoja.getRange(filaIdx, 18).setValue(ahora);
-    }
-    if (nuevoEstatus === "Cancelada") {
-      hoja.getRange(filaIdx, 15).setValue(datos.gestionadoPor || "");
-      hoja.getRange(filaIdx, 16).setValue(ahora);
-    }
-    if (datos.nota) {
-      hoja.getRange(filaIdx, 19).setValue(datos.nota);
-    }
-
-    // Notificar cambio de estatus
-    enviarNotificacionCambioEstatus(filas[filaIdx - 1], nuevoEstatus, datos.nota || "");
-
-    return respuestaOK({ id: datos.id, estatus: nuevoEstatus });
-  } catch (err) {
-    return respuestaError(err.toString());
-  }
-}
-
-function enviarNotificacionCambioEstatus(fila, nuevoEstatus, nota) {
-  try {
-    const id = fila[0]; const tipo = fila[2]; const solicitante = fila[4];
-    const servicio = fila[5]; const detalle = fila[6];
-
-    const iconos = { Aprobada:"✅", Atendida:"📦", Rechazada:"❌", Cerrada:"🔒" };
-    const asunto = `[Frago] ${iconos[nuevoEstatus]||""} Solicitud ${id} — ${nuevoEstatus}`;
-    const cuerpo = `
-Tu solicitud ha sido actualizada.
-
-ID: ${id}
-Tipo: ${tipo}
-Detalle: ${detalle}
-Servicio: ${servicio}
-Nuevo estatus: ${nuevoEstatus}
-${nota ? "Nota: " + nota : ""}
-
-Ver el detalle en el Sheet:
-https://docs.google.com/spreadsheets/d/${SHEET_ID}
-    `.trim();
-
-    // Notificar a coordinadores y dir. compras
-    MailApp.sendEmail(CORREOS.coord1, asunto, cuerpo);
-    MailApp.sendEmail(CORREOS.coord2, asunto, cuerpo);
-    MailApp.sendEmail(CORREOS.compras, asunto, cuerpo);
+    if (typeof OneSignal === "undefined") return;
+    await new Promise(r => setTimeout(r, 1500));
+    const tienePermiso = OneSignal.Notifications.permission;
+    const btn = document.getElementById("btn-push-activate");
+    if (btn) btn.style.display = tienePermiso ? "none" : "inline-block";
   } catch(e) {}
 }
 
-// ============================================================
-// NOTIFICACIONES — nueva requisición recibida
-// ============================================================
-// ============================================================
-// LÓGICA DE INVENTARIO — resolver condición (nuevo vs usado)
-// Columnas Inventario_Uniformes:
-// 0:ID, 1:Prenda, 2:Talla, 3:Stock_Actual, 4:Stock_Minimo, 5:Condicion, 6:Alerta
-// Condicion valores: "Nueva" | "Nuevo" | "Usada (Buen estado)" | "Usado (Buen estado)"
-// ============================================================
-const CONDICION_USADA = ["Usada (Buen estado)", "Usado (Buen estado)"];
-const CONDICION_NUEVA = ["Nueva", "Nuevo"];
+function continuarConRol(rol) {
+  rolActual = rol;
+  setTimeout(verificarEstadoPush, 2000);
+  tipoActual = null;
+  document.getElementById("form-body").style.display = "none";
+  document.querySelectorAll(".modulo").forEach(m => m.classList.remove("visible"));
 
-function resolverCondicionInventario(prenda_talla) {
+  const acceso = ACCESO[rol] || [];
+  const grid = document.getElementById("tipo-grid");
+  grid.innerHTML = acceso.map(tipo => {
+    const c = TIPOS_CONFIG[tipo];
+    return `<button class="tipo-btn ${c.clase}" onclick="setTipo('${tipo}',this)">
+      <span class="tipo-icon">${c.icon}</span>
+      <span class="tipo-label">${c.label}</span>
+    </button>`;
+  }).join("");
+
+  document.getElementById("tipo-section").style.display = "block";
+  actualizarCampoSolicitante();
+  actualizarProgreso(2);
+  document.getElementById("btn-back").style.display = "block";
+  setTimeout(() => {
+    document.getElementById("tipo-section").scrollIntoView({ behavior:"smooth", block:"start" });
+  }, 50);
+}
+
+// ── PASO 2: TIPO ──
+function setTipo(tipo, btn) {
+  tipoActual = tipo;
+  document.querySelectorAll(".tipo-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("form-body").style.display = "block";
+  document.querySelectorAll(".modulo").forEach(m => m.classList.remove("visible"));
+  document.getElementById("mod-" + tipo).classList.add("visible");
+
+  const esConsulta = tipo === "Consulta";
+
+  // Mostrar u ocultar campos comunes según si es Consulta o no
+  document.getElementById("btn-enviar").style.display        = esConsulta ? "none" : "flex";
+  document.getElementById("btn-enviar").className            = "btn-submit t-" + tipo.toLowerCase();
+  document.getElementById("campo-servicio").style.display    = esConsulta ? "none" : "block";
+
+  const urgRow = document.querySelector(".urgencia-grid");
+  if (urgRow && urgRow.parentElement) urgRow.parentElement.style.display = esConsulta ? "none" : "block";
+
+  const solRow = document.getElementById("solicitante");
+  if (solRow && solRow.parentElement) solRow.parentElement.style.display = esConsulta ? "none" : "block";
+
+  if (!esConsulta) {
+    poblarServicios();
+    if (tipo === "Patrulla") aplicarRestriccionesPatrulla();
+    if (tipo === "Uniforme") actualizarCampoCondicion();
+  } else {
+    mostrarFoliosRecientesMod();
+  }
+
+  // Progreso paso 3
+  actualizarProgreso(3);
+  setTimeout(() => {
+    document.getElementById("form-body").scrollIntoView({ behavior:"smooth", block:"start" });
+  }, 50);
+}
+
+// ── SERVICIOS ──
+async function cargarServicios() {
+  // Intentar cargar de cache primero (válido 24 horas)
   try {
-    const ss = SpreadsheetApp.openById(SHEET_ID);
-    const hoja = ss.getSheetByName("Inventario_Uniformes");
-    if (!hoja) return "Nuevo";
-    const datos = hoja.getDataRange().getValues();
-
-    let stockUsado = 0;
-    let stockNuevo = 0;
-    let condUsado = "";
-    let condNuevo = "";
-
-    datos.slice(1).forEach(fila => {
-      const clave = (fila[1] + " / " + fila[2]).trim();
-      const stock = Number(fila[3]);
-      const condicion = (fila[5] || "Nuevo").toString().trim();
-      if (clave === prenda_talla && stock > 0) {
-        if (CONDICION_USADA.includes(condicion)) { stockUsado += stock; condUsado = condicion; }
-        if (CONDICION_NUEVA.includes(condicion)) { stockNuevo += stock; condNuevo = condicion; }
+    const cached = localStorage.getItem("frago_servicios_cache");
+    if (cached) {
+      const { servicios, ts } = JSON.parse(cached);
+      const horas = (Date.now() - ts) / 3600000;
+      if (horas < 24 && servicios && servicios.length) {
+        todosLosServicios = servicios;
+        // Refrescar en segundo plano sin bloquear
+        refrescarServiciosFondo();
+        return;
       }
-    });
+    }
+  } catch(e) {}
 
-    // Primero usado, luego nuevo — retorna el valor exacto del Sheet
-    if (stockUsado > 0) return condUsado;
-    if (stockNuevo > 0) return condNuevo;
-    return "Sin stock";
+  try {
+    const res  = await fetch(SCRIPT_URL);
+    const data = await res.json();
+    if (data.ok && data.servicios) {
+      todosLosServicios = data.servicios.map(s => s.nombre);
+      localStorage.setItem("frago_servicios_cache", JSON.stringify({ servicios: todosLosServicios, ts: Date.now() }));
+    }
   } catch(e) {
-    return "Nuevo";
+    todosLosServicios = [
+      "3 vistas","Vértice","Agua azul","Magnolia","Gasolinera","Med 100",
+      "Central park","El templo","Cumbres del lago Z1","Cumbres del lago Z2",
+      "Cumbres del lago Z3","Cumbres del lago Z4","Villa capri","Lago el valle",
+      "Lago palomas","Catena","Lomas del lago","Lomas de juriquilla caseta 1",
+      "Lomas de juriquilla caseta 2","Condesa","Balcones de juriquilla","Atia",
+      "Real del Lago","Oficinas"
+    ];
   }
 }
 
-function enviarNotificacionNuevaRequisicion(datos, id, condicionResuelta) {
-  condicionResuelta = condicionResuelta || "";
-  const tipo = datos.tipo || "Requisición";
-  const asunto = `[Frago] Nueva solicitud ${id} — ${tipo}`;
-
-  const cuerpo = `
-Nueva solicitud recibida en el sistema Frago.
-
-ID: ${id}
-Tipo: ${tipo}
-Rol: ${datos.rol || "No especificado"}
-Solicitante: ${datos.solicitante}
-Servicio / Caseta: ${datos.servicio}
-Urgencia: ${datos.urgencia || "Normal"}
-Detalle: ${datos.detalle}
-${datos.unidad ? "Unidad: " + datos.unidad : ""}
-${datos.prenda_talla ? "Prenda / Talla: " + datos.prenda_talla : ""}
-${condicionResuelta ? "Condición uniforme asignada: " + condicionResuelta : ""}
-${datos.articulo ? "Artículo: " + datos.articulo : ""}
-${datos.cantidad ? "Cantidad: " + datos.cantidad : ""}
-${datos.notas ? "Notas: " + datos.notas : ""}
-
-Accede al Sheet para aprobar o gestionar:
-https://docs.google.com/spreadsheets/d/${SHEET_ID}
-  `.trim();
-
-  // Coordinadores generales reciben todas las requisiciones
-  MailApp.sendEmail(CORREOS.coord1, asunto, cuerpo);
-  MailApp.sendEmail(CORREOS.coord2, asunto, cuerpo);
-
-  // Directora de compras recibe copia directa en mantenimiento/gasolina
-  if (datos.tipo === "Patrulla") {
-    MailApp.sendEmail(CORREOS.compras, asunto, cuerpo);
-  }
-}
-
-// ============================================================
-// VERIFICAR STOCK MÍNIMO
-// Columnas: 0:ID, 1:Prenda, 2:Talla, 3:Stock_Actual, 4:Stock_Minimo,
-//           5:Condicion, 6:Alerta_Stock, 7:Ultima_Actualizacion
-// Trigger quincenal + al registrar entrega (solo nuevos bajos)
-// ============================================================
-function verificarStockMinimo(soloNuevos) {
-  const ss = SpreadsheetApp.openById(SHEET_ID);
-  const hojas = [
-    { nombre: "Inventario_Uniformes", tipo: "Uniformes" },
-    { nombre: "Inventario_Papeleria", tipo: "Papelería" }
-  ];
-  let alertas = [];
-
-  hojas.forEach(({ nombre, tipo }) => {
-    const hoja = ss.getSheetByName(nombre);
-    if (!hoja) return;
-    const datos = hoja.getDataRange().getValues();
-
-    datos.slice(1).forEach((fila, i) => {
-      const stockActual = Number(fila[3]);
-      const stockMinimo = Number(fila[4]);
-      const alertaActual = (fila[6] || "").toString().trim();
-      const filaSS = i + 2; // +2: encabezado + base 1
-
-      if (stockActual <= stockMinimo) {
-        const esBajoNuevo = alertaActual !== "⚠️ STOCK BAJO";
-        if (esBajoNuevo) {
-          // Marcar en columna 7 (Alerta_Stock)
-          hoja.getRange(filaSS, 7).setValue("⚠️ STOCK BAJO");
-          // Actualizar ultima actualización en columna 8
-          hoja.getRange(filaSS, 8).setValue(new Date());
-        }
-        if (!soloNuevos || esBajoNuevo) {
-          alertas.push(`• [${tipo}] ${fila[1]}${fila[2] ? " / " + fila[2] : ""} — Stock: ${stockActual} (mínimo: ${stockMinimo})`);
-        }
-      } else {
-        // Limpiar alerta si ya se repuso el stock
-        if (alertaActual === "⚠️ STOCK BAJO") {
-          hoja.getRange(filaSS, 7).setValue("");
-        }
-      }
-    });
-  });
-
-  if (alertas.length > 0) {
-    const modo = soloNuevos ? "nuevo stock bajo detectado" : "revisión quincenal";
-    const asunto = `[Frago] ⚠️ Stock bajo — ${alertas.length} artículo(s) (${modo})`;
-    const cuerpo = `Los siguientes artículos están por debajo del stock mínimo:
-
-${alertas.join("\n")}
-
-Revisa el inventario:
-https://docs.google.com/spreadsheets/d/${SHEET_ID}`;
-    MailApp.sendEmail(CORREOS.coord1, asunto, cuerpo);
-    MailApp.sendEmail(CORREOS.coord2, asunto, cuerpo);
-    MailApp.sendEmail(CORREOS.compras, asunto, cuerpo);
-  }
-}
-
-// Trigger quincenal — todos los artículos bajos
-function verificarStockMinimoQuincenal() { verificarStockMinimo(false); }
-
-// Al registrar entrega — solo los que acaban de bajar
-function verificarStockMinimoNuevos() { verificarStockMinimo(true); }
-
-// ============================================================
-// ESCALAMIENTO — requisiciones sin atender en 48 hrs
-// Ejecutar con trigger cada 24 hrs
-// ============================================================
-// ============================================================
-// SISTEMA DE RECORDATORIOS ESCALONADOS
-// Trigger: ejecutar diariamente a las 7:00 a.m.
-//
-// Calendario por urgencia (horas desde último cambio de estatus):
-//   Crítico: 12h → 24h → 96h (escala) → 192h
-//   Urgente: 24h → 48h → 120h (escala) → 240h
-//   Normal:  24h → 48h → 120h (escala) → 240h
-// 15+ días → alerta diaria a todos los directivos
-// ============================================================
-
-const CALENDARIO_RECORDATORIOS = {
-  "Crítico": [12, 24, 96, 192],
-  "Urgente": [24, 48, 120, 240],
-  "Normal":  [24, 48, 120, 240]
-};
-const HORAS_ALERTA_TOTAL = 360;
-
-function verificarRequisicionesPendientes() {
+async function refrescarServiciosFondo() {
   try {
-    const ss   = SpreadsheetApp.openById(SHEET_ID);
-    const hoja = ss.getSheetByName(HOJA_REQUISICIONES);
-    const filas = hoja.getDataRange().getValues();
-    const headers = filas[0];
-
-    let colRecordatorio = headers.indexOf("Ultimo_Recordatorio");
-    if (colRecordatorio === -1) {
-      hoja.getRange(1, headers.length + 1).setValue("Ultimo_Recordatorio");
-      colRecordatorio = headers.length;
+    const res  = await fetch(SCRIPT_URL);
+    const data = await res.json();
+    if (data.ok && data.servicios) {
+      todosLosServicios = data.servicios.map(s => s.nombre);
+      localStorage.setItem("frago_servicios_cache", JSON.stringify({ servicios: todosLosServicios, ts: Date.now() }));
     }
-    let colNumAvisos = headers.indexOf("Num_Avisos");
-    if (colNumAvisos === -1) {
-      hoja.getRange(1, headers.length + 2).setValue("Num_Avisos");
-      colNumAvisos = headers.length + 1;
-    }
+  } catch(e) {}
+}
 
-    const ahora = new Date();
-    let enviados = 0;
+function tienePatrulla(nombre) {
+  const n = nombre.toLowerCase();
+  return SERVICIOS_PATRULLA.some(p => n.includes(p));
+}
 
-    for (let i = 1; i < filas.length; i++) {
-      const fila = filas[i];
-      const id              = fila[0];
-      const fecha           = fila[1];
-      const tipo            = fila[2];
-      const urgencia        = String(fila[12]||"Normal");
-      const estatus         = String(fila[13]||"");
-      const fechaAprobacion = fila[15];
-      const fechaEntrega    = fila[18];
-      const ultimoRecord    = fila[colRecordatorio];
-      const numAvisos       = Number(fila[colNumAvisos] || 0);
+async function poblarServicios() {
+  const sel = document.getElementById("servicio");
 
-      if (["Cerrada","Cancelada","Rechazada"].includes(estatus)) continue;
+  // Si todavía no han cargado los servicios, esperar
+  if (todosLosServicios.length === 0) {
+    sel.innerHTML = '<option value="">Cargando servicios...</option>';
+    await cargarServicios();
+  }
 
-      let fechaUltimoCambio = fecha;
-      if (estatus === "Aprobada" && fechaAprobacion)  fechaUltimoCambio = fechaAprobacion;
-      if (estatus === "Atendida" && fechaEntrega)     fechaUltimoCambio = fechaEntrega;
+  sel.innerHTML = '<option value="">Selecciona un servicio...</option>';
+  let lista = [...todosLosServicios];
 
-      const horasDesdeCambio = (ahora - new Date(fechaUltimoCambio)) / 3600000;
-      const horasDesdeAviso  = ultimoRecord ? (ahora - new Date(ultimoRecord)) / 3600000 : 9999;
+  if (tipoActual === "Patrulla") {
+    lista = lista.filter(s => tienePatrulla(s));
+  } else if (tipoActual === "Papeleria" && !ROLES_CON_OFICINAS.includes(rolActual)) {
+    lista = lista.filter(s => s.toLowerCase() !== "oficinas");
+  }
 
-      const calendario = CALENDARIO_RECORDATORIOS[urgencia] || CALENDARIO_RECORDATORIOS["Normal"];
+  lista.forEach(nombre => {
+    const opt = document.createElement("option");
+    opt.value = nombre; opt.textContent = nombre;
+    sel.appendChild(opt);
+  });
+}
 
-      let debeNotificar = false;
-      let tipoAviso = "";
+// ── RESTRICCIONES PATRULLA ──
+function aplicarRestriccionesPatrulla() {
+  const operativos = ROLES_GASOLINA_INSUMOS_REVISION.includes(rolActual);
+  const sinVirtus  = ROLES_SIN_VIRTUS.includes(rolActual);
+  const aviso      = document.getElementById("aviso-patrulla");
 
-      if (horasDesdeCambio >= HORAS_ALERTA_TOTAL) {
-        if (horasDesdeAviso >= 24) {
-          debeNotificar = true;
-          tipoAviso = "alerta_total";
-        }
-      } else if (numAvisos < calendario.length) {
-        const proximoUmbral = calendario[numAvisos];
-        if (horasDesdeCambio >= proximoUmbral) {
-          debeNotificar = true;
-          tipoAviso = numAvisos === 0 ? "primer_aviso" :
-                       numAvisos >= 2 ? "escala" : "recordatorio";
-        }
-      }
+  // Aviso
+  if (operativos) {
+    aviso.textContent = "ⓘ Tu rol permite solicitar carga de gasolina, insumos y revisión / servicio.";
+    aviso.classList.add("visible");
+  } else {
+    aviso.classList.remove("visible");
+  }
 
-      if (debeNotificar) {
-        const destinatarios = obtenerDestinatariosRecordatorio(tipo, estatus, tipoAviso);
-        const asunto = construirAsuntoRecordatorio(urgencia, tipoAviso, id, estatus);
-        const cuerpo = construirCuerpoRecordatorio(urgencia, tipoAviso, fila, horasDesdeCambio);
+  // Virtus Auto
+  const optVirtus = document.getElementById("opt-virtus-auto");
+  optVirtus.disabled = sinVirtus; optVirtus.style.display = sinVirtus ? "none" : "";
+  if (sinVirtus && document.getElementById("unidad").value === "Virtus Automatico 2023")
+    document.getElementById("unidad").value = "";
 
-        try {
-          MailApp.sendEmail({
-            to: destinatarios.join(","),
-            subject: asunto,
-            htmlBody: cuerpo
-          });
-          // Push push paralelo a los responsables
-          const pushIds = destinatarios.map(correo => {
-            for (const [user, c] of Object.entries(CORREOS)) {
-              if (c === correo) return USERS_ADMIN[user] || user;
-            }
-            return null;
-          }).filter(Boolean);
-          enviarPush(pushIds, asunto.substring(0, 50), "Toca atender la solicitud " + id, urlPanelConSolicitud(id));
-          hoja.getRange(i+1, colRecordatorio+1).setValue(ahora);
-          hoja.getRange(i+1, colNumAvisos+1).setValue(numAvisos + 1);
-          enviados++;
-        } catch(err) {
-          Logger.log("Error enviando recordatorio " + id + ": " + err);
-        }
-      }
-    }
+  // Tipos de solicitud — para operativos solo: gasolina, insumos, revisión
+  const tp = document.getElementById("tipo-patrulla");
+  document.querySelectorAll(".opt-restringida").forEach(opt => {
+    opt.disabled = operativos; opt.style.display = operativos ? "none" : "";
+  });
+  const TIPOS_PERMITIDOS_OPERATIVOS = ["Carga de gasolina","Insumos","Revision general"];
+  if (operativos && tp.value && !TIPOS_PERMITIDOS_OPERATIVOS.includes(tp.value)) tp.value = "";
+}
 
-    Logger.log("Recordatorios enviados: " + enviados);
-  } catch(err) {
-    Logger.log("Error en verificarRequisicionesPendientes: " + err);
+function esMonopatin() { return document.getElementById("unidad").value === "Monopatin Electrico Real del Lago"; }
+
+function onTipoPatrullaChange() {
+  const tp = document.getElementById("tipo-patrulla").value;
+  if (esMonopatin() && !["Reparacion","Revision general"].includes(tp))
+    document.getElementById("tipo-patrulla").value = "";
+
+  // Mostrar bloque de insumos si aplica
+  const bloque = document.getElementById("bloque-insumos-patrulla");
+  if (bloque) bloque.style.display = (tp === "Insumos") ? "block" : "none";
+
+  // Cambiar label de descripción según tipo
+  const lbl = document.getElementById("label-desc-patrulla");
+  if (lbl) {
+    if (tp === "Insumos") lbl.innerHTML = "Notas adicionales <span class=\"req\">*</span>";
+    else if (tp === "Carga de gasolina") lbl.innerHTML = "Litros / detalles <span class=\"req\">*</span>";
+    else lbl.innerHTML = "Descripción <span class=\"req\">*</span>";
   }
 }
 
-function obtenerDestinatariosRecordatorio(tipo, estatus, tipoAviso) {
-  const t = normalizarTipoApp(tipo);
+// Restringe opciones cuando se selecciona el monopatín
+document.addEventListener("change", function(e) {
+  if (e.target.id !== "unidad") return;
+  const mono = esMonopatin();
+  const aviso = document.getElementById("aviso-patrulla");
+  const tp = document.getElementById("tipo-patrulla");
+  const optGas = document.querySelector('[value="Carga de gasolina"]');
+  const optMant = document.querySelector('.opt-restringida');
 
-  const RESPONSABLES = {
-    Uniforme: {
-      Pendiente: [CORREOS.gigi, CORREOS.gabriel, CORREOS.emiliano],
-      Aprobada:  [CORREOS.gabriel, CORREOS.emiliano, CORREOS.othon],
-      Atendida:  [CORREOS.gabriel, CORREOS.emiliano, CORREOS.othon]
-    },
-    Patrulla: {
-      Pendiente: [CORREOS.gigi],
-      Aprobada:  [CORREOS.gigi],
-      Atendida:  [CORREOS.gabriel, CORREOS.emiliano]
-    },
-    Papeleria: {
-      Pendiente: [CORREOS.gabriel, CORREOS.emiliano],
-      Aprobada:  [CORREOS.gigi],
-      Atendida:  [CORREOS.gigi]
-    },
-    Equipo: {
-      Pendiente: [CORREOS.othon],
-      Aprobada:  [CORREOS.gigi],
-      Atendida:  [CORREOS.othon, CORREOS.gabriel, CORREOS.emiliano]
+  if (mono) {
+    if (optGas) { optGas.disabled = true; optGas.style.display = "none"; }
+    document.querySelectorAll(".opt-restringida").forEach(o => { o.disabled = true; o.style.display = "none"; });
+    aviso.textContent = "⚠️ El monopatín solo permite reparación o revisión general.";
+    aviso.classList.add("visible");
+    if (!["Reparacion","Revision general"].includes(tp.value)) tp.value = "";
+  } else {
+    if (optGas) { optGas.disabled = false; optGas.style.display = ""; }
+    aplicarRestriccionesPatrulla();
+  }
+});
+
+// ── CONDICIÓN UNIFORME ──
+function actualizarCampoCondicion() {
+  const campo = document.getElementById("campo-condicion");
+  if (!campo) return;
+  const mostrar = ROLES_CON_CONDICION.includes(rolActual);
+  campo.style.display = mostrar ? "block" : "none";
+  if (!mostrar) { condicionActual = "Cualquiera"; }
+}
+
+function actualizarTallas() {
+  const prenda = document.getElementById("prenda").value;
+  const sel    = document.getElementById("talla");
+  const tallas = TALLAS_POR_PRENDA[prenda] || [];
+  sel.innerHTML = tallas.length
+    ? '<option value="">Selecciona...</option>' + tallas.map(t => `<option>${t}</option>`).join("")
+    : '<option value="">Selecciona prenda primero...</option>';
+
+  // Si solo hay una opción, seleccionarla automáticamente
+  if (tallas.length === 1) sel.value = tallas[0];
+}
+
+function setCondicion(cond, btn) {
+  condicionActual = cond;
+  document.querySelectorAll("[data-cond]").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+}
+
+// ── URGENCIA ──
+function setUrgencia(urg, btn) {
+  urgenciaActual = urg;
+  document.querySelectorAll(".urg-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+}
+
+// ── TOAST ──
+function mostrarToast(msg, tipo) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.className = "toast show " + tipo;
+  setTimeout(() => { t.className = "toast"; }, 4500);
+}
+
+// ── VALIDACIÓN ──
+function validar() {
+  if (!rolActual)  { mostrarToast("Selecciona tu rol", "err"); return false; }
+  if (!tipoActual) { mostrarToast("Selecciona el tipo de solicitud", "err"); return false; }
+  if (!usuarioLogeadoNombre) {
+    mostrarToast("Debes iniciar sesión primero", "err"); return false;
+  }
+  if (tipoActual !== "Equipo" && !document.getElementById("servicio").value) { mostrarToast("Selecciona el servicio / caseta", "err"); return false; }
+
+  if (tipoActual === "Uniforme") {
+    if (!document.getElementById("prenda").value)      { mostrarToast("Selecciona la prenda", "err"); return false; }
+    if (!document.getElementById("talla").value)       { mostrarToast("Selecciona la talla", "err"); return false; }
+    if (!document.getElementById("cantidad-uni").value){ mostrarToast("Indica la cantidad", "err"); return false; }
+  }
+  if (tipoActual === "Patrulla") {
+    const unidad  = document.getElementById("unidad").value;
+    const tipoPat = document.getElementById("tipo-patrulla").value;
+    if (!unidad)  { mostrarToast("Selecciona la unidad", "err"); return false; }
+    if (!tipoPat) { mostrarToast("Selecciona el tipo de solicitud", "err"); return false; }
+    if (ROLES_GASOLINA_INSUMOS_REVISION.includes(rolActual) && !["Carga de gasolina","Insumos","Revision general"].includes(tipoPat)) {
+      mostrarToast("Tu rol solo puede solicitar gasolina, insumos o revisión general", "err"); return false;
     }
+    if (tipoPat === "Insumos" && !document.getElementById("insumo-patrulla").value) {
+      mostrarToast("Selecciona un insumo", "err"); return false;
+    }
+    if (esMonopatin() && !["Reparacion","Revision general"].includes(tipoPat)) { mostrarToast("El monopatín solo permite reparación o revisión general", "err"); return false; }
+    if (!document.getElementById("detalle-patrulla").value.trim()) { mostrarToast("Describe la solicitud", "err"); return false; }
+  }
+  if (tipoActual === "Papeleria") {
+    if (!document.getElementById("articulo").value)        { mostrarToast("Selecciona el artículo", "err"); return false; }
+    if (!document.getElementById("cantidad-pap").value)    { mostrarToast("Indica la cantidad", "err"); return false; }
+  }
+  if (tipoActual === "Equipo") {
+    if (!document.getElementById("tipo-equipo").value)     { mostrarToast("Selecciona el tipo de equipo", "err"); return false; }
+    if (!document.getElementById("cantidad-equipo").value) { mostrarToast("Indica la cantidad", "err"); return false; }
+    if (!document.getElementById("accion-equipo").value)   { mostrarToast("Selecciona la acción", "err"); return false; }
+    if (!document.getElementById("detalle-equipo").value.trim()) { mostrarToast("Describe la solicitud", "err"); return false; }
+  }
+  return true;
+}
+
+// ── ENVÍO ──
+async function enviar() {
+  if (!validar()) return;
+  const btn = document.getElementById("btn-enviar");
+  const spinner = document.getElementById("spinner");
+  const btnText = document.getElementById("btn-text");
+  btn.disabled = true; spinner.style.display = "block"; btnText.textContent = "Enviando...";
+
+  const ROLES_LABELS = {
+    guardia:"Guardia", jefe_turno:"Jefe de turno", coord_operativo:"Coordinador operativo",
+    coord_general:"Coordinador general", director_general:"Director general",
+    aux_administrativa:"Auxiliar administrativa", director_finanzas:"Director de finanzas / Administración"
   };
 
-  const ESCALA_SUPERIOR = [CORREOS.gabriel, CORREOS.emiliano, CORREOS.othon];
-  const TODOS = [CORREOS.gabriel, CORREOS.emiliano, CORREOS.othon, CORREOS.gigi];
+  const payload = {
+    tipo:       tipoActual,
+    rol:        ROLES_LABELS[rolActual] || rolActual,
+    solicitante:document.getElementById("solicitante").value.trim(),
+    servicio:   tipoActual === "Equipo" ? "N/A" : document.getElementById("servicio").value,
+    urgencia:   urgenciaActual
+  };
 
-  if (tipoAviso === "alerta_total") return TODOS;
-  if (tipoAviso === "escala") {
-    const responsables = (RESPONSABLES[t] && RESPONSABLES[t][estatus]) || [];
-    return [...new Set([...responsables, ...ESCALA_SUPERIOR])];
+  if (tipoActual === "Uniforme") {
+    const prenda = document.getElementById("prenda").value;
+    const talla  = document.getElementById("talla").value;
+    payload.prenda_talla = prenda + " / " + talla;
+    payload.cantidad     = document.getElementById("cantidad-uni").value;
+    payload.condicion    = condicionActual;
+    payload.notas        = document.getElementById("notas-uni").value.trim();
+    payload.detalle      = prenda + " talla " + talla;
   }
-  return (RESPONSABLES[t] && RESPONSABLES[t][estatus]) || TODOS;
-}
-
-function normalizarTipoApp(tipo) {
-  const t = String(tipo||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-  if (t.includes("unif"))    return "Uniforme";
-  if (t.includes("patrull")) return "Patrulla";
-  if (t.includes("papel"))   return "Papeleria";
-  if (t.includes("equip"))   return "Equipo";
-  return tipo;
-}
-
-function construirAsuntoRecordatorio(urgencia, tipoAviso, id, estatus) {
-  const accion = estatus === "Pendiente" ? "aprobar" : estatus === "Aprobada" ? "atender" : "cerrar";
-  let prefijo = "";
-  if (tipoAviso === "alerta_total")      prefijo = "🚨 ALERTA — 15+ DÍAS sin acción — ";
-  else if (tipoAviso === "escala")       prefijo = "⚠️ ESCALA — ";
-  else if (tipoAviso === "primer_aviso") prefijo = "🔔 Recordatorio — ";
-  else                                   prefijo = "🔁 Recordatorio — ";
-
-  if (urgencia === "Crítico")      prefijo = "🚨 CRÍTICO — " + prefijo;
-  else if (urgencia === "Urgente") prefijo = "⚡ URGENTE — " + prefijo;
-
-  return prefijo + "Pendiente de " + accion + " (" + id + ")";
-}
-
-function construirCuerpoRecordatorio(urgencia, tipoAviso, fila, horasDesdeCambio) {
-  const id          = fila[0];
-  const tipo        = fila[2];
-  const solicitante = fila[4];
-  const servicio    = fila[5];
-  const detalle     = fila[6];
-  const estatus     = fila[13];
-  const dias        = Math.floor(horasDesdeCambio / 24);
-  const accion      = estatus === "Pendiente" ? "APROBAR" : estatus === "Aprobada" ? "ATENDER" : "CERRAR";
-
-  let banner = "";
-  if (tipoAviso === "alerta_total") {
-    banner = '<div style="background:#fff3cd;border-left:4px solid #d4a900;padding:14px;margin-bottom:18px;border-radius:6px;"><strong style="color:#7a5f00;font-size:16px;">🚨 ALERTA — Sin acción por más de 15 días</strong><p style="margin:6px 0 0;color:#7a5f00;">Notificación a todos los directivos. Acción requerida ASAP.</p></div>';
-  } else if (tipoAviso === "escala") {
-    banner = '<div style="background:#ffe9e0;border-left:4px solid #e07b4a;padding:14px;margin-bottom:18px;border-radius:6px;"><strong style="color:#9c4519;">⚠️ Escalamiento</strong><p style="margin:6px 0 0;color:#9c4519;">Esta solicitud lleva ' + dias + ' días sin moverse. Se notifica también al nivel superior.</p></div>';
+  if (tipoActual === "Patrulla") {
+    payload.unidad  = document.getElementById("unidad").value;
+    const tipoPat   = document.getElementById("tipo-patrulla").value;
+    payload.detalle = tipoPat + ": " + document.getElementById("detalle-patrulla").value.trim();
+    const km = document.getElementById("km").value;
+    if (km) payload.notas = "Kilometraje: " + km + " km";
+  }
+  if (tipoActual === "Papeleria") {
+    payload.articulo = document.getElementById("articulo").value;
+    payload.cantidad = document.getElementById("cantidad-pap").value;
+    payload.notas    = document.getElementById("notas-pap").value.trim();
+    payload.detalle  = document.getElementById("articulo").value;
+  }
+  if (tipoActual === "Equipo") {
+    const tipoEq   = document.getElementById("tipo-equipo").value;
+    const accion   = document.getElementById("accion-equipo").value;
+    const asignado = document.getElementById("asignado-equipo").value.trim();
+    payload.articulo = tipoEq;
+    payload.cantidad = document.getElementById("cantidad-equipo").value;
+    payload.detalle  = accion + ": " + document.getElementById("detalle-equipo").value.trim();
+    payload.notas    = asignado ? "Asignado a: " + asignado : "";
   }
 
-  let urgenciaBanner = "";
-  if (urgencia === "Crítico")      urgenciaBanner = '<p style="background:#fce4e4;color:#a52525;padding:10px;border-radius:6px;border:1px solid #f1b8b8;margin:0 0 12px;font-weight:500;">🚨 SOLICITUD CRÍTICA — atender de inmediato</p>';
-  else if (urgencia === "Urgente") urgenciaBanner = '<p style="background:#fff4e0;color:#8a5400;padding:10px;border-radius:6px;border:1px solid #ffd89a;margin:0 0 12px;font-weight:500;">⚡ SOLICITUD URGENTE</p>';
-
-  return '<div style="font-family:Inter,Arial,sans-serif;max-width:560px;margin:auto;color:#222;">'
-    + banner
-    + urgenciaBanner
-    + '<h2 style="margin:0 0 8px;color:#1a1a1a;">Solicitud pendiente de ' + accion.toLowerCase() + '</h2>'
-    + '<p style="color:#666;margin:0 0 16px;font-size:13px;">Esta solicitud lleva <strong>' + dias + ' día' + (dias!==1?'s':'') + '</strong> en estatus "' + estatus + '" sin movimiento.</p>'
-    + '<table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:16px;">'
-    + '<tr><td style="padding:6px 0;color:#666;width:120px;">ID:</td><td style="padding:6px 0;font-family:monospace;">' + id + '</td></tr>'
-    + '<tr><td style="padding:6px 0;color:#666;">Tipo:</td><td style="padding:6px 0;">' + tipo + '</td></tr>'
-    + '<tr><td style="padding:6px 0;color:#666;">Solicitante:</td><td style="padding:6px 0;">' + (solicitante||"—") + '</td></tr>'
-    + '<tr><td style="padding:6px 0;color:#666;">Servicio:</td><td style="padding:6px 0;">' + (servicio||"—") + '</td></tr>'
-    + '<tr><td style="padding:6px 0;color:#666;">Detalle:</td><td style="padding:6px 0;">' + (detalle||"—") + '</td></tr>'
-    + '<tr><td style="padding:6px 0;color:#666;">Estatus actual:</td><td style="padding:6px 0;font-weight:500;">' + estatus + '</td></tr>'
-    + '<tr><td style="padding:6px 0;color:#666;">Urgencia:</td><td style="padding:6px 0;">' + urgencia + '</td></tr>'
-    + '</table>'
-    + '<p style="color:#666;font-size:13px;">Abre el panel para tomar acción sobre esta solicitud.</p>'
-    + '<p style="color:#999;font-size:11px;margin-top:24px;">Frago Seguridad Privada — Sistema de gestión interna</p>'
-    + '</div>';
-}
-
-// ============================================================
-// RESUMEN SEMANAL — ejecutar con trigger los lunes
-// ============================================================
-function enviarResumenSemanal() {
-  const ss = SpreadsheetApp.openById(SHEET_ID);
-  const hoja = ss.getSheetByName(HOJA_REQUISICIONES);
-  const datos = hoja.getDataRange().getValues();
-
-  const hace7dias = new Date();
-  hace7dias.setDate(hace7dias.getDate() - 7);
-
-  let total = 0, atendidas = 0, pendientes = 0;
-  const porTipo = { Uniforme: 0, Patrulla: 0, Papeleria: 0 };
-
-  datos.slice(1).forEach(fila => {
-    const fecha = new Date(fila[1]);
-    if (fecha >= hace7dias) {
-      total++;
-      if (fila[11] === "Entregado" || fila[11] === "Atendido") atendidas++;
-      if (fila[11] === "Pendiente") pendientes++;
-      if (porTipo[fila[2]] !== undefined) porTipo[fila[2]]++;
-    }
-  });
-
-  const asunto = `[Frago] Resumen semanal del sistema — ${new Date().toLocaleDateString("es-MX")}`;
-  const cuerpo = `
-Resumen de la última semana en el sistema Frago:
-
-Total de requisiciones: ${total}
-  • Uniformes: ${porTipo.Uniforme}
-  • Patrullas: ${porTipo.Patrulla}
-  • Papelería: ${porTipo.Papeleria}
-
-Atendidas: ${atendidas}
-Pendientes: ${pendientes}
-
-Accede al Sheet completo:
-https://docs.google.com/spreadsheets/d/${SHEET_ID}
-  `.trim();
-
-  // Resumen va a todos
-  Object.values(CORREOS).forEach(correo => MailApp.sendEmail(correo, asunto, cuerpo));
-}
-
-// ============================================================
-// INVENTARIO — leer y gestionar desde el panel
-// Columnas: 0:ID, 1:Prenda, 2:Talla, 3:Stock_Actual, 4:Stock_Minimo,
-//           5:Condicion, 6:Alerta_Stock, 7:Ultima_Actualizacion
-// ============================================================
-function getInventario() {
   try {
-    const ss   = SpreadsheetApp.openById(SHEET_ID);
-    const hoja = ss.getSheetByName("Inventario_Uniformes");
-    if (!hoja) return respuestaError("Hoja no encontrada");
-    const datos = hoja.getDataRange().getValues();
-    const items = datos.slice(1).map((fila, i) => ({
-      id:       fila[0] ? String(fila[0]) : "U" + String(i+1).padStart(3,"0"),
-      prenda:   fila[1],
-      talla:    fila[2],
-      stock:    fila[3],
-      minimo:   fila[4],
-      condicion:fila[5],
-      alerta:   fila[6],
-      updated:  fila[7]
-    })).filter(i => i.prenda);
-    return ContentService
-      .createTextOutput(JSON.stringify({ ok:true, items }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch(err) { return respuestaError(err.toString()); }
-}
-
-function gestionarInventario(datos) {
-  try {
-    const ss   = SpreadsheetApp.openById(SHEET_ID);
-    const hoja = ss.getSheetByName("Inventario_Uniformes");
-    const ahora = new Date();
-
-    if (datos.tipo === "nuevo") {
-      // Generar nuevo ID
-      const lastRow = hoja.getLastRow();
-      const newId = "U" + String(lastRow).padStart(3,"0");
-      hoja.appendRow([newId, datos.prenda, datos.talla, datos.stock, datos.minimo, datos.condicion, "", ahora]);
-      verificarStockMinimoNuevos();
-      return respuestaOK({ id: newId });
-    }
-
-    // Buscar fila por ID
-    const filas = hoja.getDataRange().getValues();
-    let filaIdx = -1;
-    for (let i = 1; i < filas.length; i++) {
-      if (String(filas[i][0]) === String(datos.id)) { filaIdx = i + 1; break; }
-    }
-    if (filaIdx === -1) return respuestaError("Artículo no encontrado: " + datos.id);
-
-    if (datos.tipo === "entrada" || datos.tipo === "salida") {
-      const stockActual = Number(filas[filaIdx-1][3]);
-      const nuevoStock  = Math.max(0, stockActual + Number(datos.cantidad));
-      hoja.getRange(filaIdx, 4).setValue(nuevoStock);
-      hoja.getRange(filaIdx, 8).setValue(ahora);
-      // Log en Log_Alertas
-      const logHoja = ss.getSheetByName("Log_Alertas");
-      if (logHoja) logHoja.appendRow([ahora, datos.tipo, datos.id, datos.gestionadoPor||"", "Panel", datos.motivo||"", datos.notas||""]);
-      verificarStockMinimoNuevos();
-    }
-
-    if (datos.tipo === "ajuste") {
-      hoja.getRange(filaIdx, 4).setValue(datos.nuevoStock);
-      hoja.getRange(filaIdx, 5).setValue(datos.nuevoMinimo);
-      hoja.getRange(filaIdx, 8).setValue(ahora);
-      const logHoja = ss.getSheetByName("Log_Alertas");
-      if (logHoja) logHoja.appendRow([ahora, "ajuste", datos.id, datos.gestionadoPor||"", "Panel", "Ajuste manual", datos.notas||""]);
-      verificarStockMinimoNuevos();
-    }
-
-    return respuestaOK({ id: datos.id });
-  } catch(err) { return respuestaError(err.toString()); }
-}
-
-// ============================================================
-// FLOTA — historial de gasolina y servicios
-// Usa la pestaña "Flota" del Sheet
-// Columnas: 0:ID_Unidad, 1:Unidad, 2:Tipo_Registro, 3:Fecha,
-//           4:Litros/Tipo_Svc, 5:Descripcion, 6:Km, 7:RegistradoPor, 8:Notas
-// ============================================================
-function getFlota() {
-  try {
-    const ss   = SpreadsheetApp.openById(SHEET_ID);
-    const hoja = ss.getSheetByName("Flota");
-    if (!hoja) return respuestaOK({ flota: {} });
-    const datos = hoja.getDataRange().getValues();
-    const flota = {};
-
-    datos.slice(1).forEach(fila => {
-      const id   = String(fila[0]);
-      const tipo = String(fila[2]); // "gasolina" o "servicio"
-      if (!id || !tipo) return;
-      if (!flota[id]) flota[id] = { gasolina:[], servicios:[] };
-
-      if (tipo === "gasolina") {
-        flota[id].gasolina.push({
-          fecha:         fila[3],
-          litros:        fila[4],
-          registradoPor: fila[7],
-          notas:         fila[8]
-        });
-      } else {
-        flota[id].servicios.push({
-          fecha:         fila[3],
-          tipo:          fila[4],
-          descripcion:   fila[5],
-          km:            fila[6],
-          registradoPor: fila[7],
-          notas:         fila[8]
-        });
-      }
-    });
-
-    return ContentService
-      .createTextOutput(JSON.stringify({ ok:true, flota }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch(err) { return respuestaError(err.toString()); }
-}
-
-function registrarFlota(datos) {
-  try {
-    const ss   = SpreadsheetApp.openById(SHEET_ID);
-    const hoja = ss.getSheetByName("Flota");
-    if (!hoja) return respuestaError("Hoja Flota no encontrada");
-    const ahora = new Date();
-
-    if (datos.tipo === "gasolina") {
-      hoja.appendRow([
-        datos.unidadId, "", "gasolina", ahora,
-        datos.litros, "", "", datos.registradoPor||"", datos.notas||""
-      ]);
+    const res  = await fetchConReintentos(SCRIPT_URL, { method:"POST", body:JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.ok) {
+      mostrarToast("✓ Enviado — " + data.id, "ok");
+      setTimeout(() => resetForm(), 2200);
     } else {
-      hoja.appendRow([
-        datos.unidadId, "", "servicio", ahora,
-        datos.tipoSvc||"", datos.descripcion||"", datos.km||"",
-        datos.registradoPor||"", datos.notas||""
-      ]);
-    }
-
-    return respuestaOK({ ok: true });
-  } catch(err) { return respuestaError(err.toString()); }
-}
-
-// ============================================================
-// CONSULTAR FOLIO — desde el formulario de solicitudes
-// ============================================================
-function consultarFolioPost(payload) {
-  try {
-    const id = payload && payload.id;
-    if (!id) return respuestaError("ID requerido");
-
-    const ss    = SpreadsheetApp.openById(SHEET_ID);
-    const hoja  = ss.getSheetByName(HOJA_REQUISICIONES);
-    const filas = hoja.getDataRange().getValues();
-
-    const fila = filas.slice(1).find(f => String(f[0]).trim() === String(id).trim());
-    if (!fila) return ContentService
-      .createTextOutput(JSON.stringify({ ok:false, error:"No encontrado: " + id }))
-      .setMimeType(ContentService.MimeType.JSON);
-
-    const solicitud = {
-      id:          fila[0],
-      fecha:       fila[1],
-      tipo:        fila[2],
-      solicitante: fila[4],
-      servicio:    fila[5],
-      detalle:     fila[6],
-      urgencia:    fila[12],
-      estatus:     fila[13],
-      notaGestion: fila[18]
-    };
-
-    return ContentService
-      .createTextOutput(JSON.stringify({ ok:true, solicitud }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch(err) { return respuestaError(err.toString()); }
-}
-
-// ============================================================
-// ELEMENTOS — catálogo de personal
-// Columnas: 0:ID_Elemento, 1:Nombre, 2:Fecha_Ingreso, 3:Activo
-// ============================================================
-function getElementos() {
-  try {
-    const ss   = SpreadsheetApp.openById(SHEET_ID);
-    const hoja = ss.getSheetByName("Elementos");
-    if (!hoja) return respuestaOK({ elementos: [] });
-    const datos = hoja.getDataRange().getValues();
-    const elementos = datos.slice(1)
-      .filter(f => f[0] && String(f[3]).toLowerCase() !== "no" && String(f[4]||"").trim() !== "")
-      .map(f => ({
-        id:           String(f[0]),
-        nombre:       f[1],
-        fechaIngreso: f[2],
-        activo:       f[3],
-        rol:          String(f[4]||"").trim().toLowerCase()
-      }));
-    return ContentService
-      .createTextOutput(JSON.stringify({ ok:true, elementos }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch(err) { return respuestaError(err.toString()); }
-}
-
-// ============================================================
-// HISTORIAL — consultar entregas previas de una prenda
-// Columnas Historial_Entregas:
-// 0:Fecha, 1:ID_Elemento, 2:Prenda, 3:Talla, 4:Condicion,
-// 5:Solicitud_ID, 6:Costo, 7:Motivo, 8:Reporte, 9:Foto_URL
-// ============================================================
-function getHistorialPrenda(e) {
-  try {
-    const idElemento = e && e.parameter && e.parameter.id;
-    const prenda     = e && e.parameter && e.parameter.prenda;
-    if (!idElemento || !prenda) return respuestaError("ID y prenda requeridos");
-
-    const ss   = SpreadsheetApp.openById(SHEET_ID);
-    const hoja = ss.getSheetByName("Historial_Entregas");
-    if (!hoja) return respuestaOK({ historial: [], ultimaFecha: null });
-
-    const datos = hoja.getDataRange().getValues();
-    const historial = datos.slice(1)
-      .filter(f => String(f[1]) === String(idElemento) &&
-                   normalizarPrenda(f[2]) === normalizarPrenda(prenda))
-      .map(f => ({
-        fecha:       f[0],
-        prenda:      f[2],
-        talla:       f[3],
-        condicion:   f[4],
-        solicitudId: f[5],
-        costo:       f[6],
-        motivo:      f[7]
-      }))
-      .sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
-
-    const ultima = historial[0] || null;
-    const ultimaFecha = ultima ? ultima.fecha : null;
-    const diasDesdeUltima = ultima ? Math.floor((new Date() - new Date(ultima.fecha)) / 86400000) : null;
-    const requiereDecision = ultima && diasDesdeUltima !== null && diasDesdeUltima < 180;
-
-    return ContentService
-      .createTextOutput(JSON.stringify({
-        ok: true,
-        historial,
-        ultimaFecha,
-        diasDesdeUltima,
-        requiereDecision,
-        totalEntregas: historial.length
-      }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch(err) { return respuestaError(err.toString()); }
-}
-
-function extraerIdElemento(notas) {
-  if (!notas) return "";
-  const m = String(notas).match(/^\[(E\d+)\]/);
-  return m ? m[1] : "";
-}
-
-function extraerNotas(notas) {
-  if (!notas) return "";
-  return String(notas).replace(/^\[E\d+\]\s*/, "");
-}
-
-function normalizarPrenda(prenda) {
-  return String(prenda || "").trim().toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
-
-// Versión POST de getHistorialPrenda
-function getHistorialPrendaPost(datos) {
-  const fakeE = { parameter: { id: datos.id, prenda: datos.prenda } };
-  return getHistorialPrenda(fakeE);
-}
-
-// ============================================================
-// DETALLE COMPLETO DE UN ELEMENTO (para dashboard por elemento)
-// ============================================================
-function getDetalleElemento(datos) {
-  try {
-    const idElemento = datos.id;
-    if (!idElemento) return respuestaError("ID de elemento requerido");
-
-    const ss = SpreadsheetApp.openById(SHEET_ID);
-
-    // 1. Datos generales del elemento
-    const hojaElem = ss.getSheetByName("Elementos");
-    const filasElem = hojaElem.getDataRange().getValues();
-    let elemento = null;
-    for (let i = 1; i < filasElem.length; i++) {
-      if (String(filasElem[i][0]) === String(idElemento)) {
-        elemento = {
-          id: String(filasElem[i][0]),
-          nombre: filasElem[i][1],
-          fechaIngreso: filasElem[i][2],
-          activo: filasElem[i][3],
-          rol: String(filasElem[i][4]||"").trim().toLowerCase()
-        };
-        break;
-      }
-    }
-    if (!elemento) return respuestaError("Elemento no encontrado");
-
-    // 2. Historial de entregas
-    const hojaHist = ss.getSheetByName("Historial_Entregas");
-    let historial = [];
-    if (hojaHist) {
-      const filasHist = hojaHist.getDataRange().getValues();
-      historial = filasHist.slice(1)
-        .filter(f => String(f[1]) === String(idElemento))
-        .map(f => ({
-          fecha: f[0],
-          prenda: f[2],
-          talla: f[3],
-          condicion: f[4],
-          solicitudId: f[5],
-          costo: Number(f[6]) || 0,
-          motivo: f[7],
-          reporte: f[8] || "",
-          fotoURL: f[9] || ""
-        }))
-        .sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
-    }
-
-    // 3. Prendas asignadas actualmente (última entrega de cada tipo)
-    const prendasUnicas = {};
-    historial.forEach(h => {
-      const key = normalizarPrenda(h.prenda);
-      if (!prendasUnicas[key] || new Date(h.fecha) > new Date(prendasUnicas[key].fecha)) {
-        prendasUnicas[key] = h;
-      }
-    });
-    const ahora = new Date();
-    const asignadas = Object.values(prendasUnicas).map(h => {
-      const dias = Math.floor((ahora - new Date(h.fecha)) / 86400000);
-      return {
-        prenda: h.prenda,
-        talla: h.talla,
-        fecha: h.fecha,
-        diasDesde: dias,
-        dentroCobertura: dias < 180
-      };
-    });
-
-    // 4. Resumen de cobros
-    const totalCobrado = historial.reduce((sum, h) => sum + (h.costo || 0), 0);
-    const cobrosPorMotivo = {};
-    historial.forEach(h => {
-      if (h.costo > 0) {
-        cobrosPorMotivo[h.motivo] = (cobrosPorMotivo[h.motivo] || 0) + h.costo;
-      }
-    });
-
-    // 5. Solicitudes hechas por este elemento
-    const hojaReq = ss.getSheetByName(HOJA_REQUISICIONES);
-    let solicitudes = [];
-    if (hojaReq) {
-      const filasReq = hojaReq.getDataRange().getValues();
-      solicitudes = filasReq.slice(1)
-        .filter(f => extraerIdElemento(f[18]) === String(idElemento))
-        .map(f => ({
-          id: f[0],
-          fecha: f[1],
-          tipo: f[2],
-          detalle: f[6],
-          estatus: f[13]
-        }))
-        .sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
-    }
-
-    return ContentService
-      .createTextOutput(JSON.stringify({
-        ok: true,
-        elemento,
-        asignadas,
-        historial,
-        totalCobrado,
-        cobrosPorMotivo,
-        solicitudes
-      }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch(err) {
-    return respuestaError(err.toString());
-  }
-}
-
-// ============================================================
-// REGISTRAR ENTREGA en Historial_Entregas
-// Se llama cuando una solicitud de uniforme se marca como Atendida
-// ============================================================
-function registrarEntrega(datos) {
-  try {
-    const ss   = SpreadsheetApp.openById(SHEET_ID);
-    const hoja = ss.getSheetByName("Historial_Entregas");
-    if (!hoja) return respuestaError("Hoja Historial_Entregas no encontrada");
-
-    hoja.appendRow([
-      new Date(),
-      datos.idElemento  || "",
-      datos.prenda      || "",
-      datos.talla       || "",
-      datos.condicion   || "Nuevo",
-      datos.solicitudId || "",
-      Number(datos.costo) || 0,
-      datos.motivo      || "Reposición",
-      datos.reporte     || "",
-      datos.fotoURL     || ""
-    ]);
-    return respuestaOK({ ok: true });
-  } catch(err) { return respuestaError(err.toString()); }
-}
-
-// ============================================================
-// ONESIGNAL — ENVÍO DE PUSH NOTIFICATIONS
-// ============================================================
-function enviarPush(externalUserIds, titulo, mensaje, url) {
-  try {
-    if (!externalUserIds || externalUserIds.length === 0) return;
-    const filtered = [...new Set(externalUserIds.filter(Boolean).map(String))];
-    if (filtered.length === 0) return;
-
-    const payload = {
-      app_id: ONESIGNAL_APP_ID,
-      include_aliases: { external_id: filtered },
-      target_channel: "push",
-      headings: { en: titulo, es: titulo },
-      contents: { en: mensaje, es: mensaje },
-      url: url || PANEL_URL_PWA
-    };
-
-    const opciones = {
-      method: "post",
-      contentType: "application/json",
-      headers: {
-        "Authorization": "Basic " + ONESIGNAL_API_KEY
-      },
-      payload: JSON.stringify(payload),
-      muteHttpExceptions: true
-    };
-
-    const respuesta = UrlFetchApp.fetch("https://api.onesignal.com/notifications", opciones);
-    const code = respuesta.getResponseCode();
-    if (code < 200 || code >= 300) {
-      Logger.log("Push error " + code + ": " + respuesta.getContentText());
+      mostrarToast("Error: " + (data.error || "intenta de nuevo"), "err");
     }
   } catch(err) {
-    Logger.log("Error enviarPush: " + err);
+    mostrarToast("Error de conexión — intenta de nuevo", "err");
+  } finally {
+    btn.disabled = false; spinner.style.display = "none"; btnText.textContent = "Enviar solicitud";
   }
 }
 
-// Wrapper que también envía correo + push
-function notificarEvento(destinatariosCorreo, destinatariosPush, asunto, htmlCuerpo, mensajePushCorto, url) {
-  // Correo
+// ── RESET ──
+function resetForm() {
+  rolActual = null; tipoActual = null; urgenciaActual = "Normal"; condicionActual = "Cualquiera";
+  document.querySelectorAll(".rol-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".urg-btn").forEach(b => b.classList.remove("active"));
+  document.querySelector('.urg-btn[data-urg="Normal"]').classList.add("active");
+  document.querySelectorAll("[data-cond]").forEach(b => b.classList.remove("active"));
+  const defCond = document.querySelector('[data-cond="Cualquiera"]');
+  if (defCond) defCond.classList.add("active");
+  document.getElementById("tipo-section").style.display = "none";
+  document.getElementById("form-body").style.display = "none";
+  document.querySelectorAll(".modulo").forEach(m => m.classList.remove("visible"));
+  document.getElementById("aviso-patrulla").classList.remove("visible");
+  ["solicitante","servicio","prenda","talla","unidad","tipo-patrulla","articulo","tipo-equipo","accion-equipo"].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = "";
+  });
+  ["cantidad-uni","notas-uni","detalle-patrulla","km","cantidad-pap","notas-pap","cantidad-equipo","detalle-equipo","asignado-equipo"].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = "";
+  });
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+
+// ── PROGRESO Y NAVEGACIÓN ──
+function actualizarProgreso(paso) {
+  [1,2,3].forEach(i => {
+    const dot   = document.getElementById("pdot-"  + i);
+    const label = document.getElementById("plabel-"+ i);
+    const line  = document.getElementById("pline-" + i);
+    if (!dot) return;
+    dot.className   = "progress-dot" + (i < paso ? " done" : i === paso ? " active" : "");
+    label.className = "progress-label" + (i === paso ? " active" : "");
+    if (line) line.className = "progress-line" + (i < paso ? " done" : "");
+  });
+}
+
+function regresarPaso() {
+  if (tipoActual) {
+    // Regresar de paso 3 a paso 2
+    tipoActual = null;
+    document.querySelectorAll(".tipo-btn").forEach(b => b.classList.remove("active"));
+    document.getElementById("form-body").style.display = "none";
+    document.querySelectorAll(".modulo").forEach(m => m.classList.remove("visible"));
+    actualizarProgreso(2);
+    document.getElementById("btn-back").style.display = "block";
+    document.getElementById("tipo-section").scrollIntoView({ behavior:"smooth", block:"start" });
+  } else if (rolActual) {
+    // Regresar de paso 2 a paso 1
+    rolActual = null;
+    document.querySelectorAll(".rol-btn").forEach(b => b.classList.remove("active"));
+    document.getElementById("tipo-section").style.display = "none";
+    document.getElementById("btn-back").style.display = "none";
+    actualizarProgreso(1);
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }
+}
+
+// ── RECORDAR ROL Y NOMBRE ──
+function cargarDatosGuardados() {
+  // Solo pre-llenar el nombre, NO el rol (el rol siempre debe seleccionarse manualmente)
+  const nombreGuardado = localStorage.getItem("frago_nombre");
+  if (nombreGuardado) document.getElementById("solicitante").value = nombreGuardado;
+}
+
+// ── PANTALLA DE CONFIRMACIÓN ──
+const CADENA_APROBACION = {
+  Uniforme: [
+    { paso: "Solicitud recibida", quien: "Sistema", icono: "📋" },
+    { paso: "Aprobación", quien: "Dir. Compras o Coordinador General", icono: "✅" },
+    { paso: "Entrega", quien: "Coordinador General o Director General", icono: "📦" },
+    { paso: "Cierre", quien: "Coordinador General o Director General", icono: "🔒" }
+  ],
+  Patrulla: [
+    { paso: "Solicitud recibida", quien: "Sistema", icono: "📋" },
+    { paso: "Aprobación", quien: "Directora de Compras", icono: "✅" },
+    { paso: "Atención", quien: "Directora de Compras", icono: "🔧" },
+    { paso: "Cierre", quien: "Coordinador General", icono: "🔒" }
+  ],
+  Papeleria: [
+    { paso: "Solicitud recibida", quien: "Sistema", icono: "📋" },
+    { paso: "Aprobación", quien: "Coordinador General", icono: "✅" },
+    { paso: "Entrega", quien: "Directora de Compras", icono: "📦" },
+    { paso: "Cierre", quien: "Directora de Compras", icono: "🔒" }
+  ],
+  Equipo: [
+    { paso: "Solicitud recibida", quien: "Sistema", icono: "📋" },
+    { paso: "Aprobación", quien: "Director General", icono: "✅" },
+    { paso: "Gestión", quien: "Directora de Compras", icono: "🔦" },
+    { paso: "Cierre", quien: "Director General o Coordinadores", icono: "🔒" }
+  ]
+};
+
+function mostrarConfirmacion(folio) {
+  guardarFolioReciente(folio);
+  const nombre = document.getElementById("solicitante").value.trim();
+  if (nombre) localStorage.setItem("frago_nombre", nombre);
+  if (rolActual) localStorage.setItem("frago_rol", rolActual);
+
+  document.querySelector(".main").style.display = "none";
+  document.getElementById("confirmacion-screen").style.display = "block";
+  document.getElementById("confirm-folio").textContent = folio;
+
+  // Mostrar cadena de aprobación según tipo
+  const cadena = CADENA_APROBACION[tipoActual] || [];
+  const cadenaEl = document.getElementById("confirm-cadena");
+  if (cadena.length) {
+    cadenaEl.innerHTML = `
+      <p style="font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px;">¿Qué sigue con tu solicitud?</p>
+      ${cadena.map((p, i) => `
+        <div style="display:flex;align-items:flex-start;gap:10px;${i < cadena.length-1 ? 'margin-bottom:12px;' : ''}">
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+            <div style="width:28px;height:28px;border-radius:50%;background:${i===0 ? 'rgba(93,184,122,0.2)' : 'var(--surface2)'};border:1.5px solid ${i===0 ? 'var(--accent2)' : 'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:13px;">${p.icono}</div>
+            ${i < cadena.length-1 ? '<div style="width:1.5px;height:20px;background:var(--border);margin:3px 0;"></div>' : ''}
+          </div>
+          <div style="padding-top:4px;">
+            <div style="font-size:13px;font-weight:500;color:${i===0 ? 'var(--accent2)' : 'var(--text)'};">${p.paso}</div>
+            <div style="font-size:11px;color:var(--text3);">${p.quien}</div>
+          </div>
+        </div>
+      `).join("")}`;
+    cadenaEl.style.display = "block";
+  } else {
+    cadenaEl.style.display = "none";
+  }
+
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+
+function copiarFolio() {
+  const folio = document.getElementById("confirm-folio").textContent;
+  navigator.clipboard.writeText(folio).then(() => {
+    mostrarToast("✓ Folio copiado", "ok");
+  }).catch(() => {
+    mostrarToast("Folio: " + folio, "ok");
+  });
+}
+
+function nuevaSolicitud() {
+  document.getElementById("confirmacion-screen").style.display = "none";
+  document.querySelector(".main").style.display = "block";
+  resetForm();
+  cargarDatosGuardados();
+  mostrarFoliosRecientes();
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+
+function verEstatusDesdeConfirmacion() {
+  // Regresar al inicio sin resetear — mantiene folios recientes visibles
+  document.getElementById("confirmacion-screen").style.display = "none";
+  document.querySelector(".main").style.display = "block";
+  resetForm();
+  cargarDatosGuardados();
+  mostrarFoliosRecientes();
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+
+// ── FOLIOS RECIENTES ──
+function guardarFolioReciente(folio) {
+  let recientes = JSON.parse(localStorage.getItem("frago_folios") || "[]");
+  recientes = [folio, ...recientes.filter(f => f !== folio)].slice(0, 5);
+  localStorage.setItem("frago_folios", JSON.stringify(recientes));
+}
+
+function mostrarFoliosRecientes() {
+  const recientes = JSON.parse(localStorage.getItem("frago_folios") || "[]");
+  const wrap = document.getElementById("recientes-wrap");
+  const chips = document.getElementById("recientes-chips");
+  if (!recientes.length) { wrap.style.display = "none"; return; }
+  wrap.style.display = "block";
+  chips.innerHTML = recientes.map(f =>
+    `<span class="reciente-chip" onclick="usarFolioReciente('${f}')">${f}</span>`
+  ).join("");
+}
+
+function usarFolioReciente(folio) {
+  document.getElementById("consulta-input").value = folio;
+  consultarFolio();
+}
+
+// ── CONSULTA DE FOLIO ──
+async function consultarFolio() {
+  const folio = document.getElementById("consulta-input").value.trim().toUpperCase();
+  if (!folio || !folio.startsWith("REQ")) {
+    mostrarToast("Ingresa un folio válido", "err"); return;
+  }
+  const result = document.getElementById("consulta-result");
+  result.style.display = "block";
+  result.innerHTML = '<p style="font-size:13px;color:var(--text3);">Consultando...</p>';
+
   try {
-    if (destinatariosCorreo && destinatariosCorreo.length) {
-      MailApp.sendEmail({ to: destinatariosCorreo.join(","), subject: asunto, htmlBody: htmlCuerpo });
-    }
-  } catch(err) { Logger.log("Error correo: " + err); }
+    const res  = await fetchConReintentos(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "consultarFolio", id: folio })
+    });
+    const data = await res.json();
 
-  // Push
-  if (destinatariosPush && destinatariosPush.length) {
-    enviarPush(destinatariosPush, asunto.substring(0, 50), mensajePushCorto || asunto, url);
+    if (data.ok && data.solicitud) {
+      const s = data.solicitud;
+      const estatusColor = {
+        Pendiente:"#e0b84a", Aprobada:"#4a90d9", Atendida:"#5db87a",
+        Rechazada:"#e05a5a", Cerrada:"#5a6275"
+      }[s.estatus] || "#8a93a8";
+
+      result.innerHTML = `
+        <div style="background:var(--surface2);border-radius:10px;padding:14px;border:1px solid var(--border);">
+          <div class="consulta-row">
+            <div class="consulta-field"><div class="consulta-field-label">Folio</div><div class="consulta-field-val" style="font-family:var(--mono);font-size:12px;">${s.id}</div></div>
+            <div class="consulta-field"><div class="consulta-field-label">Estatus</div><div class="consulta-field-val" style="color:${estatusColor};">● ${s.estatus}</div></div>
+          </div>
+          <div class="consulta-row" style="margin-top:10px;">
+            <div class="consulta-field"><div class="consulta-field-label">Tipo</div><div class="consulta-field-val">${s.tipo}</div></div>
+            <div class="consulta-field"><div class="consulta-field-label">Fecha</div><div class="consulta-field-val">${new Date(s.fecha).toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"})}</div></div>
+            <div class="consulta-field"><div class="consulta-field-label">Servicio</div><div class="consulta-field-val">${s.servicio||"—"}</div></div>
+          </div>
+          ${s.notaGestion ? `<div style="margin-top:10px;font-size:12px;color:var(--text3);">Nota: ${s.notaGestion}</div>` : ""}
+        </div>`;
+    } else {
+      result.innerHTML = '<p style="font-size:13px;color:var(--danger);">No se encontró una solicitud con ese folio.</p>';
+    }
+  } catch(e) {
+    result.innerHTML = '<p style="font-size:13px;color:var(--danger);">Error de conexión — intenta de nuevo.</p>';
   }
 }
 
-// ============================================================
-// UTILIDADES
-// ============================================================
-function generarID(fecha) {
-  const pad = n => String(n).padStart(2, "0");
-  return `REQ-${fecha.getFullYear()}${pad(fecha.getMonth()+1)}${pad(fecha.getDate())}-${pad(fecha.getHours())}${pad(fecha.getMinutes())}${pad(fecha.getSeconds())}`;
+// (overrides eliminados — la lógica ahora está en setRol, setTipo y enviar directamente)
+
+// ── INIT ──
+async function consultarFolioMod() {
+  const folio = document.getElementById("consulta-input-mod")?.value.trim().toUpperCase();
+  if (!folio || !folio.startsWith("REQ")) { mostrarToast("Ingresa un folio válido", "err"); return; }
+  const result = document.getElementById("consulta-mod-result");
+  result.innerHTML = '<p style="font-size:13px;color:var(--text3);">Consultando...</p>';
+  try {
+    console.log("Consultando folio:", folio);
+    const res  = await fetchConReintentos(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "consultarFolio", id: folio })
+    });
+    const data = await res.json();
+    console.log("Respuesta:", JSON.stringify(data));
+    if (data.ok && data.solicitud) {
+      const s = data.solicitud;
+      const estatusColor = {
+        Pendiente:"#e0b84a", Aprobada:"#4a90d9", Atendida:"#5db87a",
+        Rechazada:"#e05a5a", Cerrada:"#5a6275", Cancelada:"#e05a5a"
+      }[s.estatus] || "#8a93a8";
+      guardarFolioReciente(folio);
+      mostrarFoliosRecientesMod();
+
+      // Línea de tiempo del estatus
+      const PASOS = ["Pendiente","Aprobada","Atendida","Cerrada"];
+      const estatusIdx = PASOS.indexOf(s.estatus);
+      const esRechazada = s.estatus === "Rechazada";
+      const esCancelada = s.estatus === "Cancelada";
+
+      const timelineHTML = (esRechazada || esCancelada) ? `
+        <div style="text-align:center;padding:12px;background:rgba(224,90,90,0.08);border-radius:8px;border:1px solid rgba(224,90,90,0.2);margin-bottom:12px;">
+          <div style="font-size:20px;margin-bottom:4px;">${esCancelada ? "🚫" : "❌"}</div>
+          <div style="font-weight:500;color:var(--danger);">${s.estatus}</div>
+          ${s.notaGestion ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;">${s.notaGestion}</div>` : ""}
+        </div>` : `
+        <div style="display:flex;align-items:center;gap:0;margin-bottom:16px;overflow-x:auto;padding:4px 0;">
+          ${PASOS.map((paso, i) => {
+            const done  = i < estatusIdx;
+            const activo = i === estatusIdx;
+            const color  = done || activo ? "#4a90d9" : "#252d42";
+            const textC  = done || activo ? "#e8eaf0" : "#5a6275";
+            const bgC    = activo ? "#4a90d9" : done ? "#1D9E75" : "#1c2235";
+            const iconos = ["📋","✅","📦","🔒"];
+            return `
+              <div style="display:flex;align-items:center;flex:1;min-width:60px;">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+                  <div style="width:32px;height:32px;border-radius:50%;background:${bgC};border:2px solid ${color};display:flex;align-items:center;justify-content:center;font-size:14px;">${done ? "✓" : activo ? iconos[i] : iconos[i]}</div>
+                  <div style="font-size:10px;color:${textC};text-align:center;white-space:nowrap;">${paso}</div>
+                </div>
+                ${i < PASOS.length-1 ? `<div style="height:2px;flex:1;background:${done ? "#1D9E75" : "#252d42"};margin-bottom:16px;min-width:10px;"></div>` : ""}
+              </div>`;
+          }).join("")}
+        </div>`;
+
+      result.innerHTML = `
+        <div style="background:var(--surface2);border-radius:10px;padding:14px;border:1px solid var(--border);">
+          ${timelineHTML}
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+            <div style="flex:1;min-width:100px;">
+              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;">Folio</div>
+              <div style="font-family:var(--mono);font-size:12px;color:var(--text);">${s.id}</div>
+            </div>
+            <div style="flex:1;min-width:100px;">
+              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;">Tipo</div>
+              <div style="font-size:13px;color:var(--text);">${s.tipo}</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+            <div style="flex:1;min-width:80px;">
+              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;">Fecha</div>
+              <div style="font-size:13px;color:var(--text);">${new Date(s.fecha).toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"})}</div>
+            </div>
+            <div style="flex:1;min-width:80px;">
+              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;">Servicio</div>
+              <div style="font-size:13px;color:var(--text);">${s.servicio||"—"}</div>
+            </div>
+          </div>
+          ${s.detalle ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;padding-top:8px;border-top:1px solid var(--border);">Detalle: ${s.detalle}</div>` : ""}
+          ${s.notaGestion && !esRechazada && !esCancelada ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;">Nota: ${s.notaGestion}</div>` : ""}
+        </div>`;
+    } else {
+      result.innerHTML = '<p style="font-size:13px;color:var(--danger);">No se encontró una solicitud con ese folio.</p>';
+    }
+  } catch(e) {
+    result.innerHTML = '<p style="font-size:13px;color:var(--danger);">Error de conexión — intenta de nuevo.</p>';
+  }
 }
 
-function respuestaOK(datos) {
-  return ContentService
-    .createTextOutput(JSON.stringify({ ok: true, ...datos }))
-    .setMimeType(ContentService.MimeType.JSON);
+function mostrarFoliosRecientesMod() {
+  const recientes = JSON.parse(localStorage.getItem("frago_folios") || "[]");
+  const wrap  = document.getElementById("recientes-mod-wrap");
+  const chips = document.getElementById("recientes-mod-chips");
+  if (!wrap || !recientes.length) { if(wrap) wrap.style.display = "none"; return; }
+  wrap.style.display = "block";
+  chips.innerHTML = recientes.map(f =>
+    `<span class="reciente-chip" onclick="document.getElementById('consulta-input-mod').value='${f}';consultarFolioMod();">${f}</span>`
+  ).join("");
 }
 
-function respuestaError(mensaje) {
-  return ContentService
-    .createTextOutput(JSON.stringify({ ok: false, error: mensaje }))
-    .setMimeType(ContentService.MimeType.JSON);
+let elementosCache = [];
+let rolPendiente = null;
+
+// Fetch con reintentos automáticos
+async function fetchConReintentos(url, opciones = {}, intentos = 3) {
+  let ultimoError;
+  for (let i = 0; i < intentos; i++) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      const res = await fetch(url, { ...opciones, signal: controller.signal });
+      clearTimeout(timeout);
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res;
+    } catch(e) {
+      ultimoError = e;
+      if (i < intentos - 1) await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i)));
+    }
+  }
+  throw ultimoError;
+}
+let usuarioLogeadoNombre = null;
+let usuarioLogeadoId = null;
+
+const ROLES_LOGIN_OPERATIVO = ["guardia","jefe_turno","coord_operativo"];
+const ROLES_LOGIN_ADMIN     = ["coord_general","director_general","aux_administrativa","director_finanzas"];
+
+const ROLES_ADMIN_PUEDEN_RECORDAR = ["coord_general","director_general","aux_administrativa","director_finanzas"];
+
+const USUARIOS_ADMIN = {
+  "gabriel":  { pass: "fqEVDmty0Hr0", nombre: "Gabriel Gomez Cesar",        rol: "coord_general" },
+  "emiliano": { pass: "OMwqCm0FcyvS", nombre: "Emiliano Alba",              rol: "coord_general" },
+  "gigi":     { pass: "@apDwM#$YdST", nombre: "Gigi Soto",                  rol: "director_finanzas" },
+  "othon":    { pass: "GAQhutq66yCF", nombre: "Othón G.C.",                 rol: "director_general" },
+  "samantha": { pass: "Ofzbhj3uO52A", nombre: "Samantha",                   rol: "aux_administrativa" }
+};
+
+const ROLES_LABELS_LOGIN = {
+  guardia:            "Guardia",
+  jefe_turno:         "Jefe de turno",
+  coord_operativo:    "Coordinador operativo",
+  coord_general:      "Coordinador general",
+  director_general:   "Director general",
+  aux_administrativa: "Auxiliar administrativa",
+  director_finanzas:  "Director de finanzas / Administración"
+};
+
+function mostrarLogin(rol) {
+  // Verificar sesión recordada para admin
+  if (ROLES_LOGIN_ADMIN.includes(rol)) {
+    const recordado = localStorage.getItem("frago_form_admin");
+    if (recordado) {
+      try {
+        const datos = JSON.parse(recordado);
+        if (datos.user && USUARIOS_ADMIN[datos.user] && datos.rol === rol) {
+          usuarioLogeadoNombre = USUARIOS_ADMIN[datos.user].nombre;
+          continuarConRol(rol);
+          return;
+        }
+      } catch(e) {}
+    }
+  }
+
+  if (ROLES_LOGIN_OPERATIVO.includes(rol)) {
+    document.getElementById("login-op-rol-sub").textContent = "Como " + ROLES_LABELS_LOGIN[rol];
+    document.getElementById("op-nombre").value = "";
+    document.getElementById("op-pin").value = "";
+    document.getElementById("op-error").textContent = "";
+    document.getElementById("op-sugerencias").style.display = "none";
+    document.getElementById("login-operativo").style.display = "flex";
+    setTimeout(() => document.getElementById("op-nombre").focus(), 100);
+  } else {
+    document.getElementById("login-ad-rol-sub").textContent = "Como " + ROLES_LABELS_LOGIN[rol];
+    document.getElementById("ad-user").value = "";
+    document.getElementById("ad-pass").value = "";
+    document.getElementById("ad-error").textContent = "";
+    document.getElementById("ad-remember").checked = false;
+    document.getElementById("remember-wrap").style.display = ROLES_ADMIN_PUEDEN_RECORDAR.includes(rol) ? "flex" : "none";
+    document.getElementById("login-admin").style.display = "flex";
+    setTimeout(() => document.getElementById("ad-user").focus(), 100);
+  }
 }
 
-// Handler para peticiones OPTIONS (preflight CORS)
-function doOptions(e) {
-  return ContentService
-    .createTextOutput("")
-    .setMimeType(ContentService.MimeType.TEXT);
+function cerrarLogin() {
+  document.getElementById("login-operativo").style.display = "none";
+  document.getElementById("login-admin").style.display = "none";
+  document.querySelectorAll(".rol-btn").forEach(b => b.classList.remove("active"));
+  rolPendiente = null;
 }
+
+function filtrarNombres() {
+  const q = document.getElementById("op-nombre").value.trim().toLowerCase();
+  const box = document.getElementById("op-sugerencias");
+  if (q.length < 2) { box.style.display = "none"; return; }
+  const norm = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  const qn = norm(q);
+
+  // Filtrar SOLO elementos cuyo rol coincide con el rol seleccionado
+  const elementosDelRol = elementosCache.filter(el => el.rol === rolPendiente);
+
+  const matches = elementosDelRol.filter(el => norm(el.nombre).includes(qn)).slice(0, 6);
+  if (!matches.length) {
+    box.innerHTML = '<div class="sugerencia-item" style="color:var(--text3);">Sin coincidencias en este rol</div>';
+    box.style.display = "block";
+    return;
+  }
+  box.innerHTML = matches.map(el =>
+    `<div class="sugerencia-item" onclick="seleccionarNombre('${el.id}','${el.nombre.replace(/'/g,"\\'")}')">${el.nombre}<span class="sugerencia-id">${el.id}</span></div>`
+  ).join("");
+  box.style.display = "block";
+}
+
+function seleccionarNombre(id, nombre) {
+  document.getElementById("op-nombre").value = nombre;
+  document.getElementById("op-nombre").dataset.id = id;
+  document.getElementById("op-sugerencias").style.display = "none";
+  document.getElementById("op-pin").focus();
+}
+
+function validarOperativo() {
+  const nombre = document.getElementById("op-nombre").value.trim();
+  const pin    = document.getElementById("op-pin").value.trim().toUpperCase();
+  const errEl  = document.getElementById("op-error");
+
+  if (!nombre) { errEl.textContent = "Escribe tu nombre"; return; }
+  if (!pin)    { errEl.textContent = "Ingresa tu PIN";   return; }
+
+  // Buscar coincidencia exacta o por ID, SOLO entre elementos del rol seleccionado
+  const norm = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  const elementosDelRol = elementosCache.filter(el => el.rol === rolPendiente);
+  const elemento = elementosDelRol.find(el => norm(el.nombre) === norm(nombre)) ||
+                   elementosDelRol.find(el => el.id === pin);
+
+  if (!elemento) { errEl.textContent = "Nombre no encontrado para este rol"; return; }
+  if (elemento.id !== pin) { errEl.textContent = "PIN incorrecto"; return; }
+
+  usuarioLogeadoId     = elemento.id;
+  usuarioLogeadoNombre = elemento.nombre;
+  document.getElementById("login-operativo").style.display = "none";
+  // Asociar con OneSignal
+  if (window.fragoLoginOneSignal) {
+    window.fragoLoginOneSignal(elemento.id, { rol: rolPendiente, nombre: elemento.nombre, tipo: "operativo" });
+    
+  }
+  continuarConRol(rolPendiente);
+}
+
+function validarAdmin() {
+  const user  = document.getElementById("ad-user").value.trim().toLowerCase();
+  const pass  = document.getElementById("ad-pass").value;
+  const errEl = document.getElementById("ad-error");
+
+  const u = USUARIOS_ADMIN[user];
+  if (!u) { errEl.textContent = "Usuario no encontrado"; return; }
+  if (u.pass !== pass) { errEl.textContent = "Contraseña incorrecta"; return; }
+
+  // Verificar que el rol del usuario coincida con el rol seleccionado
+  if (u.rol !== rolPendiente) {
+    errEl.textContent = "Este usuario no tiene acceso a este rol (" + ROLES_LABELS_LOGIN[rolPendiente] + ")";
+    return;
+  }
+
+  usuarioLogeadoNombre = u.nombre;
+  usuarioLogeadoId = "";
+
+  // Recordar si lo solicitó
+  if (document.getElementById("ad-remember").checked && ROLES_ADMIN_PUEDEN_RECORDAR.includes(rolPendiente)) {
+    localStorage.setItem("frago_form_admin", JSON.stringify({ user, rol: rolPendiente }));
+  } else {
+    localStorage.removeItem("frago_form_admin");
+  }
+
+  document.getElementById("login-admin").style.display = "none";
+  // Asociar con OneSignal
+  if (window.fragoLoginOneSignal) {
+    window.fragoLoginOneSignal(user, { rol: rolPendiente, nombre: u.nombre, tipo: "admin" });
+    
+  }
+  continuarConRol(rolPendiente);
+}
+
+async function cargarElementos() {
+  try {
+    const cached = localStorage.getItem("frago_elementos_cache");
+    if (cached) {
+      const { elementos, ts } = JSON.parse(cached);
+      if ((Date.now() - ts) / 3600000 < 24 && elementos.length) {
+        elementosCache = elementos;
+        return;
+      }
+    }
+  } catch(e) {}
+  try {
+    const res  = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "getElementos" })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      elementosCache = data.elementos || [];
+      localStorage.setItem("frago_elementos_cache", JSON.stringify({ elementos: elementosCache, ts: Date.now() }));
+    }
+  } catch(e) {}
+}
+
+const ROLES_ELEMENTOS = ["guardia","jefe_turno","coord_operativo"];
+
+async function actualizarCampoSolicitante() {
+  const input  = document.getElementById("solicitante");
+  const select = document.getElementById("solicitante-select");
+  const label  = document.getElementById("label-solicitante");
+
+  // El nombre ya viene del login — solo mostrar como información
+  label.innerHTML = "Solicitante";
+  input.style.display  = "block";
+  input.readOnly = true;
+  input.value = usuarioLogeadoNombre || "";
+  input.style.background = "var(--surface2)";
+  input.style.color = "var(--text3)";
+  select.style.display = "none";
+  const info = document.getElementById("elemento-info");
+  if (info) {
+    info.style.display = usuarioLogeadoId ? "block" : "none";
+    info.textContent = usuarioLogeadoId ? "ID: " + usuarioLogeadoId : "";
+  }
+}
+
+cargarServicios();
+cargarElementos();
+mostrarFoliosRecientes();
+actualizarProgreso(1);
+</script>
+<script>
+// ── PULL TO REFRESH (móvil) ──
+(function() {
+  let startY = 0, pulling = false, pullDistance = 0, indicador = null;
+  function crearIndicador() {
+    if (indicador) return indicador;
+    indicador = document.createElement("div");
+    indicador.style.cssText = "position:fixed;top:0;left:50%;transform:translate(-50%,-60px);background:var(--surface);border:1px solid var(--border);border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;z-index:100;transition:transform 0.2s,opacity 0.2s;font-size:18px;opacity:0;box-shadow:0 4px 12px rgba(0,0,0,0.3);color:var(--text);";
+    document.body.appendChild(indicador);
+    return indicador;
+  }
+  document.addEventListener("touchstart", e => {
+    if (window.scrollY > 5) return;
+    startY = e.touches[0].clientY; pulling = true; pullDistance = 0;
+  }, { passive: true });
+  document.addEventListener("touchmove", e => {
+    if (!pulling) return;
+    pullDistance = e.touches[0].clientY - startY;
+    if (pullDistance > 0 && pullDistance < 200) {
+      const ind = crearIndicador();
+      const progreso = Math.min(pullDistance / 80, 1);
+      ind.style.opacity = progreso;
+      ind.style.transform = `translate(-50%, ${Math.min(pullDistance * 0.5, 50) - 60}px) rotate(${progreso * 360}deg)`;
+      ind.textContent = pullDistance > 80 ? "↻" : "↓";
+    }
+  }, { passive: true });
+  document.addEventListener("touchend", () => {
+    if (!pulling) return;
+    pulling = false;
+    if (pullDistance > 80) {
+      const ind = crearIndicador();
+      ind.textContent = "↻"; ind.style.opacity = "1"; ind.style.transform = "translate(-50%, 10px)";
+      location.reload();
+    } else if (indicador) {
+      indicador.style.opacity = "0"; indicador.style.transform = "translate(-50%, -60px)";
+    }
+    pullDistance = 0;
+  }, { passive: true });
+})();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
+  });
+}
+</script>
+</body>
+</html>
