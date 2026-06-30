@@ -1988,14 +1988,26 @@ async function confirmarFirma() {
   if (!_firmaDatos) return;
 
   const canvas = document.getElementById("firma-canvas");
-  const firmaBase64 = canvas.toDataURL("image/png");
+
+  // Comprimir: crear un canvas más pequeño y exportar como JPEG de baja calidad
+  const canvasPequeno = document.createElement("canvas");
+  canvasPequeno.width = 400;
+  canvasPequeno.height = 180;
+  const ctx = canvasPequeno.getContext("2d");
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, 400, 180);
+  ctx.drawImage(canvas, 0, 0, 400, 180);
+  const firmaBase64 = canvasPequeno.toDataURL("image/jpeg", 0.7);
 
   cerrarModalFirma();
   mostrarToast("Guardando firma...", "ok");
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
     const res = await fetch(SCRIPT_URL, {
       method: "POST",
+      signal: controller.signal,
       body: JSON.stringify({
         action: "guardarFirma",
         firma: firmaBase64,
@@ -2004,6 +2016,7 @@ async function confirmarFirma() {
         solicitudId: _firmaDatos.solicitudId
       })
     });
+    clearTimeout(timeout);
     const data = await res.json();
     if (data.ok) {
       mostrarToast("✓ Firma guardada correctamente", "ok");
@@ -2011,7 +2024,11 @@ async function confirmarFirma() {
       mostrarToast("Error al guardar firma: " + (data.error||""), "err");
     }
   } catch(e) {
-    mostrarToast("Error de conexión al guardar firma", "err");
+    if (e.name === "AbortError") {
+      mostrarToast("La firma tardó demasiado — intenta de nuevo", "err");
+    } else {
+      mostrarToast("Error al guardar firma: " + e.message, "err");
+    }
   }
 }
 
