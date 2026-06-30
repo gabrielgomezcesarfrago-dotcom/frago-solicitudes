@@ -1857,6 +1857,9 @@ async function ejecutarDescuento(descontar) {
     mostrarToast("Describe los detalles de la pérdida", "err"); return;
   }
 
+  // Guardar datos del cobro para el comprobante PDF
+  window._datosCobro = { costo: costo, motivo: motivoEntrega, reporte: reporte };
+
   cerrarModalDescuento();
 
   // Marcar como atendida
@@ -2022,11 +2025,15 @@ async function confirmarFirma() {
   const datosFirma = {
     idElemento:  _firmaDatos.idElemento,
     nombre:      _firmaDatos.nombre,
-    solicitudId: _firmaDatos.solicitudId
+    solicitudId: _firmaDatos.solicitudId,
+    prenda:      _firmaDatos.prenda,
+    talla:       _firmaDatos.talla,
+    costo:       window._datosCobro ? window._datosCobro.costo : 0,
+    motivo:      window._motivoEntrega || "Entrega"
   };
 
   cerrarModalFirma();
-  mostrarToast("Guardando firma...", "ok");
+  mostrarToast("Generando comprobante...", "ok");
 
   try {
     const controller = new AbortController();
@@ -2039,21 +2046,25 @@ async function confirmarFirma() {
         firma: firmaBase64,
         idElemento: datosFirma.idElemento,
         nombre: datosFirma.nombre,
-        solicitudId: datosFirma.solicitudId
+        solicitudId: datosFirma.solicitudId,
+        prenda: datosFirma.prenda,
+        talla: datosFirma.talla,
+        costo: datosFirma.costo,
+        motivo: datosFirma.motivo
       })
     });
     clearTimeout(timeout);
     const data = await res.json();
     if (data.ok) {
-      mostrarToast("✓ Firma guardada correctamente", "ok");
+      mostrarToast("✓ Comprobante PDF generado y guardado", "ok");
     } else {
-      mostrarToast("Error al guardar firma: " + (data.error||""), "err");
+      mostrarToast("Error al generar comprobante: " + (data.error||""), "err");
     }
   } catch(e) {
     if (e.name === "AbortError") {
-      mostrarToast("La firma tardó demasiado — intenta de nuevo", "err");
+      mostrarToast("El comprobante tardó demasiado — intenta de nuevo", "err");
     } else {
-      mostrarToast("Error al guardar firma: " + e.message, "err");
+      mostrarToast("Error al generar comprobante: " + e.message, "err");
     }
   }
 }
