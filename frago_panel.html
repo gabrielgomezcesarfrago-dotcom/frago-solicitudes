@@ -1162,6 +1162,25 @@ function logout() {
   document.getElementById("remember-me").checked = false;
 }
 
+// ── FETCH CON REINTENTOS (resiliencia en móvil) ──
+async function fetchConReintentos(url, opciones = {}, intentos = 3) {
+  let ultimoError;
+  for (let i = 0; i < intentos; i++) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      const res = await fetch(url, { ...opciones, signal: controller.signal });
+      clearTimeout(timeout);
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res;
+    } catch(e) {
+      ultimoError = e;
+      if (i < intentos - 1) await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i)));
+    }
+  }
+  throw ultimoError;
+}
+
 // ── CARGAR SOLICITUDES ──
 async function cargarSolicitudes() {
   document.getElementById("tabla-body").innerHTML =
@@ -1950,13 +1969,13 @@ async function iniciarElementos() {
   // Cargar lista de elementos si no la tenemos
   if (elementosListaDash.length === 0) {
     try {
-      const res = await fetchConReintentos(SCRIPT_URL, {
+      const res = await fetch(SCRIPT_URL, {
         method: "POST",
         body: JSON.stringify({ action: "getElementos" })
       });
       const data = await res.json();
       if (data.ok) elementosListaDash = data.elementos || [];
-    } catch(e) {}
+    } catch(e) { console.warn("Error cargando elementos:", e); }
   }
 }
 
@@ -1992,7 +2011,7 @@ async function verDetalleElemento(idElemento) {
   cont.innerHTML = '<p style="text-align:center;padding:40px;color:var(--text3);">Cargando información...</p>';
 
   try {
-    const res = await fetchConReintentos(SCRIPT_URL, {
+    const res = await fetch(SCRIPT_URL, {
       method: "POST",
       body: JSON.stringify({ action: "getDetalleElemento", id: idElemento })
     });
