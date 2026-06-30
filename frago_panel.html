@@ -1917,53 +1917,72 @@ let firmaVacia = true;
 let _firmaDatos = null;
 
 function abrirModalFirma(solicitudId, prenda, talla) {
-  _firmaDatos = {
-    solicitudId,
-    idElemento: window._idElemento || "",
-    nombre: "",
-    prenda, talla
-  };
+  try {
+    _firmaDatos = {
+      solicitudId,
+      idElemento: window._idElemento || "",
+      nombre: "",
+      prenda, talla
+    };
 
-  // Buscar nombre del elemento
-  const s = solicitudes.find(x => x.id === solicitudId);
-  if (s) _firmaDatos.nombre = s.solicitante || "";
+    const s = solicitudes.find(x => x.id === solicitudId);
+    if (s) _firmaDatos.nombre = s.solicitante || "";
 
-  document.getElementById("mf-elemento").textContent = (_firmaDatos.nombre || "") + (_firmaDatos.idElemento ? " · " + _firmaDatos.idElemento : "");
-  document.getElementById("mf-resumen").innerHTML = "Recibe: <strong style=\"color:var(--text);\">" + prenda + "</strong>" + (talla ? " · Talla " + talla : "");
+    const elemEl = document.getElementById("mf-elemento");
+    const resumenEl = document.getElementById("mf-resumen");
+    const modalEl = document.getElementById("modal-firma-bg");
+    if (!elemEl || !resumenEl || !modalEl) {
+      alert("Error: faltan elementos del modal de firma en el HTML");
+      return;
+    }
 
-  document.getElementById("modal-firma-bg").classList.add("open");
-  // Inicializar canvas tras render
-  setTimeout(inicializarCanvasFirma, 100);
+    elemEl.textContent = (_firmaDatos.nombre || "") + (_firmaDatos.idElemento ? " · " + _firmaDatos.idElemento : "");
+    resumenEl.innerHTML = "Recibe: <strong style=\"color:var(--text);\">" + prenda + "</strong>" + (talla ? " · Talla " + talla : "");
+
+    modalEl.classList.add("open");
+    setTimeout(inicializarCanvasFirma, 150);
+  } catch(err) {
+    alert("Error abriendo modal de firma: " + err.message);
+  }
 }
 
 function inicializarCanvasFirma() {
-  const canvas = document.getElementById("firma-canvas");
-  if (!canvas) return;
-  // Ajustar resolución real del canvas
-  const rect = canvas.getBoundingClientRect();
-  canvas.width = rect.width * 2;
-  canvas.height = rect.height * 2;
-  firmaCtx = canvas.getContext("2d");
-  firmaCtx.scale(2, 2);
-  firmaCtx.lineWidth = 2;
-  firmaCtx.lineCap = "round";
-  firmaCtx.lineJoin = "round";
-  firmaCtx.strokeStyle = "#1a1a1a";
-  firmaVacia = true;
+  try {
+    const canvas = document.getElementById("firma-canvas");
+    if (!canvas) { alert("Error: no se encontró el canvas de firma"); return; }
+    // Ajustar resolución real del canvas
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width === 0) {
+      // El canvas aún no tiene dimensiones, reintentar
+      setTimeout(inicializarCanvasFirma, 150);
+      return;
+    }
+    canvas.width = rect.width * 2;
+    canvas.height = rect.height * 2;
+    firmaCtx = canvas.getContext("2d");
+    firmaCtx.scale(2, 2);
+    firmaCtx.lineWidth = 2;
+    firmaCtx.lineCap = "round";
+    firmaCtx.lineJoin = "round";
+    firmaCtx.strokeStyle = "#1a1a1a";
+    firmaVacia = true;
 
-  const getPos = (e) => {
-    const r = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return { x: clientX - r.left, y: clientY - r.top };
-  };
+    const getPos = (e) => {
+      const r = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: clientX - r.left, y: clientY - r.top };
+    };
 
-  const start = (e) => { e.preventDefault(); firmaDibujando = true; firmaVacia = false; const p = getPos(e); firmaCtx.beginPath(); firmaCtx.moveTo(p.x, p.y); };
-  const move = (e) => { if (!firmaDibujando) return; e.preventDefault(); const p = getPos(e); firmaCtx.lineTo(p.x, p.y); firmaCtx.stroke(); };
-  const end = () => { firmaDibujando = false; };
+    const start = (e) => { e.preventDefault(); firmaDibujando = true; firmaVacia = false; const p = getPos(e); firmaCtx.beginPath(); firmaCtx.moveTo(p.x, p.y); };
+    const move = (e) => { if (!firmaDibujando) return; e.preventDefault(); const p = getPos(e); firmaCtx.lineTo(p.x, p.y); firmaCtx.stroke(); };
+    const end = () => { firmaDibujando = false; };
 
-  canvas.onmousedown = start; canvas.onmousemove = move; canvas.onmouseup = end; canvas.onmouseleave = end;
-  canvas.ontouchstart = start; canvas.ontouchmove = move; canvas.ontouchend = end;
+    canvas.onmousedown = start; canvas.onmousemove = move; canvas.onmouseup = end; canvas.onmouseleave = end;
+    canvas.ontouchstart = start; canvas.ontouchmove = move; canvas.ontouchend = end;
+  } catch(err) {
+    alert("Error inicializando firma: " + err.message);
+  }
 }
 
 function limpiarFirma() {
@@ -1999,6 +2018,13 @@ async function confirmarFirma() {
   ctx.drawImage(canvas, 0, 0, 400, 180);
   const firmaBase64 = canvasPequeno.toDataURL("image/jpeg", 0.7);
 
+  // Guardar los datos ANTES de cerrar el modal (cerrarModalFirma los pone en null)
+  const datosFirma = {
+    idElemento:  _firmaDatos.idElemento,
+    nombre:      _firmaDatos.nombre,
+    solicitudId: _firmaDatos.solicitudId
+  };
+
   cerrarModalFirma();
   mostrarToast("Guardando firma...", "ok");
 
@@ -2011,9 +2037,9 @@ async function confirmarFirma() {
       body: JSON.stringify({
         action: "guardarFirma",
         firma: firmaBase64,
-        idElemento: _firmaDatos.idElemento,
-        nombre: _firmaDatos.nombre,
-        solicitudId: _firmaDatos.solicitudId
+        idElemento: datosFirma.idElemento,
+        nombre: datosFirma.nombre,
+        solicitudId: datosFirma.solicitudId
       })
     });
     clearTimeout(timeout);
