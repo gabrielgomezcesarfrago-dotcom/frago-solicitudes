@@ -887,6 +887,42 @@
   </div>
 </div>
 
+<!-- MODAL FIRMA DIGITAL -->
+<div class="modal-bg" id="modal-firma-bg" onclick="if(event.target===this)cerrarModalFirma()">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">✍️ Firma de recepción</div>
+        <div class="modal-id" id="mf-elemento"></div>
+      </div>
+      <button class="btn-close" onclick="cerrarModalFirma()">×</button>
+    </div>
+
+    <!-- Resumen de lo que recibe -->
+    <div id="mf-resumen" style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px;font-size:13px;color:var(--text2);"></div>
+
+    <!-- Texto de compromiso -->
+    <div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px;max-height:160px;overflow-y:auto;font-size:11px;color:var(--text3);line-height:1.6;">
+      <p style="margin:0 0 8px;">Me comprometo a dar al uniforme(s) el uso adecuado para realizar las actividades de mi trabajo, utilizándolo solo dentro del servicio asignado, sin ingresar uniformado a centros de vicio o mala fama.</p>
+      <p style="margin:0 0 8px;">Declaro también que la empresa me está proporcionando el uniforme(s) sin costo alguno, que en caso de deterioro normal por el tiempo o por el desempeño de mi trabajo me será repuesto sin costo, pero en caso de robo, extravío o deterioro por mal uso, me será descontado el importe correspondiente al serme repuesto. En caso de baja deberé entregar el uniforme completo y limpio en las oficinas de la empresa.</p>
+      <p style="margin:0;">Acepto que se me descuente el uniforme(s) si doy de baja de la empresa antes de 3 meses.</p>
+    </div>
+
+    <!-- Canvas de firma -->
+    <p style="font-size:12px;color:var(--text2);margin-bottom:8px;">Firma del elemento <span style="color:var(--danger);">*</span></p>
+    <div style="background:#fff;border:2px solid var(--border);border-radius:10px;overflow:hidden;position:relative;">
+      <canvas id="firma-canvas" style="display:block;width:100%;height:180px;touch-action:none;cursor:crosshair;"></canvas>
+      <button onclick="limpiarFirma()" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.05);border:none;border-radius:6px;padding:5px 10px;font-size:11px;color:#666;cursor:pointer;">Limpiar</button>
+    </div>
+    <p style="font-size:11px;color:var(--text3);margin-top:6px;text-align:center;">Firma con el dedo o el mouse dentro del recuadro</p>
+
+    <div class="modal-acciones" style="margin-top:16px;">
+      <button class="btn-modal bm-atender" onclick="confirmarFirma()">✓ Confirmar y guardar firma</button>
+      <button class="btn-modal bm-cerrar" onclick="saltarFirma()">Omitir firma</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL INVENTARIO -->
 <div class="modal-bg" id="modal-inv-bg" onclick="if(event.target===this)cerrarModalInv()">
   <div class="modal">
@@ -1868,6 +1904,114 @@ async function ejecutarDescuento(descontar) {
     mostrarToast("✓ Atendida — registrado cobro de $" + costo + " a nómina", "ok");
   } else {
     mostrarToast("✓ Atendida y registrada en historial", "ok");
+  }
+
+  // Abrir modal de firma para capturar recepción
+  abrirModalFirma(id, prenda, talla);
+}
+
+// ── FIRMA DIGITAL ──
+let firmaCtx = null;
+let firmaDibujando = false;
+let firmaVacia = true;
+let _firmaDatos = null;
+
+function abrirModalFirma(solicitudId, prenda, talla) {
+  _firmaDatos = {
+    solicitudId,
+    idElemento: window._idElemento || "",
+    nombre: "",
+    prenda, talla
+  };
+
+  // Buscar nombre del elemento
+  const s = solicitudes.find(x => x.id === solicitudId);
+  if (s) _firmaDatos.nombre = s.solicitante || "";
+
+  document.getElementById("mf-elemento").textContent = (_firmaDatos.nombre || "") + (_firmaDatos.idElemento ? " · " + _firmaDatos.idElemento : "");
+  document.getElementById("mf-resumen").innerHTML = "Recibe: <strong style=\"color:var(--text);\">" + prenda + "</strong>" + (talla ? " · Talla " + talla : "");
+
+  document.getElementById("modal-firma-bg").classList.add("open");
+  // Inicializar canvas tras render
+  setTimeout(inicializarCanvasFirma, 100);
+}
+
+function inicializarCanvasFirma() {
+  const canvas = document.getElementById("firma-canvas");
+  if (!canvas) return;
+  // Ajustar resolución real del canvas
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * 2;
+  canvas.height = rect.height * 2;
+  firmaCtx = canvas.getContext("2d");
+  firmaCtx.scale(2, 2);
+  firmaCtx.lineWidth = 2;
+  firmaCtx.lineCap = "round";
+  firmaCtx.lineJoin = "round";
+  firmaCtx.strokeStyle = "#1a1a1a";
+  firmaVacia = true;
+
+  const getPos = (e) => {
+    const r = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: clientX - r.left, y: clientY - r.top };
+  };
+
+  const start = (e) => { e.preventDefault(); firmaDibujando = true; firmaVacia = false; const p = getPos(e); firmaCtx.beginPath(); firmaCtx.moveTo(p.x, p.y); };
+  const move = (e) => { if (!firmaDibujando) return; e.preventDefault(); const p = getPos(e); firmaCtx.lineTo(p.x, p.y); firmaCtx.stroke(); };
+  const end = () => { firmaDibujando = false; };
+
+  canvas.onmousedown = start; canvas.onmousemove = move; canvas.onmouseup = end; canvas.onmouseleave = end;
+  canvas.ontouchstart = start; canvas.ontouchmove = move; canvas.ontouchend = end;
+}
+
+function limpiarFirma() {
+  if (!firmaCtx) return;
+  const canvas = document.getElementById("firma-canvas");
+  firmaCtx.clearRect(0, 0, canvas.width, canvas.height);
+  firmaVacia = true;
+}
+
+function cerrarModalFirma() {
+  document.getElementById("modal-firma-bg").classList.remove("open");
+  _firmaDatos = null;
+}
+
+function saltarFirma() {
+  cerrarModalFirma();
+  mostrarToast("Entrega registrada sin firma", "ok");
+}
+
+async function confirmarFirma() {
+  if (firmaVacia) { mostrarToast("El elemento debe firmar primero", "err"); return; }
+  if (!_firmaDatos) return;
+
+  const canvas = document.getElementById("firma-canvas");
+  const firmaBase64 = canvas.toDataURL("image/png");
+
+  cerrarModalFirma();
+  mostrarToast("Guardando firma...", "ok");
+
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "guardarFirma",
+        firma: firmaBase64,
+        idElemento: _firmaDatos.idElemento,
+        nombre: _firmaDatos.nombre,
+        solicitudId: _firmaDatos.solicitudId
+      })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      mostrarToast("✓ Firma guardada correctamente", "ok");
+    } else {
+      mostrarToast("Error al guardar firma: " + (data.error||""), "err");
+    }
+  } catch(e) {
+    mostrarToast("Error de conexión al guardar firma", "err");
   }
 }
 
